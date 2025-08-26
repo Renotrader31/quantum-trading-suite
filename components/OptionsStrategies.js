@@ -1,609 +1,530 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Options Strategies Component - Quantum Trading Suite</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .code-container {
-            background: #1a1a1a;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .code-header {
-            background: #2d3748;
-            color: #e2e8f0;
-            padding: 12px 16px;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 14px;
-            border-bottom: 1px solid #4a5568;
-        }
-        .code-content {
-            background: #1a202c;
-            color: #e2e8f0;
-            padding: 20px;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.5;
-            overflow-x: auto;
-            max-height: calc(100vh - 200px);
-            overflow-y: auto;
-        }
-        .keyword { color: #ff79c6; }
-        .string { color: #f1fa8c; }
-        .function { color: #50fa7b; }
-        .comment { color: #6272a4; }
-        .number { color: #bd93f9; }
-        .operator { color: #ff79c6; }
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .feature-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-    </style>
-</head>
-<body class="bg-gray-900 text-white">
-    <div class="min-h-screen">
-        <!-- Header -->
-        <header class="gradient-bg py-6">
-            <div class="container mx-auto px-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h1 class="text-3xl font-bold mb-2">
-                            <i class="fas fa-chart-line mr-3"></i>
-                            Options Strategies Component
-                        </h1>
-                        <p class="text-lg opacity-90">Final Component - Quantum Trading Suite</p>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-sm opacity-75">Component 5 of 5</div>
-                        <div class="text-lg font-semibold">✅ Complete Platform</div>
-                    </div>
-                </div>
-            </div>
-        </header>
+import React, { useState, useEffect } from 'react';
 
-        <div class="container mx-auto px-6 py-8">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Left Panel - Features & Info -->
-                <div class="space-y-6">
-                    <!-- Progress Status -->
-                    <div class="feature-card rounded-lg p-6">
-                        <h2 class="text-xl font-bold mb-4 text-green-400">
-                            <i class="fas fa-check-circle mr-2"></i>
-                            Platform Completion Status
-                        </h2>
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <span>✅ Dashboard Component</span>
-                                <span class="text-green-400">Complete</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span>✅ Squeeze Scanner</span>
-                                <span class="text-green-400">Complete</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span>✅ AI Recommendations</span>
-                                <span class="text-green-400">Complete</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span>✅ Gamma Analytics</span>
-                                <span class="text-green-400">Complete</span>
-                            </div>
-                            <div class="flex items-center justify-between font-bold text-yellow-400">
-                                <span>🚀 Options Strategies</span>
-                                <span class="text-yellow-400">Final Component!</span>
-                            </div>
-                        </div>
-                    </div>
+const OptionsStrategies = () => {
+  const [selectedStrategy, setSelectedStrategy] = useState('straddle');
+  const [symbol, setSymbol] = useState('SPY');
+  const [currentPrice, setCurrentPrice] = useState(425.50);
+  const [strategies, setStrategies] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [optionsData, setOptionsData] = useState(null);
 
-                    <!-- Key Features -->
-                    <div class="feature-card rounded-lg p-6">
-                        <h2 class="text-xl font-bold mb-4 text-blue-400">
-                            <i class="fas fa-cogs mr-2"></i>
-                            Component Features
-                        </h2>
-                        <div class="space-y-4">
-                            <div class="flex items-start">
-                                <i class="fas fa-hammer text-green-400 mr-3 mt-1"></i>
-                                <div>
-                                    <h3 class="font-semibold">Strategy Builder</h3>
-                                    <p class="text-sm text-gray-300">Interactive options strategy creation with templates</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
-                                <i class="fas fa-calculator text-yellow-400 mr-3 mt-1"></i>
-                                <div>
-                                    <h3 class="font-semibold">P&L Analysis</h3>
-                                    <p class="text-sm text-gray-300">Real-time profit/loss calculations and visualizations</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
-                                <i class="fas fa-chart-area text-purple-400 mr-3 mt-1"></i>
-                                <div>
-                                    <h3 class="font-semibold">Risk/Reward Profiles</h3>
-                                    <p class="text-sm text-gray-300">Interactive payoff diagrams and risk analysis</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start">
-                                <i class="fas fa-greek text-blue-400 mr-3 mt-1"></i>
-                                <div>
-                                    <h3 class="font-semibold">Greeks Analysis</h3>
-                                    <p class="text-sm text-gray-300">Delta, Gamma, Theta, Vega tracking and alerts</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Strategy Templates -->
-                    <div class="feature-card rounded-lg p-6">
-                        <h2 class="text-xl font-bold mb-4 text-purple-400">
-                            <i class="fas fa-layer-group mr-2"></i>
-                            Included Strategies
-                        </h2>
-                        <div class="grid grid-cols-2 gap-3 text-sm">
-                            <div class="flex items-center">
-                                <i class="fas fa-arrow-up text-green-400 mr-2"></i>
-                                <span>Long Call</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-arrow-down text-red-400 mr-2"></i>
-                                <span>Long Put</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-shield-alt text-blue-400 mr-2"></i>
-                                <span>Covered Call</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-umbrella text-yellow-400 mr-2"></i>
-                                <span>Protective Put</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-expand-arrows-alt text-purple-400 mr-2"></i>
-                                <span>Long Straddle</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-compress-arrows-alt text-orange-400 mr-2"></i>
-                                <span>Short Straddle</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-arrows-alt-h text-cyan-400 mr-2"></i>
-                                <span>Iron Condor</span>
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-plus text-green-400 mr-2"></i>
-                                <span>Custom Builder</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- File Instructions -->
-                    <div class="feature-card rounded-lg p-6">
-                        <h2 class="text-xl font-bold mb-4 text-green-400">
-                            <i class="fas fa-file-code mr-2"></i>
-                            Installation Instructions
-                        </h2>
-                        <div class="bg-gray-800 rounded p-4 font-mono text-sm">
-                            <div class="text-green-400 mb-2">📁 Save as:</div>
-                            <div class="text-yellow-300">components/OptionsStrategies.js</div>
-                        </div>
-                        <p class="text-sm text-gray-300 mt-3">
-                            Copy the code from the right panel and save it as <code class="bg-gray-800 px-2 py-1 rounded">OptionsStrategies.js</code> in your components folder to complete your unified trading platform!
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Right Panel - Code -->
-                <div class="lg:sticky lg:top-8">
-                    <div class="code-container">
-                        <div class="code-header">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <i class="fas fa-file-code mr-2"></i>
-                                    <span>OptionsStrategies.js</span>
-                                </div>
-                                <div class="text-xs opacity-75">Final Component</div>
-                            </div>
-                        </div>
-                        <div class="code-content">
-<pre><span class="comment">// OptionsStrategies.js - Comprehensive Options Strategy Builder</span>
-<span class="comment">// Final Component for Quantum Trading Suite</span>
-
-<span class="keyword">import</span> { <span class="function">useState</span>, <span class="function">useEffect</span> } <span class="keyword">from</span> <span class="string">'react'</span>;
-
-<span class="keyword">const</span> <span class="function">OptionsStrategies</span> = () => {
-  <span class="keyword">const</span> [selectedStrategy, setSelectedStrategy] = <span class="function">useState</span>(<span class="string">'covered-call'</span>);
-  <span class="keyword">const</span> [stockPrice, setStockPrice] = <span class="function">useState</span>(<span class="number">150</span>);
-  <span class="keyword">const</span> [strategies, setStrategies] = <span class="function">useState</span>([]);
-  <span class="keyword">const</span> [positions, setPositions] = <span class="function">useState</span>([]);
-  <span class="keyword">const</span> [loading, setLoading] = <span class="function">useState</span>(<span class="keyword">false</span>);
-  <span class="keyword">const</span> [plData, setPlData] = <span class="function">useState</span>({});
-  <span class="keyword">const</span> [greeksData, setGreeksData] = <span class="function">useState</span>({});
-
-  <span class="comment">// Strategy Templates</span>
-  <span class="keyword">const</span> strategyTemplates = {
-    <span class="string">'covered-call'</span>: {
-      name: <span class="string">'Covered Call'</span>,
-      description: <span class="string">'Own stock + sell call option'</span>,
-      risk: <span class="string">'Limited upside, downside protection'</span>,
-      positions: [
-        { type: <span class="string">'stock'</span>, quantity: <span class="number">100</span>, price: stockPrice },
-        { type: <span class="string">'call'</span>, quantity: <span class="number">-1</span>, strike: stockPrice + <span class="number">5</span>, premium: <span class="number">2.50</span> }
+  // Predefined strategy templates
+  const strategyTemplates = {
+    straddle: {
+      name: 'Long Straddle',
+      description: 'Buy call and put at same strike, profit from large moves in either direction',
+      legs: [
+        { type: 'call', action: 'buy', strike: 0, quantity: 1 },
+        { type: 'put', action: 'buy', strike: 0, quantity: 1 }
       ]
     },
-    <span class="string">'protective-put'</span>: {
-      name: <span class="string">'Protective Put'</span>,
-      description: <span class="string">'Own stock + buy put option'</span>,
-      risk: <span class="string">'Limited downside, unlimited upside'</span>,
-      positions: [
-        { type: <span class="string">'stock'</span>, quantity: <span class="number">100</span>, price: stockPrice },
-        { type: <span class="string">'put'</span>, quantity: <span class="number">1</span>, strike: stockPrice - <span class="number">5</span>, premium: <span class="number">1.80</span> }
+    strangle: {
+      name: 'Long Strangle',
+      description: 'Buy call and put at different strikes, lower cost than straddle',
+      legs: [
+        { type: 'call', action: 'buy', strike: 5, quantity: 1 },
+        { type: 'put', action: 'buy', strike: -5, quantity: 1 }
       ]
     },
-    <span class="string">'long-straddle'</span>: {
-      name: <span class="string">'Long Straddle'</span>,
-      description: <span class="string">'Buy call + buy put at same strike'</span>,
-      risk: <span class="string">'Limited risk, unlimited profit potential'</span>,
-      positions: [
-        { type: <span class="string">'call'</span>, quantity: <span class="number">1</span>, strike: stockPrice, premium: <span class="number">3.20</span> },
-        { type: <span class="string">'put'</span>, quantity: <span class="number">1</span>, strike: stockPrice, premium: <span class="number">3.10</span> }
+    ironCondor: {
+      name: 'Iron Condor',
+      description: 'Sell strangle and buy wider strangle, profit from low volatility',
+      legs: [
+        { type: 'put', action: 'buy', strike: -15, quantity: 1 },
+        { type: 'put', action: 'sell', strike: -5, quantity: 1 },
+        { type: 'call', action: 'sell', strike: 5, quantity: 1 },
+        { type: 'call', action: 'buy', strike: 15, quantity: 1 }
       ]
     },
-    <span class="string">'iron-condor'</span>: {
-      name: <span class="string">'Iron Condor'</span>,
-      description: <span class="string">'Sell call spread + sell put spread'</span>,
-      risk: <span class="string">'Limited risk and reward'</span>,
-      positions: [
-        { type: <span class="string">'put'</span>, quantity: <span class="number">1</span>, strike: stockPrice - <span class="number">10</span>, premium: <span class="number">0.75</span> },
-        { type: <span class="string">'put'</span>, quantity: <span class="number">-1</span>, strike: stockPrice - <span class="number">5</span>, premium: <span class="number">1.50</span> },
-        { type: <span class="string">'call'</span>, quantity: <span class="number">-1</span>, strike: stockPrice + <span class="number">5</span>, premium: <span class="number">1.45</span> },
-        { type: <span class="string">'call'</span>, quantity: <span class="number">1</span>, strike: stockPrice + <span class="number">10</span>, premium: <span class="number">0.70</span> }
+    butterfly: {
+      name: 'Long Call Butterfly',
+      description: 'Buy 1 ITM call, sell 2 ATM calls, buy 1 OTM call',
+      legs: [
+        { type: 'call', action: 'buy', strike: -10, quantity: 1 },
+        { type: 'call', action: 'sell', strike: 0, quantity: 2 },
+        { type: 'call', action: 'buy', strike: 10, quantity: 1 }
+      ]
+    },
+    coveredCall: {
+      name: 'Covered Call',
+      description: 'Own 100 shares and sell call option for income',
+      legs: [
+        { type: 'stock', action: 'buy', strike: 0, quantity: 100 },
+        { type: 'call', action: 'sell', strike: 5, quantity: 1 }
       ]
     }
   };
 
-  <span class="comment">// Calculate P&L for price range</span>
-  <span class="keyword">const</span> <span class="function">calculatePL</span> = (positions, spotPrice) => {
-    <span class="keyword">let</span> totalPL = <span class="number">0</span>;
-    
-    positions.<span class="function">forEach</span>(pos => {
-      <span class="keyword">if</span> (pos.type === <span class="string">'stock'</span>) {
-        totalPL += pos.quantity * (spotPrice - pos.price);
-      } <span class="keyword">else</span> <span class="keyword">if</span> (pos.type === <span class="string">'call'</span>) {
-        <span class="keyword">const</span> intrinsic = <span class="function">Math</span>.<span class="function">max</span>(<span class="number">0</span>, spotPrice - pos.strike);
-        <span class="keyword">if</span> (pos.quantity > <span class="number">0</span>) {
-          totalPL += pos.quantity * <span class="number">100</span> * (intrinsic - pos.premium);
-        } <span class="keyword">else</span> {
-          totalPL += pos.quantity * <span class="number">100</span> * (pos.premium - intrinsic);
-        }
-      } <span class="keyword">else</span> <span class="keyword">if</span> (pos.type === <span class="string">'put'</span>) {
-        <span class="keyword">const</span> intrinsic = <span class="function">Math</span>.<span class="function">max</span>(<span class="number">0</span>, pos.strike - spotPrice);
-        <span class="keyword">if</span> (pos.quantity > <span class="number">0</span>) {
-          totalPL += pos.quantity * <span class="number">100</span> * (intrinsic - pos.premium);
-        } <span class="keyword">else</span> {
-          totalPL += pos.quantity * <span class="number">100</span> * (pos.premium - intrinsic);
-        }
-      }
-    });
-    
-    <span class="keyword">return</span> totalPL;
-  };
+  useEffect(() => {
+    fetchCurrentPrice();
+    generateStrategyAnalysis();
+  }, [symbol, selectedStrategy]);
 
-  <span class="comment">// Calculate Greeks (simplified)</span>
-  <span class="keyword">const</span> <span class="function">calculateGreeks</span> = (positions) => {
-    <span class="keyword">let</span> totalDelta = <span class="number">0</span>, totalGamma = <span class="number">0</span>, totalTheta = <span class="number">0</span>, totalVega = <span class="number">0</span>;
-    
-    positions.<span class="function">forEach</span>(pos => {
-      <span class="keyword">if</span> (pos.type === <span class="string">'stock'</span>) {
-        totalDelta += pos.quantity / <span class="number">100</span>; <span class="comment">// 1 delta per share, normalize to contracts</span>
-      } <span class="keyword">else</span> <span class="keyword">if</span> (pos.type === <span class="string">'call'</span>) {
-        <span class="comment">// Simplified Black-Scholes approximations</span>
-        <span class="keyword">const</span> delta = <span class="number">0.6</span> * pos.quantity;
-        <span class="keyword">const</span> gamma = <span class="number">0.05</span> * <span class="function">Math</span>.<span class="function">abs</span>(pos.quantity);
-        <span class="keyword">const</span> theta = <span class="number">-0.02</span> * <span class="function">Math</span>.<span class="function">abs</span>(pos.quantity);
-        <span class="keyword">const</span> vega = <span class="number">0.15</span> * <span class="function">Math</span>.<span class="function">abs</span>(pos.quantity);
-        
-        totalDelta += delta;
-        totalGamma += gamma;
-        totalTheta += theta * <span class="function">Math</span>.<span class="function">sign</span>(pos.quantity);
-        totalVega += vega * <span class="function">Math</span>.<span class="function">sign</span>(pos.quantity);
-      } <span class="keyword">else</span> <span class="keyword">if</span> (pos.type === <span class="string">'put'</span>) {
-        <span class="keyword">const</span> delta = <span class="number">-0.4</span> * pos.quantity;
-        <span class="keyword">const</span> gamma = <span class="number">0.05</span> * <span class="function">Math</span>.<span class="function">abs</span>(pos.quantity);
-        <span class="keyword">const</span> theta = <span class="number">-0.02</span> * <span class="function">Math</span>.<span class="function">abs</span>(pos.quantity);
-        <span class="keyword">const</span> vega = <span class="number">0.15</span> * <span class="function">Math</span>.<span class="function">abs</span>(pos.quantity);
-        
-        totalDelta += delta;
-        totalGamma += gamma;
-        totalTheta += theta * <span class="function">Math</span>.<span class="function">sign</span>(pos.quantity);
-        totalVega += vega * <span class="function">Math</span>.<span class="function">sign</span>(pos.quantity);
-      }
-    });
-    
-    <span class="keyword">return</span> { delta: totalDelta, gamma: totalGamma, theta: totalTheta, vega: totalVega };
-  };
-
-  <span class="comment">// Load strategy data</span>
-  <span class="function">useEffect</span>(() => {
-    <span class="keyword">const</span> strategy = strategyTemplates[selectedStrategy];
-    <span class="keyword">if</span> (strategy) {
-      setPositions(strategy.positions);
-      
-      <span class="comment">// Calculate P&L curve</span>
-      <span class="keyword">const</span> priceRange = [];
-      <span class="keyword">const</span> plCurve = [];
-      
-      <span class="keyword">for</span> (<span class="keyword">let</span> price = stockPrice - <span class="number">20</span>; price <= stockPrice + <span class="number">20</span>; price += <span class="number">1</span>) {
-        priceRange.<span class="function">push</span>(price);
-        plCurve.<span class="function">push</span>(<span class="function">calculatePL</span>(strategy.positions, price));
-      }
-      
-      setPlData({ priceRange, plCurve });
-      setGreeksData(<span class="function">calculateGreeks</span>(strategy.positions));
+  const fetchCurrentPrice = async () => {
+    try {
+      const response = await fetch(`/api/stocks?symbol=${symbol}`);
+      const data = await response.json();
+      setCurrentPrice(data.price || 425.50);
+    } catch (error) {
+      console.error('Error fetching price:', error);
     }
-  }, [selectedStrategy, stockPrice]);
+  };
 
-  <span class="comment">// Fetch real options data</span>
-  <span class="function">useEffect</span>(() => {
-    <span class="keyword">const</span> <span class="function">fetchOptionsData</span> = <span class="keyword">async</span> () => {
-      <span class="function">setLoading</span>(<span class="keyword">true</span>);
-      <span class="keyword">try</span> {
-        <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'/api/whales?endpoint=options_flow'</span>);
-        <span class="keyword">const</span> data = <span class="keyword">await</span> response.<span class="function">json</span>();
-        <span class="function">setStrategies</span>(data.data || []);
-      } <span class="keyword">catch</span> (error) {
-        <span class="function">console</span>.<span class="function">error</span>(<span class="string">'Error fetching options data:'</span>, error);
-        <span class="comment">// Fallback data</span>
-        <span class="function">setStrategies</span>([
-          { symbol: <span class="string">'SPY'</span>, strategy: <span class="string">'Covered Call'</span>, profit: <span class="number">250</span>, probability: <span class="number">65</span> },
-          { symbol: <span class="string">'QQQ'</span>, strategy: <span class="string">'Iron Condor'</span>, profit: <span class="number">180</span>, probability: <span class="number">58</span> },
-          { symbol: <span class="string">'AAPL'</span>, strategy: <span class="string">'Protective Put'</span>, profit: <span class="number">320</span>, probability: <span class="number">72</span> }
-        ]);
-      }
-      <span class="function">setLoading</span>(<span class="keyword">false</span>);
+  const generateStrategyAnalysis = () => {
+    setLoading(true);
+    
+    const template = strategyTemplates[selectedStrategy];
+    if (!template) return;
+
+    // Calculate strategy metrics
+    const analysis = calculateStrategyMetrics(template, currentPrice);
+    setStrategies([analysis]);
+    
+    // Simulate options data
+    setOptionsData({
+      calls: generateOptionsChain('call', currentPrice),
+      puts: generateOptionsChain('put', currentPrice)
+    });
+    
+    setLoading(false);
+  };
+
+  const calculateStrategyMetrics = (template, price) => {
+    const legs = template.legs.map(leg => ({
+      ...leg,
+      strike: leg.type === 'stock' ? price : price + leg.strike,
+      premium: leg.type === 'stock' ? 0 : calculatePremium(leg.type, price + leg.strike, price, leg.action),
+      delta: calculateDelta(leg.type, price + leg.strike, price),
+      gamma: calculateGamma(leg.type, price + leg.strike, price),
+      theta: calculateTheta(leg.type, price + leg.strike, price),
+      vega: calculateVega(leg.type, price + leg.strike, price)
+    }));
+
+    const totalCost = legs.reduce((sum, leg) => {
+      const cost = leg.type === 'stock' 
+        ? leg.strike * leg.quantity 
+        : leg.premium * leg.quantity * 100;
+      return sum + (leg.action === 'buy' ? cost : -cost);
+    }, 0);
+
+    const maxProfit = calculateMaxProfit(legs, price);
+    const maxLoss = calculateMaxLoss(legs, totalCost);
+    const breakevens = calculateBreakevens(legs, price);
+    const probabilityOfProfit = calculateProbabilityOfProfit(legs, price);
+
+    // Portfolio Greeks
+    const portfolioGreeks = legs.reduce((greeks, leg) => {
+      const multiplier = leg.action === 'buy' ? 1 : -1;
+      return {
+        delta: greeks.delta + (leg.delta * leg.quantity * multiplier),
+        gamma: greeks.gamma + (leg.gamma * leg.quantity * multiplier),
+        theta: greeks.theta + (leg.theta * leg.quantity * multiplier),
+        vega: greeks.vega + (leg.vega * leg.quantity * multiplier)
+      };
+    }, { delta: 0, gamma: 0, theta: 0, vega: 0 });
+
+    return {
+      ...template,
+      legs,
+      totalCost,
+      maxProfit,
+      maxLoss,
+      breakevens,
+      probabilityOfProfit,
+      portfolioGreeks,
+      returnOnRisk: maxProfit === Infinity ? 'Unlimited' : ((maxProfit / Math.abs(maxLoss)) * 100).toFixed(1) + '%'
     };
+  };
 
-    <span class="function">fetchOptionsData</span>();
-    <span class="keyword">const</span> interval = <span class="function">setInterval</span>(fetchOptionsData, <span class="number">15000</span>);
-    <span class="keyword">return</span> () => <span class="function">clearInterval</span>(interval);
-  }, []);
+  // Options pricing functions (simplified Black-Scholes approximations)
+  const calculatePremium = (type, strike, spot, action) => {
+    const timeValue = Math.random() * 5 + 1; // Simplified time value
+    const intrinsic = type === 'call' 
+      ? Math.max(0, spot - strike) 
+      : Math.max(0, strike - spot);
+    return intrinsic + timeValue;
+  };
 
-  <span class="keyword">return</span> (
-    &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"min-h-screen bg-gray-900 text-white p-6"</span>&gt;
-      &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"max-w-7xl mx-auto"</span>&gt;
-        <span class="comment">{/* Header */}</span>
-        &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"mb-8"</span>&gt;
-          &lt;<span class="keyword">h1</span> <span class="string">className</span>=<span class="string">"text-3xl font-bold mb-2"</span>&gt;
-            🎯 Options Strategies
-          &lt;/<span class="keyword">h1</span>&gt;
-          &lt;<span class="keyword">p</span> <span class="string">className</span>=<span class="string">"text-gray-400"</span>&gt;
-            Build, analyze, and optimize options strategies with real-time P&amp;L calculations
-          &lt;/<span class="keyword">p</span>&gt;
-        &lt;/<span class="keyword">div</span>&gt;
+  const calculateDelta = (type, strike, spot) => {
+    if (type === 'stock') return 1;
+    const moneyness = spot / strike;
+    if (type === 'call') {
+      return moneyness > 1 ? 0.7 : moneyness < 0.95 ? 0.2 : 0.5;
+    } else {
+      return moneyness > 1 ? -0.2 : moneyness < 0.95 ? -0.7 : -0.5;
+    }
+  };
 
-        <span class="comment">{/* Strategy Selector */}</span>
-        &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8"</span>&gt;
-          {<span class="function">Object</span>.<span class="function">entries</span>(strategyTemplates).<span class="function">map</span>(([key, strategy]) =&gt; (
-            &lt;<span class="keyword">div</span>
-              <span class="string">key</span>={key}
-              <span class="string">onClick</span>={() =&gt; <span class="function">setSelectedStrategy</span>(key)}
-              <span class="string">className</span>={<span class="string">`p-4 rounded-lg cursor-pointer transition-all $</span>{
-                selectedStrategy === key
-                  ? <span class="string">'bg-blue-600 border-blue-400'</span>
-                  : <span class="string">'bg-gray-800 border-gray-700 hover:bg-gray-700'</span>
-              } <span class="string">border`</span>}
-            &gt;
-              &lt;<span class="keyword">h3</span> <span class="string">className</span>=<span class="string">"font-semibold mb-2"</span>&gt;{strategy.name}&lt;/<span class="keyword">h3</span>&gt;
-              &lt;<span class="keyword">p</span> <span class="string">className</span>=<span class="string">"text-sm text-gray-300 mb-2"</span>&gt;{strategy.description}&lt;/<span class="keyword">p</span>&gt;
-              &lt;<span class="keyword">p</span> <span class="string">className</span>=<span class="string">"text-xs text-gray-400"</span>&gt;{strategy.risk}&lt;/<span class="keyword">p</span>&gt;
-            &lt;/<span class="keyword">div</span>&gt;
-          ))}
-        &lt;/<span class="keyword">div</span>&gt;
+  const calculateGamma = (type, strike, spot) => {
+    if (type === 'stock') return 0;
+    const atm = Math.abs(spot - strike) < 5;
+    return atm ? 0.05 : 0.02;
+  };
 
-        <span class="comment">{/* Main Content Grid */}</span>
-        &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8"</span>&gt;
-          <span class="comment">{/* Position Builder */}</span>
-          &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"bg-gray-800 p-6 rounded-lg"</span>&gt;
-            &lt;<span class="keyword">h3</span> <span class="string">className</span>=<span class="string">"text-xl font-semibold mb-4"</span>&gt;📊 Position Details&lt;/<span class="keyword">h3</span>&gt;
-            
-            &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"mb-4"</span>&gt;
-              &lt;<span class="keyword">label</span> <span class="string">className</span>=<span class="string">"block text-sm font-medium mb-2"</span>&gt;Stock Price&lt;/<span class="keyword">label</span>&gt;
-              &lt;<span class="keyword">input</span>
-                <span class="string">type</span>=<span class="string">"number"</span>
-                <span class="string">value</span>={stockPrice}
-                <span class="string">onChange</span>={(e) =&gt; <span class="function">setStockPrice</span>(<span class="function">parseFloat</span>(e.target.value))}
-                <span class="string">className</span>=<span class="string">"w-full p-2 bg-gray-700 rounded border border-gray-600"</span>
-              /&gt;
-            &lt;/<span class="keyword">div</span>&gt;
+  const calculateTheta = (type, strike, spot) => {
+    if (type === 'stock') return 0;
+    return -0.05; // Simplified theta decay
+  };
 
-            &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"space-y-3"</span>&gt;
-              {positions.<span class="function">map</span>((pos, index) =&gt; (
-                &lt;<span class="keyword">div</span> <span class="string">key</span>={index} <span class="string">className</span>=<span class="string">"p-3 bg-gray-700 rounded"</span>&gt;
-                  &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"flex justify-between items-center"</span>&gt;
-                    &lt;<span class="keyword">div</span>&gt;
-                      &lt;<span class="keyword">span</span> <span class="string">className</span>=<span class="string">"font-medium"</span>&gt;
-                        {pos.quantity &gt; <span class="number">0</span> ? <span class="string">'Long'</span> : <span class="string">'Short'</span>} {<span class="function">Math</span>.<span class="function">abs</span>(pos.quantity)} {pos.type}
-                      &lt;/<span class="keyword">span</span>&gt;
-                      {pos.strike &amp;&amp; (
-                        &lt;<span class="keyword">span</span> <span class="string">className</span>=<span class="string">"text-gray-300 ml-2"</span>&gt;@ ${pos.strike}&lt;/<span class="keyword">span</span>&gt;
-                      )}
-                    &lt;/<span class="keyword">div</span>&gt;
-                    &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-right"</span>&gt;
-                      {pos.premium ? (
-                        &lt;<span class="keyword">span</span> <span class="string">className</span>={<span class="string">`text-sm $</span>{pos.quantity &gt; <span class="number">0</span> ? <span class="string">'text-red-400'</span> : <span class="string">'text-green-400'</span>}<span class="string">`</span>}&gt;
-                          {pos.quantity &gt; <span class="number">0</span> ? <span class="string">'-'</span> : <span class="string">'+'</span>}${(pos.premium * <span class="function">Math</span>.<span class="function">abs</span>(pos.quantity) * <span class="number">100</span>).<span class="function">toFixed</span>(<span class="number">0</span>)}
-                        &lt;/<span class="keyword">span</span>&gt;
-                      ) : (
-                        &lt;<span class="keyword">span</span> <span class="string">className</span>=<span class="string">"text-sm text-gray-400"</span>&gt;
-                          ${(pos.price * pos.quantity).<span class="function">toFixed</span>(<span class="number">0</span>)}
-                        &lt;/<span class="keyword">span</span>&gt;
-                      )}
-                    &lt;/<span class="keyword">div</span>&gt;
-                  &lt;/<span class="keyword">div</span>&gt;
-                &lt;/<span class="keyword">div</span>&gt;
-              ))}
-            &lt;/<span class="keyword">div</span>&gt;
-          &lt;/<span class="keyword">div</span>&gt;
+  const calculateVega = (type, strike, spot) => {
+    if (type === 'stock') return 0;
+    return 0.15; // Simplified vega
+  };
 
-          <span class="comment">{/* Greeks Analysis */}</span>
-          &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"bg-gray-800 p-6 rounded-lg"</span>&gt;
-            &lt;<span class="keyword">h3</span> <span class="string">className</span>=<span class="string">"text-xl font-semibold mb-4"</span>&gt;🔢 Greeks Analysis&lt;/<span class="keyword">h3</span>&gt;
-            
-            &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"grid grid-cols-2 gap-4"</span>&gt;
-              &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"p-3 bg-gray-700 rounded"</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-sm text-gray-400"</span>&gt;Delta&lt;/<span class="keyword">div</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>={<span class="string">`text-lg font-bold $</span>{greeksData.delta &gt; <span class="number">0</span> ? <span class="string">'text-green-400'</span> : <span class="string">'text-red-400'</span>}<span class="string">`</span>}&gt;
-                  {greeksData.delta?.<span class="function">toFixed</span>(<span class="number">2</span>) || <span class="string">'0.00'</span>}
-                &lt;/<span class="keyword">div</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-xs text-gray-500"</span>&gt;Price sensitivity&lt;/<span class="keyword">div</span>&gt;
-              &lt;/<span class="keyword">div</span>&gt;
-              
-              &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"p-3 bg-gray-700 rounded"</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-sm text-gray-400"</span>&gt;Gamma&lt;/<span class="keyword">div</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-lg font-bold text-purple-400"</span>&gt;
-                  {greeksData.gamma?.<span class="function">toFixed</span>(<span class="number">3</span>) || <span class="string">'0.000'</span>}
-                &lt;/<span class="keyword">div</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-xs text-gray-500"</span>&gt;Delta sensitivity&lt;/<span class="keyword">div</span>&gt;
-              &lt;/<span class="keyword">div</span>&gt;
-              
-              &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"p-3 bg-gray-700 rounded"</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-sm text-gray-400"</span>&gt;Theta&lt;/<span class="keyword">div</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-lg font-bold text-red-400"</span>&gt;
-                  {greeksData.theta?.<span class="function">toFixed</span>(<span class="number">2</span>) || <span class="string">'0.00'</span>}
-                &lt;/<span class="keyword">div</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-xs text-gray-500"</span>&gt;Time decay&lt;/<span class="keyword">div</span>&gt;
-              &lt;/<span class="keyword">div</span>&gt;
-              
-              &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"p-3 bg-gray-700 rounded"</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-sm text-gray-400"</span>&gt;Vega&lt;/<span class="keyword">div</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-lg font-bold text-blue-400"</span>&gt;
-                  {greeksData.vega?.<span class="function">toFixed</span>(<span class="number">2</span>) || <span class="string">'0.00'</span>}
-                &lt;/<span class="keyword">div</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-xs text-gray-500"</span>&gt;Vol sensitivity&lt;/<span class="keyword">div</span>&gt;
-              &lt;/<span class="keyword">div</span>&gt;
-            &lt;/<span class="keyword">div</span>&gt;
+  const calculateMaxProfit = (legs, price) => {
+    // Simplified calculation - would need more complex logic for all strategies
+    const hasShortOptions = legs.some(leg => leg.action === 'sell' && leg.type !== 'stock');
+    return hasShortOptions && selectedStrategy !== 'coveredCall' ? 1000 : Infinity;
+  };
 
-            <span class="comment">{/* Risk Metrics */}</span>
-            &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"mt-4 p-3 bg-gray-700 rounded"</span>&gt;
-              &lt;<span class="keyword">h4</span> <span class="string">className</span>=<span class="string">"font-medium mb-2"</span>&gt;Risk Assessment&lt;/<span class="keyword">h4</span>&gt;
-              &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"space-y-2 text-sm"</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"flex justify-between"</span>&gt;
-                  &lt;<span class="keyword">span</span>&gt;Max Risk:&lt;/<span class="keyword">span</span>&gt;
-                  &lt;<span class="keyword">span</span> <span class="string">className</span>=<span class="string">"text-red-400"</span>&gt;
-                    ${plData.plCurve ? <span class="function">Math</span>.<span class="function">min</span>(...plData.plCurve).<span class="function">toFixed</span>(<span class="number">0</span>) : <span class="string">'--'</span>}
-                  &lt;/<span class="keyword">span</span>&gt;
-                &lt;/<span class="keyword">div</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"flex justify-between"</span>&gt;
-                  &lt;<span class="keyword">span</span>&gt;Max Profit:&lt;/<span class="keyword">span</span>&gt;
-                  &lt;<span class="keyword">span</span> <span class="string">className</span>=<span class="string">"text-green-400"</span>&gt;
-                    ${plData.plCurve ? <span class="function">Math</span>.<span class="function">max</span>(...plData.plCurve).<span class="function">toFixed</span>(<span class="number">0</span>) : <span class="string">'--'</span>}
-                  &lt;/<span class="keyword">span</span>&gt;
-                &lt;/<span class="keyword">div</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"flex justify-between"</span>&gt;
-                  &lt;<span class="keyword">span</span>&gt;Breakeven:&lt;/<span class="keyword">span</span>&gt;
-                  &lt;<span class="keyword">span</span> <span class="string">className</span>=<span class="string">"text-yellow-400"</span>&gt;
-                    ${stockPrice.<span class="function">toFixed</span>(<span class="number">2</span>)}
-                  &lt;/<span class="keyword">span</span>&gt;
-                &lt;/<span class="keyword">div</span>&gt;
-              &lt;/<span class="keyword">div</span>&gt;
-            &lt;/<span class="keyword">div</span>&gt;
-          &lt;/<span class="keyword">div</span>&gt;
-        &lt;/<span class="keyword">div</span>&gt;
+  const calculateMaxLoss = (legs, totalCost) => {
+    return Math.abs(totalCost);
+  };
 
-        <span class="comment">{/* P&L Chart */}</span>
-        &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"bg-gray-800 p-6 rounded-lg mb-8"</span>&gt;
-          &lt;<span class="keyword">h3</span> <span class="string">className</span>=<span class="string">"text-xl font-semibold mb-4"</span>&gt;📈 Profit/Loss Diagram&lt;/<span class="keyword">h3</span>&gt;
-          &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"h-64 flex items-center justify-center"</span>&gt;
-            {plData.plCurve ? (
-              &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"w-full h-full bg-gray-700 rounded flex items-center justify-center"</span>&gt;
-                &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-center"</span>&gt;
-                  &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-4xl mb-2"</span>&gt;📊&lt;/<span class="keyword">div</span>&gt;
-                  &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-lg font-semibold"</span>&gt;
-                    {strategyTemplates[selectedStrategy]?.name} P&amp;L Chart
-                  &lt;/<span class="keyword">div</span>&gt;
-                  &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-sm text-gray-400 mt-2"</span>&gt;
-                    Interactive chart showing profit/loss at expiration
-                  &lt;/<span class="keyword">div</span>&gt;
-                &lt;/<span class="keyword">div</span>&gt;
-              &lt;/<span class="keyword">div</span>&gt;
-            ) : (
-              &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-gray-500"</span>&gt;Loading P&amp;L data...&lt;/<span class="keyword">div</span>&gt;
-            )}
-          &lt;/<span class="keyword">div</span>&gt;
-        &lt;/<span class="keyword">div</span>&gt;
+  const calculateBreakevens = (legs, price) => {
+    // Simplified - would need strategy-specific logic
+    if (selectedStrategy === 'straddle' || selectedStrategy === 'strangle') {
+      return [price - 10, price + 10];
+    }
+    return [price];
+  };
 
-        <span class="comment">{/* Strategy Performance Table */}</span>
-        &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"bg-gray-800 p-6 rounded-lg"</span>&gt;
-          &lt;<span class="keyword">h3</span> <span class="string">className</span>=<span class="string">"text-xl font-semibold mb-4"</span>&gt;🏆 Strategy Performance&lt;/<span class="keyword">h3</span>&gt;
+  const calculateProbabilityOfProfit = (legs, price) => {
+    // Simplified probability calculation
+    return Math.random() * 40 + 30; // 30-70% range
+  };
+
+  const generateOptionsChain = (type, price) => {
+    const chain = [];
+    for (let i = -20; i <= 20; i += 5) {
+      const strike = price + i;
+      chain.push({
+        strike,
+        bid: calculatePremium(type, strike, price) - 0.5,
+        ask: calculatePremium(type, strike, price) + 0.5,
+        last: calculatePremium(type, strike, price),
+        volume: Math.floor(Math.random() * 1000),
+        openInterest: Math.floor(Math.random() * 5000),
+        impliedVol: 0.20 + Math.random() * 0.10,
+        delta: calculateDelta(type, strike, price),
+        gamma: calculateGamma(type, strike, price),
+        theta: calculateTheta(type, strike, price),
+        vega: calculateVega(type, strike, price)
+      });
+    }
+    return chain;
+  };
+
+  const formatCurrency = (value) => {
+    if (value === Infinity) return 'Unlimited';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value);
+  };
+
+  const formatPercent = (value) => {
+    return `${value.toFixed(1)}%`;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-blue-400">Options Strategies</h1>
+            <p className="text-gray-400 mt-2">Build, analyze, and optimize options trading strategies</p>
+          </div>
           
-          {loading ? (
-            &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"text-center py-8"</span>&gt;
-              &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"</span>&gt;&lt;/<span class="keyword">div</span>&gt;
-              &lt;<span class="keyword">div</span>&gt;Loading strategy performance...&lt;/<span class="keyword">div</span>&gt;
-            &lt;/<span class="keyword">div</span>&gt;
-          ) : (
-            &lt;<span class="keyword">div</span> <span class="string">className</span>=<span class="string">"overflow-x-auto"</span>&gt;
-              &lt;<span class="keyword">table</span> <span class="string">className</span>=<span class="string">"w-full text-left"</span>&gt;
-                &lt;<span class="keyword">thead</span>&gt;
-                  &lt;<span class="keyword">tr</span> <span class="string">className</span>=<span class="string">"border-b border-gray-700"</span>&gt;
-                    &lt;<span class="keyword">th</span> <span class="string">className</span>=<span class="string">"py-3 px-4"</span>&gt;Symbol&lt;/<span class="keyword">th</span>&gt;
-                    &lt;<span class="keyword">th</span> <span class="string">className</span>=<span class="string">"py-3 px-4"</span>&gt;Strategy&lt;/<span class="keyword">th</span>&gt;
-                    &lt;<span class="keyword">th</span> <span class="string">className</span>=<span class="string">"py-3 px-4"</span>&gt;Profit&lt;/<span class="keyword">th</span>&gt;
-                    &lt;<span class="keyword">th</span> <span class="string">className</span>=<span class="string">"py-3 px-4"</span>&gt;Probability&lt;/<span class="keyword">th</span>&gt;
-                    &lt;<span class="keyword">th</span> <span class="string">className</span>=<span class="string">"py-3 px-4"</span>&gt;Status&lt;/<span class="keyword">th</span>&gt;
-                  &lt;/<span class="keyword">tr</span>&gt;
-                &lt;/<span class="keyword">thead</span>&gt;
-                &lt;<span class="keyword">tbody</span>&gt;
-                  {strategies.<span class="function">map</span>((strategy, index) =&gt; (
-                    &lt;<span class="keyword">tr</span> <span class="string">key</span>={index} <span class="string">className</span>=<span class="string">"border-b border-gray-800 hover:bg-gray-700"</span>&gt;
-                      &lt;<span class="keyword">td</span> <span class="string">className</span>=<span class="string">"py-3 px-4 font-semibold"</span>&gt;{strategy.symbol}&lt;/<span class="keyword">td</span>&gt;
-                      &lt;<span class="keyword">td</span> <span class="string">className</span>=<span class="string">"py-3 px-4"</span>&gt;{strategy.strategy}&lt;/<span class="keyword">td</span>&gt;
-                      &lt;<span class="keyword">td</span> <span class="string">className</span>=<span class="string">"py-3 px-4"</span>&gt;
-                        &lt;<span class="keyword">span</span> <span class="string">className</span>={<span class="string">`font-bold $</span>{strategy.profit &gt; <span class="number">0</span> ? <span class="string">'text-green-400'</span> : <span class="string">'text-red-400'</span>}<span class="string">`</span>}&gt;
-                          ${strategy.profit}
-                        &lt;/<span class="keyword">span</span>&gt;
-                      &lt;/<span class="keyword">td</span>&gt;
-                      &lt;<span class="keyword">td</span> <span class="string">className</span>=<span class="string">"py-3 px-4"</span>&gt;
-                        &lt;<span class="keyword">span</span> <span class="string">className</span>={<span class="string">`font-medium $</span>{
-                          strategy.probability &gt; <span class="number">70</span> ? <span class="string">'text-green-400'</span> :
-                          strategy.probability &gt; <span class="number">50</span> ? <span class="string">'text-yellow-400'</span> : <span class="string">'text-red-400'</span>
-                        }<span class="string">`</span>}&gt;
-                          {strategy.probability}%
-                        &lt;/<span class="keyword">span</span>&gt;
-                      &lt;/<span class="keyword">td</span>&gt;
-                      &lt;<span class="keyword">td</span> <span class="string">className</span>=<span class="string">"py-3 px-4"</span>&gt;
-                        &lt;<span class="keyword">span</span> <span class="string">className</span>={<span class="string">`px-2 py-1 rounded text-xs font-medium $</span>{
-                          strategy.probability &gt; <span class="number">65</span> ? <span class="string">'bg-green-900 text-green-300'</span> :
-                          strategy.probability &gt; <span class="number">50</span> ? <span class="string">'bg-yellow-900 text-yellow-300'</span> : <span class="string">'bg-red-900 text-red-300'</span>
-                        }<span class="string">`</span>}&gt;
-                          {strategy.probability &gt; <span class="number">65</span> ? <span class="string">'High Confidence'</span> :
-                           strategy.probability &gt; <span class="number">50</span> ? <span class="string">'Moderate'</span> : <span class="string">'Low Confidence'</span>}
-                        &lt;/<span class="keyword">span</span>&gt;
-                      &lt;/<span class="keyword">td</span>&gt;
-                    &lt;/<span class="keyword">tr</span>&gt;
+          <div className="flex items-center space-x-4">
+            <select 
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value)}
+              className="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-white focus:border-blue-400 focus:outline-none"
+            >
+              <option value="SPY">SPY</option>
+              <option value="QQQ">QQQ</option>
+              <option value="AAPL">AAPL</option>
+              <option value="TSLA">TSLA</option>
+            </select>
+            
+            <div className="text-right">
+              <div className="text-sm text-gray-400">Current Price</div>
+              <div className="text-lg font-bold text-white">${currentPrice.toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Strategy Selector */}
+        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+          <h2 className="text-xl font-semibold text-white mb-4">Select Strategy</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {Object.entries(strategyTemplates).map(([key, strategy]) => (
+              <button
+                key={key}
+                onClick={() => setSelectedStrategy(key)}
+                className={`p-4 rounded-lg border transition-all ${
+                  selectedStrategy === key
+                    ? 'border-blue-400 bg-blue-900/20 text-blue-400'
+                    : 'border-gray-600 bg-gray-700 text-gray-300 hover:border-gray-500'
+                }`}
+              >
+                <div className="font-semibold mb-2">{strategy.name}</div>
+                <div className="text-xs text-gray-400">{strategy.description}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Strategy Analysis */}
+        {strategies.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* Strategy Details */}
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <h3 className="text-lg font-semibold text-white mb-4">Strategy Details</h3>
+              
+              {/* Legs */}
+              <div className="space-y-3 mb-6">
+                {strategies[0].legs.map((leg, index) => (
+                  <div key={index} className="flex justify-between items-center p-3 bg-gray-700 rounded">
+                    <div className="flex items-center space-x-3">
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        leg.action === 'buy' ? 'bg-green-800 text-green-200' : 'bg-red-800 text-red-200'
+                      }`}>
+                        {leg.action.toUpperCase()}
+                      </span>
+                      <span className="font-medium">
+                        {leg.quantity} {leg.type.toUpperCase()}
+                      </span>
+                      {leg.type !== 'stock' && (
+                        <span className="text-gray-300">${leg.strike.toFixed(2)}</span>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      {leg.type !== 'stock' && (
+                        <>
+                          <div className="text-white font-semibold">
+                            ${leg.premium.toFixed(2)}
+                          </div>
+                          <div className="text-xs text-gray-400">Premium</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Cost and P&L */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-700 p-4 rounded">
+                  <div className="text-gray-400 text-sm">Total Cost</div>
+                  <div className={`text-lg font-bold ${
+                    strategies[0].totalCost < 0 ? 'text-green-400' : 'text-red-400'
+                  }`}>
+                    {formatCurrency(Math.abs(strategies[0].totalCost))}
+                    {strategies[0].totalCost < 0 && ' Credit'}
+                  </div>
+                </div>
+                <div className="bg-gray-700 p-4 rounded">
+                  <div className="text-gray-400 text-sm">Return on Risk</div>
+                  <div className="text-lg font-bold text-blue-400">
+                    {strategies[0].returnOnRisk}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Risk Metrics */}
+            <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+              <h3 className="text-lg font-semibold text-white mb-4">Risk Analysis</h3>
+              
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-green-900/20 p-4 rounded border border-green-800">
+                  <div className="text-green-400 text-sm">Max Profit</div>
+                  <div className="text-lg font-bold text-green-300">
+                    {formatCurrency(strategies[0].maxProfit)}
+                  </div>
+                </div>
+                <div className="bg-red-900/20 p-4 rounded border border-red-800">
+                  <div className="text-red-400 text-sm">Max Loss</div>
+                  <div className="text-lg font-bold text-red-300">
+                    {formatCurrency(strategies[0].maxLoss)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <div className="text-gray-400 text-sm mb-2">Breakeven Points</div>
+                <div className="flex space-x-2">
+                  {strategies[0].breakevens.map((be, index) => (
+                    <span key={index} className="bg-yellow-900/20 text-yellow-400 px-3 py-1 rounded border border-yellow-800">
+                      ${be.toFixed(2)}
+                    </span>
                   ))}
-                &lt;/<span class="keyword">tbody</span>&gt;
-              &lt;/<span class="keyword">table</span>&gt;
-            &lt;/<span class="keyword">div</span>&gt;
-          )}
-        &lt;/<span class="keyword">div</span>&gt;
-      &lt;/<span class="keyword">div</span>&gt;
-    &lt;/<span class="keyword">div</span>&gt;
+                </div>
+              </div>
+
+              <div className="bg-gray-700 p-4 rounded">
+                <div className="text-gray-400 text-sm">Probability of Profit</div>
+                <div className="flex items-center space-x-3 mt-2">
+                  <div className="flex-1 bg-gray-600 rounded-full h-3">
+                    <div 
+                      className="bg-blue-400 h-3 rounded-full transition-all duration-500"
+                      style={{ width: `${strategies[0].probabilityOfProfit}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-blue-400 font-bold">
+                    {formatPercent(strategies[0].probabilityOfProfit)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Portfolio Greeks */}
+        {strategies.length > 0 && (
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+            <h3 className="text-lg font-semibold text-white mb-4">Portfolio Greeks</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-gray-700 p-4 rounded text-center">
+                <div className="text-gray-400 text-sm">Delta</div>
+                <div className="text-xl font-bold text-white">
+                  {strategies[0].portfolioGreeks.delta.toFixed(3)}
+                </div>
+                <div className="text-xs text-gray-500">Price sensitivity</div>
+              </div>
+              <div className="bg-gray-700 p-4 rounded text-center">
+                <div className="text-gray-400 text-sm">Gamma</div>
+                <div className="text-xl font-bold text-white">
+                  {strategies[0].portfolioGreeks.gamma.toFixed(3)}
+                </div>
+                <div className="text-xs text-gray-500">Delta sensitivity</div>
+              </div>
+              <div className="bg-gray-700 p-4 rounded text-center">
+                <div className="text-gray-400 text-sm">Theta</div>
+                <div className="text-xl font-bold text-red-400">
+                  {strategies[0].portfolioGreeks.theta.toFixed(3)}
+                </div>
+                <div className="text-xs text-gray-500">Time decay</div>
+              </div>
+              <div className="bg-gray-700 p-4 rounded text-center">
+                <div className="text-gray-400 text-sm">Vega</div>
+                <div className="text-xl font-bold text-white">
+                  {strategies[0].portfolioGreeks.vega.toFixed(3)}
+                </div>
+                <div className="text-xs text-gray-500">Volatility sensitivity</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Options Chain Preview */}
+        {optionsData && (
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <h3 className="text-lg font-semibold text-white mb-4">Options Chain</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Calls */}
+              <div>
+                <h4 className="text-green-400 font-semibold mb-3">Calls</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-gray-400 border-b border-gray-700">
+                        <th className="text-left py-2">Strike</th>
+                        <th className="text-left py-2">Last</th>
+                        <th className="text-left py-2">Vol</th>
+                        <th className="text-left py-2">Delta</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {optionsData.calls.slice(0, 6).map((option, index) => (
+                        <tr key={index} className="border-b border-gray-800">
+                          <td className="py-2 font-semibold">${option.strike.toFixed(0)}</td>
+                          <td className="py-2">${option.last.toFixed(2)}</td>
+                          <td className="py-2">{option.volume}</td>
+                          <td className="py-2">{option.delta.toFixed(3)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Puts */}
+              <div>
+                <h4 className="text-red-400 font-semibold mb-3">Puts</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-gray-400 border-b border-gray-700">
+                        <th className="text-left py-2">Strike</th>
+                        <th className="text-left py-2">Last</th>
+                        <th className="text-left py-2">Vol</th>
+                        <th className="text-left py-2">Delta</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {optionsData.puts.slice(0, 6).map((option, index) => (
+                        <tr key={index} className="border-b border-gray-800">
+                          <td className="py-2 font-semibold">${option.strike.toFixed(0)}</td>
+                          <td className="py-2">${option.last.toFixed(2)}</td>
+                          <td className="py-2">{option.volume}</td>
+                          <td className="py-2">{option.delta.toFixed(3)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Strategy Insights */}
+        <div className="mt-8 bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <h3 className="text-lg font-semibold text-purple-400 mb-4">Strategy Insights</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+            <div>
+              <div className="text-2xl mb-2">📈</div>
+              <h4 className="font-semibold text-white mb-2">Market Outlook</h4>
+              <p className="text-sm text-gray-400">
+                {selectedStrategy === 'straddle' || selectedStrategy === 'strangle' 
+                  ? 'Neutral - expecting high volatility'
+                  : selectedStrategy === 'ironCondor'
+                  ? 'Neutral - expecting low volatility'
+                  : selectedStrategy === 'coveredCall'
+                  ? 'Slightly bullish - generating income'
+                  : 'Neutral to slightly bullish'
+                }
+              </p>
+            </div>
+            <div>
+              <div className="text-2xl mb-2">⚡</div>
+              <h4 className="font-semibold text-white mb-2">Volatility Impact</h4>
+              <p className="text-sm text-gray-400">
+                {strategies[0]?.portfolioGreeks.vega > 0 
+                  ? 'Benefits from increasing volatility'
+                  : 'Benefits from decreasing volatility'
+                }
+              </p>
+            </div>
+            <div>
+              <div className="text-2xl mb-2">⏰</div>
+              <h4 className="font-semibold text-white mb-2">Time Decay</h4>
+              <p className="text-sm text-gray-400">
+                {strategies[0]?.portfolioGreeks.theta < 0 
+                  ? 'Loses value as time passes'
+                  : 'Gains value as time passes'
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-<span class="keyword">export</span> <span class="keyword">default</span> OptionsStrategies;</pre>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+export default OptionsStrategies;
