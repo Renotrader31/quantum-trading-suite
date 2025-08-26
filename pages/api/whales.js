@@ -213,7 +213,15 @@ function generateEnhancedMockData(symbol = 'SPY', type = 'flow') {
           call_delta: (Math.random() * 1000000).toFixed(4),
           put_delta: (-Math.random() * 1000000).toFixed(4),
           call_gamma: (Math.random() * 100000).toFixed(4),
-          put_gamma: (-Math.random() * 100000).toFixed(4),
-          call_charm: (Math.random() * 1000000).toFixed(4)
- }
+        put_gamma: (-Math.random() * 100000).toFixed(4),
+        call_charm: (Math.random() * 1000000).toFixed(4),
+        put_charm: (-Math.random() * 500000).toFixed(4)
+        };
+      default:
+        return res.status(400).json({ error: 'Invalid endpoint' });
+    }
+  } catch (error) {
+    console.error('API Error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 }
