@@ -268,4 +268,5 @@ function generateFallbackStockData(symbol) {
     low: parseFloat((basePrice * 0.97).toFixed(2)),
     close: parseFloat((basePrice + change).toFixed(2)),
     volume: Math.floor(Math.random() * 50000000) + 1000000,
-    change: parse<span class="cursor">█</span>
+    change: parseFloat(change.toFixed(2)),
+
