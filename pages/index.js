@@ -9,6 +9,7 @@ export default function Home() {
   const [activeMode, setActiveMode] = useState('dashboard');
   const [marketData, setMarketData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState(null);
 
   useEffect(() => {
     fetchMarketData();
@@ -18,15 +19,21 @@ export default function Home() {
 
   const fetchMarketData = async () => {
     try {
+      setLoading(true);
       const response = await fetch('/api/stocks');
       const data = await response.json();
       
-      if (data.status === 'success') {
+      if (data.metadata?.status === 'success' || data.status === 'success') {
         const dataMap = {};
-        data.data.forEach(stock => {
+        const stocksArray = data.data || [];
+        
+        stocksArray.forEach(stock => {
           dataMap[stock.symbol] = stock;
         });
+        
         setMarketData(dataMap);
+        setLastUpdate(new Date().toLocaleTimeString());
+        console.log(`Updated market data for ${Object.keys(dataMap).length} symbols`);
       }
     } catch (error) {
       console.error('Error fetching market data:', error);
@@ -44,72 +51,112 @@ export default function Home() {
   ];
 
   const renderActiveComponent = () => {
-    const commonProps = { marketData, loading };
+    const commonProps = { 
+      marketData, 
+      loading,
+      onRefresh: fetchMarketData,
+      lastUpdate 
+    };
     
     switch (activeMode) {
       case 'dashboard':
-        return ">;
+        return <Dashboard {...commonProps} />;
       case 'scanner':
-        return ">;
+        return <SqueezeScanner {...commonProps} />;
       case 'ai':
-        return ">;
+        return <AIRecommendations {...commonProps} />;
       case 'gamma':
-        return ">;
+        return <GammaAnalytics {...commonProps} />;
       case 'options':
-        return ">;
+        return <OptionsStrategies {...commonProps} />;
       default:
-        return ">;
+        return <Dashboard {...commonProps} />;
     }
   };
 
+  const getDataStats = () => {
+    const symbolCount = Object.keys(marketData).length;
+    const gainers = Object.values(marketData).filter(stock => stock.changePercent > 0).length;
+    const losers = Object.values(marketData).filter(stock => stock.changePercent < 0).length;
+    
+    return { symbolCount, gainers, losers };
+  };
+
+  const { symbolCount, gainers, losers } = getDataStats();
+
   return (
-    900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
-      800 border-b border-gray-700">
-        4 sm:px-6 lg:px-8">
-          4">
-            ">
-              400 to-pink-400 bg-clip-text text-transparent">
+      <div className="bg-gray-800 border-b border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-pink-400 bg-clip-text text-transparent">
                 🚀 Quantum Trading Suite
-              
-            
-            4">
-              2">
-                2 h-2 bg-green-500 rounded-full animate-pulse">
-                300">Live Data
-              
-              400">
-                {new Date().toLocaleTimeString()}
-              
-            
-          
-        
-      
+              </h1>
+              <p className="text-gray-400 text-sm mt-1">
+                Advanced AI-powered trading platform with real-time analytics
+              </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-green-300 text-sm">
+                  {loading ? 'Updating...' : 'Live Data'}
+                </span>
+              </div>
+              <div className="text-gray-400 text-sm">
+                {lastUpdate || new Date().toLocaleTimeString()}
+              </div>
+              <div className="text-xs text-gray-500">
+                {symbolCount} symbols • {gainers}↑ • {losers}↓
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Navigation */}
-      800 border-b border-gray-700">
-        4 sm:px-6 lg:px-8">
-          8">
+      <div className="bg-gray-800 border-b border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-8">
             {modes.map((mode) => (
-              " onclick="{()" ==""> setActiveMode(mode.id)}
-                className={`py-3 px-4 text-sm font-medium transition-colors ${
+              <button
+                key={mode.id}
+                onClick={() => setActiveMode(mode.id)}
+                className={`py-3 px-4 text-sm font-medium transition-colors border-b-2 ${
                   activeMode === mode.id
-                    ? 'text-purple-400 border-b-2 border-purple-400'
-                    : 'text-gray-300 hover:text-white'
+                    ? 'text-purple-400 border-purple-400'
+                    : 'text-gray-300 hover:text-white border-transparent hover:border-gray-600'
                 }`}
               >
-                2">{mode.icon}
+                <span className="mr-2">{mode.icon}</span>
                 {mode.name}
-              
+              </button>
             ))}
-          
-        
-      
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
-      4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {renderActiveComponent()}
-      
-    
+      </div>
+
+      {/* Footer Stats */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 px-4 py-2">
+        <div className="max-w-7xl mx-auto flex justify-between items-center text-xs text-gray-400">
+          <div>
+            Mode: <span className="text-purple-400">{modes.find(m => m.id === activeMode)?.name}</span>
+          </div>
+          <div>
+            Market Data: {symbolCount} symbols loaded
+          </div>
+          <div>
+            Last Update: {lastUpdate || 'Never'}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
