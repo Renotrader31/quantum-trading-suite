@@ -214,6 +214,6 @@ function generateEnhancedMockData(symbol = 'SPY', type = 'flow') {
           put_delta: (-Math.random() * 1000000).toFixed(4),
           call_gamma: (Math.random() * 100000).toFixed(4),
           put_gamma: (-Math.random() * 100000).toFixed(4),
-          call_charm: (Math.random() * 1000000).toFixed(4),
+          call_charm: (Math.random() * 1000000).toFixed(4)
  }
 }
