@@ -1,4 +1,4 @@
-const UW_API_KEY = 'your_actual_unusual_whales_api_key_here'; // 🔑 ADD YOUR REAL API KEY
+const UW_API_KEY = '29a464c8-9da0-490a-ac24-0d4aa492dcbd'; // 🔑 ADD YOUR REAL API KEY
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
