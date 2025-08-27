@@ -1,4 +1,10 @@
-const UW_API_KEY = '29a464c8-9da0-490a-ac24-0d4aa492dcbd'; // 🔑 ADD YOUR REAL API KEY
+// Use the exact same token loading as your working whales.js
+const UW_TOKEN = process.env.UNUSUAL_WHALES_API_KEY || process.env.UW_TOKEN || '29a464c8-9da0-490a-ac24-0d4aa492dcbd';
+
+// Debug logging like your whales.js
+console.log('Scan API - Token length:', UW_TOKEN ? UW_TOKEN.length : 'MISSING');
+console.log('Scan API - Token preview:', UW_TOKEN ? UW_TOKEN.substring(0, 10) + '...' : 'NOT FOUND');
+
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
