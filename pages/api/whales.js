@@ -1,433 +1,453 @@
+// pages/api/whales.js - Unusual Whales API Integration with Real Response Structures
 export default async function handler(req, res) {
-  const { endpoint, symbol = 'SPY' } = req.query;
-  const WHALES_API_KEY = process.env.UNUSUAL_WHALES_API_KEY;
-  
-  if (!WHALES_API_KEY) {
-    return res.status(500).json({ error: 'Unusual Whales API key not configured' });
+  const { type, ticker, expiry, date, strike } = req.query;
+
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+
+  const API_KEY = process.env.UNUSUAL_WHALES_API_KEY;
+
+  if (!API_KEY) {
+    console.log('âš ï¸  Unusual Whales API key not found');
+    return res.status(500).json({ error: 'API key not configured' });
   }
 
   try {
-    switch (endpoint) {
+    let endpoint = '';
+    let baseUrl = 'https://api.unusualwhales.com';
+
+    // Build endpoint based on type and parameters
+    switch(type) {
+      case 'darkpools':
+        endpoint = `/api/stock/${ticker}/darkpool`;
+        if (date) endpoint += `?date=${date}`;
+        break;
+
       case 'gex':
-        // Get real GEX data from Unusual Whales
-        const gexResponse = await fetch(
-          `https://api.unusualwhales.com/api/market/gex/${symbol}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${WHALES_API_KEY}`,
-              'Accept': 'application/json'
-            }
-          }
-        );
-        
-        if (gexResponse.ok) {
-          const gexData = await gexResponse.json();
-          
-          // Get current price
-          const priceResponse = await fetch(
-            `https://api.unusualwhales.com/api/stock/${symbol}/price`,
-            {
-              headers: {
-                'Authorization': `Bearer ${WHALES_API_KEY}`,
-                'Accept': 'application/json'
-              }
-            }
-          );
-          
-          let currentPrice = 425.50; // fallback
-          if (priceResponse.ok) {
-            const priceData = await priceResponse.json();
-            currentPrice = priceData.price || currentPrice;
-          }
-          
-          // Process GEX data
-          const processedGex = processGexData(gexData, currentPrice);
-          
-          return res.status(200).json({
-            symbol: symbol,
-            current_price: currentPrice,
-            net_gex: processedGex.netGex,
-            gex_flip_point: processedGex.flipPoint,
-            total_call_gex: processedGex.totalCallGex,
-            total_put_gex: processedGex.totalPutGex,
-            largest_gamma_strike: processedGex.largestGammaStrike,
-            gamma_walls: processedGex.gammaWalls,
-            timestamp: new Date().toISOString()
-          });
-        }
-        
-        // Fallback to simulated data if API fails
-        return getFallbackGexData(symbol);
-
-      case 'flow':
-        // Get real options flow data
-        const flowResponse = await fetch(
-          `https://api.unusualwhales.com/api/options/flow/${symbol}?limit=50`,
-          {
-            headers: {
-              'Authorization': `Bearer ${WHALES_API_KEY}`,
-              'Accept': 'application/json'
-            }
-          }
-        );
-        
-        if (flowResponse.ok) {
-          const flowData = await flowResponse.json();
-          
-          const processedFlow = {
-            symbol: symbol,
-            timestamp: new Date().toISOString(),
-            total_premium: flowData.reduce((sum, trade) => sum + (trade.premium || 0), 0),
-            call_premium: flowData.filter(t => t.type === 'call').reduce((sum, trade) => sum + (trade.premium || 0), 0),
-            put_premium: flowData.filter(t => t.type === 'put').reduce((sum, trade) => sum + (trade.premium || 0), 0),
-            transactions: flowData.slice(0, 20).map(trade => ({
-              id: `txn_${trade.id || Date.now()}_${Math.random()}`,
-              symbol: trade.symbol || symbol,
-              type: trade.type || (Math.random() > 0.5 ? 'call' : 'put'),
-              strike: trade.strike || Math.round((425 + (Math.random() - 0.5) * 50) / 5) * 5,
-              expiry: trade.expiry || new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-              premium: trade.premium || parseFloat((Math.random() * 50).toFixed(2)),
-              volume: trade.volume || Math.floor(Math.random() * 1000) + 1,
-              side: trade.side || (Math.random() > 0.5 ? 'buy' : 'sell'),
-              timestamp: trade.timestamp || new Date(Date.now() - Math.random() * 60 * 60 * 1000).toISOString(),
-              unusual: trade.premium > 100000, // Mark large premium trades as unusual
-              sentiment: trade.side === 'buy' ? 'bullish' : 'bearish'
-            }))
-          };
-          
-          return res.status(200).json(processedFlow);
-        }
-        
-        return getFallbackFlowData(symbol);
-
-      case 'darkpool':
-        // Get real dark pool data
-        const darkpoolResponse = await fetch(
-          `https://api.unusualwhales.com/api/darkpool/${symbol}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${WHALES_API_KEY}`,
-              'Accept': 'application/json'
-            }
-          }
-        );
-        
-        if (darkpoolResponse.ok) {
-          const darkpoolData = await darkpoolResponse.json();
-          
-          return res.status(200).json({
-            symbol: symbol,
-            timestamp: new Date().toISOString(),
-            total_volume: darkpoolData.total_volume || Math.floor(Math.random() * 10000000) + 1000000,
-            dark_pool_percentage: darkpoolData.dark_pool_percentage || parseFloat((Math.random() * 40 + 10).toFixed(2)),
-            lit_volume: darkpoolData.lit_volume || Math.floor(Math.random() * 15000000) + 5000000,
-            dark_volume: darkpoolData.dark_volume || Math.floor(Math.random() * 8000000) + 2000000,
-            venues: darkpoolData.venues || [
-              {
-                name: 'UBS ATS',
-                volume: Math.floor(Math.random() * 2000000) + 500000,
-                percentage: parseFloat((Math.random() * 25 + 5).toFixed(2))
-              },
-              {
-                name: 'Crossfinder',
-                volume: Math.floor(Math.random() * 1500000) + 300000,
-                percentage: parseFloat((Math.random() * 20 + 3).toFixed(2))
-              },
-              {
-                name: 'SIGMA X',
-                volume: Math.floor(Math.random() * 1800000) + 400000,
-                percentage: parseFloat((Math.random() * 22 + 4).toFixed(2))
-              }
-            ]
-          });
-        }
-        
-        return getFallbackDarkpoolData(symbol);
-
-      case 'volatility':
-        // Get real volatility data
-        const volResponse = await fetch(
-          `https://api.unusualwhales.com/api/options/volatility/${symbol}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${WHALES_API_KEY}`,
-              'Accept': 'application/json'
-            }
-          }
-        );
-        
-        if (volResponse.ok) {
-          const volData = await volResponse.json();
-          
-          return res.status(200).json({
-            symbol: symbol,
-            timestamp: new Date().toISOString(),
-            implied_volatility: volData.implied_volatility || parseFloat((Math.random() * 0.5 + 0.1).toFixed(4)),
-            historical_volatility: volData.historical_volatility || parseFloat((Math.random() * 0.4 + 0.08).toFixed(4)),
-            volatility_skew: volData.volatility_skew || parseFloat((Math.random() * 0.1 - 0.05).toFixed(4)),
-            term_structure: volData.term_structure || Array.from({ length: 8 }, (_, i) => ({
-              days_to_expiry: [7, 14, 30, 60, 90, 120, 180, 360][i],
-              implied_vol: parseFloat((Math.random() * 0.3 + 0.15).toFixed(4))
-            })),
-            put_call_ratio: volData.put_call_ratio || parseFloat((Math.random() * 2 + 0.5).toFixed(2))
-          });
-        }
-        
-        return getFallbackVolatilityData(symbol);
+        endpoint = `/api/stock/${ticker}/gex`;
+        if (date) endpoint += `?date=${date}`;
+        break;
 
       case 'greeks':
-        // Get real Greeks data
-        const greeksResponse = await fetch(
-          `https://api.unusualwhales.com/api/options/greeks/${symbol}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${WHALES_API_KEY}`,
-              'Accept': 'application/json'
-            }
-          }
-        );
-        
-        if (greeksResponse.ok) {
-          const greeksData = await greeksResponse.json();
-          
-          return res.status(200).json({
-            symbol: symbol,
-            timestamp: new Date().toISOString(),
-            spot_price: greeksData.spot_price || 425.50 + (Math.random() - 0.5) * 10,
-            total_delta: greeksData.total_delta || parseFloat(((Math.random() - 0.5) * 2000000).toFixed(2)),
-            total_gamma: greeksData.total_gamma || parseFloat((Math.random() * 500000).toFixed(2)),
-            total_theta: greeksData.total_theta || parseFloat((-Math.random() * 100000).toFixed(2)),
-            total_vega: greeksData.total_vega || parseFloat((Math.random() * 800000).toFixed(2)),
-            by_expiry: greeksData.by_expiry || generateGreeksByExpiry(),
-            portfolio_greeks: greeksData.portfolio_greeks || {
-              call_delta: parseFloat((Math.random() * 1000000).toFixed(4)),
-              put_delta: parseFloat((-Math.random() * 1000000).toFixed(4)),
-              call_gamma: parseFloat((Math.random() * 100000).toFixed(4)),
-              put_gamma: parseFloat((-Math.random() * 100000).toFixed(4)),
-              call_charm: parseFloat((Math.random() * 1000000).toFixed(4)),
-              put_charm: parseFloat((-Math.random() * 500000).toFixed(4))
-            }
-          });
+        if (expiry && strike) {
+          // Individual option Greeks
+          endpoint = `/api/stock/${ticker}/greeks/${expiry}/${strike}`;
+        } else if (expiry) {
+          // Greeks by expiry
+          endpoint = `/api/stock/${ticker}/greeks/${expiry}`;
+        } else {
+          // Total Greeks flow
+          endpoint = `/api/stock/${ticker}/greeks`;
         }
-        
-        return getFallbackGreeksData(symbol);
+        if (date) {
+          endpoint += endpoint.includes('?') ? `&date=${date}` : `?date=${date}`;
+        }
+        break;
+
+      case 'options':
+        endpoint = `/api/stock/${ticker}/options-flow`;
+        let params = [];
+        if (date) params.push(`date=${date}`);
+        if (expiry) params.push(`expiry=${expiry}`);
+        if (params.length > 0) endpoint += `?${params.join('&')}`;
+        break;
+
+      case 'stocks':
+        endpoint = `/api/stock/${ticker}/candles`;
+        if (date) endpoint += `?date=${date}`;
+        break;
+
+      case 'volatility':
+        endpoint = `/api/stock/${ticker}/volatility`;
+        if (date) endpoint += `?date=${date}`;
+        break;
 
       case 'alerts':
-        // Get unusual options activity alerts
-        const alertsResponse = await fetch(
-          `https://api.unusualwhales.com/api/alerts/options?symbol=${symbol}&limit=20`,
-          {
-            headers: {
-              'Authorization': `Bearer ${WHALES_API_KEY}`,
-              'Accept': 'application/json'
-            }
-          }
-        );
-        
-        if (alertsResponse.ok) {
-          const alertsData = await alertsResponse.json();
-          
-          return res.status(200).json({
-            symbol: symbol,
-            timestamp: new Date().toISOString(),
-            alerts: alertsData.map(alert => ({
-              id: alert.id || `alert_${Date.now()}_${Math.random()}`,
-              type: alert.type || 'unusual_volume',
-              severity: alert.severity || 'medium',
-              message: alert.message || `Unusual ${alert.type} detected for ${symbol}`,
-              strike: alert.strike,
-              expiry: alert.expiry,
-              volume: alert.volume,
-              timestamp: alert.timestamp || new Date().toISOString()
-            }))
-          });
-        }
-        
-        return res.status(200).json({
-          symbol: symbol,
-          timestamp: new Date().toISOString(),
-          alerts: []
-        });
+        endpoint = `/api/stock/${ticker}/alerts`;
+        if (date) endpoint += `?date=${date}`;
+        break;
+
+      case 'chains':
+        endpoint = `/api/stock/${ticker}/chains`;
+        if (expiry) endpoint += `/${expiry}`;
+        break;
+
+      case 'maxpain':
+        endpoint = `/api/stock/${ticker}/max-pain`;
+        if (date) endpoint += `?date=${date}`;
+        break;
 
       default:
-        return res.status(400).json({ error: 'Invalid endpoint' });
+        return res.status(400).json({ error: 'Invalid type parameter' });
     }
-  } catch (error) {
-    console.error('Unusual Whales API Error:', error);
-    return res.status(500).json({ 
-      error: 'Failed to fetch data from Unusual Whales',
-      fallback: true,
-      timestamp: new Date().toISOString()
+
+    const url = `${baseUrl}${endpoint}`;
+    console.log(`ðŸ‹ Fetching Unusual Whales data: ${url}`);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+        'Content-Type': 'application/json',
+      },
     });
+
+    if (!response.ok) {
+      console.log(`âŒ Unusual Whales API Error: ${response.status} ${response.statusText}`);
+      throw new Error(`API responded with status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log(`âœ… Unusual Whales data fetched successfully for ${type}/${ticker}`);
+
+    // Transform data based on type for frontend compatibility
+    let transformedData;
+
+    switch(type) {
+      case 'darkpools':
+        transformedData = {
+          success: true,
+          data: data.data?.map(item => ({
+            canceled: item.canceled,
+            executed_at: item.executed_at,
+            ext_hour_sold_codes: item.ext_hour_sold_codes,
+            market_center: item.market_center,
+            nbbo_ask: parseFloat(item.nbbo_ask),
+            nbbo_ask_quantity: item.nbbo_ask_quantity,
+            nbbo_bid: parseFloat(item.nbbo_bid),
+            nbbo_bid_quantity: item.nbbo_bid_quantity,
+            premium: parseFloat(item.premium),
+            price: parseFloat(item.price),
+            sale_cond_codes: item.sale_cond_codes,
+            size: item.size,
+            ticker: item.ticker,
+            tracking_id: item.tracking_id,
+            trade_code: item.trade_code,
+            trade_settlement: item.trade_settlement,
+            volume: item.volume
+          })) || []
+        };
+        break;
+
+      case 'gex':
+        transformedData = {
+          success: true,
+          data: data.data?.map(item => ({
+            // Basic GEX format
+            charm_per_one_percent_move_dir: parseFloat(item.charm_per_one_percent_move_dir || 0),
+            charm_per_one_percent_move_oi: parseFloat(item.charm_per_one_percent_move_oi || 0),
+            charm_per_one_percent_move_vol: parseFloat(item.charm_per_one_percent_move_vol || 0),
+            gamma_per_one_percent_move_dir: parseFloat(item.gamma_per_one_percent_move_dir || 0),
+            gamma_per_one_percent_move_oi: parseFloat(item.gamma_per_one_percent_move_oi || 0),
+            gamma_per_one_percent_move_vol: parseFloat(item.gamma_per_one_percent_move_vol || 0),
+            price: parseFloat(item.price),
+            time: item.time,
+            vanna_per_one_percent_move_dir: parseFloat(item.vanna_per_one_percent_move_dir || 0),
+            vanna_per_one_percent_move_oi: parseFloat(item.vanna_per_one_percent_move_oi || 0),
+            vanna_per_one_percent_move_vol: parseFloat(item.vanna_per_one_percent_move_vol || 0),
+
+            // Detailed GEX format (if available)
+            call_charm_ask: parseFloat(item.call_charm_ask || 0),
+            call_charm_bid: parseFloat(item.call_charm_bid || 0),
+            call_charm_oi: parseFloat(item.call_charm_oi || 0),
+            call_charm_vol: parseFloat(item.call_charm_vol || 0),
+            call_delta_ask: parseFloat(item.call_delta_ask || 0),
+            call_delta_bid: parseFloat(item.call_delta_bid || 0),
+            call_delta_oi: parseFloat(item.call_delta_oi || 0),
+            call_delta_vol: parseFloat(item.call_delta_vol || 0),
+            call_gamma_ask: parseFloat(item.call_gamma_ask || 0),
+            call_gamma_bid: parseFloat(item.call_gamma_bid || 0),
+            call_gamma_oi: parseFloat(item.call_gamma_oi || 0),
+            call_gamma_vol: parseFloat(item.call_gamma_vol || 0),
+            call_vanna_ask: parseFloat(item.call_vanna_ask || 0),
+            call_vanna_bid: parseFloat(item.call_vanna_bid || 0),
+            call_vanna_oi: parseFloat(item.call_vanna_oi || 0),
+            call_vanna_vol: parseFloat(item.call_vanna_vol || 0),
+
+            put_charm_ask: parseFloat(item.put_charm_ask || 0),
+            put_charm_bid: parseFloat(item.put_charm_bid || 0),
+            put_charm_oi: parseFloat(item.put_charm_oi || 0),
+            put_charm_vol: parseFloat(item.put_charm_vol || 0),
+            put_delta_ask: parseFloat(item.put_delta_ask || 0),
+            put_delta_bid: parseFloat(item.put_delta_bid || 0),
+            put_delta_oi: parseFloat(item.put_delta_oi || 0),
+            put_delta_vol: parseFloat(item.put_delta_vol || 0),
+            put_gamma_ask: parseFloat(item.put_gamma_ask || 0),
+            put_gamma_bid: parseFloat(item.put_gamma_bid || 0),
+            put_gamma_oi: parseFloat(item.put_gamma_oi || 0),
+            put_gamma_vol: parseFloat(item.put_gamma_vol || 0),
+            put_vanna_ask: parseFloat(item.put_vanna_ask || 0),
+            put_vanna_bid: parseFloat(item.put_vanna_bid || 0),
+            put_vanna_oi: parseFloat(item.put_vanna_oi || 0),
+            put_vanna_vol: parseFloat(item.put_vanna_vol || 0)
+          })) || []
+        };
+        break;
+
+      case 'greeks':
+        transformedData = {
+          success: true,
+          data: data.data?.map(item => ({
+            // Basic Greeks
+            call_charm: parseFloat(item.call_charm || 0),
+            call_delta: parseFloat(item.call_delta || 0),
+            call_gamma: parseFloat(item.call_gamma || 0),
+            call_vanna: parseFloat(item.call_vanna || 0),
+            put_charm: parseFloat(item.put_charm || 0),
+            put_delta: parseFloat(item.put_delta || 0),
+            put_gamma: parseFloat(item.put_gamma || 0),
+            put_vanna: parseFloat(item.put_vanna || 0),
+
+            // Time fields
+            date: item.date,
+            dte: item.dte,
+            expiry: item.expiry,
+            strike: parseFloat(item.strike || 0),
+
+            // Flow fields
+            dir_delta_flow: parseFloat(item.dir_delta_flow || 0),
+            dir_vega_flow: parseFloat(item.dir_vega_flow || 0),
+            otm_dir_delta_flow: parseFloat(item.otm_dir_delta_flow || 0),
+            otm_dir_vega_flow: parseFloat(item.otm_dir_vega_flow || 0),
+            otm_total_delta_flow: parseFloat(item.otm_total_delta_flow || 0),
+            otm_total_vega_flow: parseFloat(item.otm_total_vega_flow || 0),
+            ticker: item.ticker,
+            timestamp: item.timestamp,
+            total_delta_flow: parseFloat(item.total_delta_flow || 0),
+            total_vega_flow: parseFloat(item.total_vega_flow || 0),
+            transactions: item.transactions,
+            volume: item.volume,
+
+            // Individual option Greeks
+            call_option_symbol: item.call_option_symbol,
+            call_rho: parseFloat(item.call_rho || 0),
+            call_theta: parseFloat(item.call_theta || 0),
+            call_vega: parseFloat(item.call_vega || 0),
+            call_volatility: parseFloat(item.call_volatility || 0),
+            put_option_symbol: item.put_option_symbol,
+            put_rho: parseFloat(item.put_rho || 0),
+            put_theta: parseFloat(item.put_theta || 0),
+            put_vega: parseFloat(item.put_vega || 0),
+            put_volatility: parseFloat(item.put_volatility || 0)
+          })) || []
+        };
+        break;
+
+      case 'options':
+        transformedData = {
+          success: true,
+          data: data.data?.map(item => ({
+            ask_vol: item.ask_vol,
+            bid_vol: item.bid_vol,
+            canceled: item.canceled,
+            delta: parseFloat(item.delta),
+            er_time: item.er_time,
+            ewma_nbbo_ask: parseFloat(item.ewma_nbbo_ask),
+            ewma_nbbo_bid: parseFloat(item.ewma_nbbo_bid),
+            exchange: item.exchange,
+            executed_at: item.executed_at,
+            expiry: item.expiry,
+            flow_alert_id: item.flow_alert_id,
+            full_name: item.full_name,
+            gamma: parseFloat(item.gamma),
+            id: item.id,
+            implied_volatility: parseFloat(item.implied_volatility),
+            industry_type: item.industry_type,
+            marketcap: parseFloat(item.marketcap),
+            mid_vol: item.mid_vol,
+            multi_vol: item.multi_vol,
+            nbbo_ask: parseFloat(item.nbbo_ask),
+            nbbo_bid: parseFloat(item.nbbo_bid),
+            next_earnings_date: item.next_earnings_date,
+            no_side_vol: item.no_side_vol,
+            open_interest: item.open_interest,
+            option_chain_id: item.option_chain_id,
+            option_type: item.option_type,
+            premium: parseFloat(item.premium),
+            price: parseFloat(item.price),
+            report_flags: item.report_flags,
+            rho: parseFloat(item.rho),
+            rule_id: item.rule_id,
+            sector: item.sector,
+            size: item.size,
+            stock_multi_vol: item.stock_multi_vol,
+            strike: parseFloat(item.strike),
+            tags: item.tags,
+            theo: parseFloat(item.theo),
+            theta: parseFloat(item.theta),
+            underlying_price: parseFloat(item.underlying_price),
+            underlying_symbol: item.underlying_symbol,
+            upstream_condition_detail: item.upstream_condition_detail,
+            vega: parseFloat(item.vega),
+            volume: item.volume
+          })) || []
+        };
+        break;
+
+      case 'stocks':
+        transformedData = {
+          success: true,
+          data: data.data?.map(item => ({
+            close: parseFloat(item.close),
+            end_time: item.end_time,
+            high: parseFloat(item.high),
+            low: parseFloat(item.low),
+            market_time: item.market_time,
+            open: parseFloat(item.open),
+            start_time: item.start_time,
+            total_volume: item.total_volume,
+            volume: item.volume,
+
+            // Alert fields (if available)
+            alert_rule: item.alert_rule,
+            all_opening_trades: item.all_opening_trades,
+            created_at: item.created_at,
+            expiry: item.expiry,
+            expiry_count: item.expiry_count,
+            has_floor: item.has_floor,
+            has_multileg: item.has_multileg,
+            has_singleleg: item.has_singleleg,
+            has_sweep: item.has_sweep,
+            open_interest: item.open_interest,
+            option_chain: item.option_chain,
+            price: parseFloat(item.price || item.close || 0),
+            strike: parseFloat(item.strike || 0),
+            ticker: item.ticker,
+            total_ask_side_prem: parseFloat(item.total_ask_side_prem || 0),
+            total_bid_side_prem: parseFloat(item.total_bid_side_prem || 0),
+            total_premium: parseFloat(item.total_premium || 0),
+            total_size: item.total_size,
+            trade_count: item.trade_count,
+            type: item.type,
+            underlying_price: parseFloat(item.underlying_price || 0),
+            volume_oi_ratio: parseFloat(item.volume_oi_ratio || 0)
+          })) || []
+        };
+        break;
+
+      case 'volatility':
+        transformedData = {
+          success: true,
+          data: data.data ? (Array.isArray(data.data) ? data.data.map(item => ({
+            date: item.date,
+            implied_volatility: parseFloat(item.implied_volatility || item.iv || 0),
+            price: parseFloat(item.price || item.close || 0),
+            realized_volatility: parseFloat(item.realized_volatility || item.rv || 0),
+            unshifted_rv_date: item.unshifted_rv_date,
+
+            // Summary fields
+            iv: parseFloat(item.iv || 0),
+            iv_high: parseFloat(item.iv_high || 0),
+            iv_low: parseFloat(item.iv_low || 0),
+            iv_rank: parseFloat(item.iv_rank || 0),
+            rv: parseFloat(item.rv || 0),
+            rv_high: parseFloat(item.rv_high || 0),
+            rv_low: parseFloat(item.rv_low || 0),
+            ticker: item.ticker,
+
+            // Term structure fields
+            dte: item.dte,
+            expiry: item.expiry,
+            implied_move: parseFloat(item.implied_move || 0),
+            implied_move_perc: parseFloat(item.implied_move_perc || 0),
+            volatility: parseFloat(item.volatility || 0),
+
+            // Percentile fields
+            days: item.days,
+            percentile: parseFloat(item.percentile || 0),
+
+            // Historical fields
+            close: parseFloat(item.close || 0),
+            iv_rank_1y: parseFloat(item.iv_rank_1y || 0),
+            updated_at: item.updated_at
+          })) : [data.data]) : []
+        };
+        break;
+
+      default:
+        transformedData = data;
+    }
+
+    return res.status(200).json(transformedData);
+
+  } catch (error) {
+    console.error('âŒ Unusual Whales API Error:', error.message);
+
+    // Return fallback data structure based on type
+    let fallbackData = { success: false, error: error.message, data: [] };
+
+    switch(type) {
+      case 'darkpools':
+        fallbackData.data = [{
+          ticker: ticker || 'SPY',
+          premium: 125000,
+          size: 5000,
+          price: 450.25,
+          volume: 1000000,
+          executed_at: new Date().toISOString(),
+          market_center: 'D'
+        }];
+        break;
+
+      case 'gex':
+        fallbackData.data = [{
+          gamma_per_one_percent_move_dir: 475681.21,
+          gamma_per_one_percent_move_oi: 65476967081.41,
+          price: 4650,
+          time: new Date().toISOString()
+        }];
+        break;
+
+      case 'greeks':
+        fallbackData.data = [{
+          call_delta: 227549667.47,
+          call_gamma: 9356683.42,
+          put_delta: -191893077.72,
+          put_gamma: -12337386.05,
+          date: new Date().toISOString().split('T')[0]
+        }];
+        break;
+
+      case 'options':
+        fallbackData.data = [{
+          delta: 0.61,
+          gamma: 0.008,
+          premium: 2150,
+          strike: 124,
+          expiry: '2025-01-17',
+          underlying_price: 128.16,
+          volume: 33
+        }];
+        break;
+
+      case 'stocks':
+        fallbackData.data = [{
+          close: 450.25,
+          high: 452.10,
+          low: 448.90,
+          open: 449.75,
+          volume: 1250000,
+          start_time: new Date().toISOString()
+        }];
+        break;
+
+      case 'volatility':
+        fallbackData.data = [{
+          implied_volatility: 0.23,
+          realized_volatility: 0.19,
+          price: 150.15,
+          date: new Date().toISOString().split('T')[0]
+        }];
+        break;
+    }
+
+    return res.status(200).json(fallbackData);
   }
-}
-
-// Helper functions
-function processGexData(gexData, currentPrice) {
-  // Process real GEX data from Unusual Whales
-  const strikes = Object.keys(gexData.strikes || {}).map(Number).sort((a, b) => a - b);
-  const gammaWalls = [];
-  let totalCallGex = 0;
-  let totalPutGex = 0;
-  let largestGamma = 0;
-  let largestGammaStrike = currentPrice;
-  
-  strikes.forEach(strike => {
-    const strikeData = gexData.strikes[strike];
-    const callGamma = strikeData.call_gamma || 0;
-    const putGamma = strikeData.put_gamma || 0;
-    const netGamma = callGamma + putGamma;
-    
-    totalCallGex += callGamma;
-    totalPutGex += putGamma;
-    
-    if (Math.abs(netGamma) > Math.abs(largestGamma)) {
-      largestGamma = netGamma;
-      largestGammaStrike = strike;
-    }
-    
-    if (Math.abs(netGamma) > 50000000) { // Significant gamma level
-      gammaWalls.push({
-        strike: strike,
-        gamma: netGamma,
-        type: strike > currentPrice ? 'resistance' : 'support'
-      });
-    }
-  });
-  
-  // Find GEX flip point (where net gamma crosses zero)
-  let flipPoint = currentPrice;
-  for (let i = 0; i < strikes.length - 1; i++) {
-    const currentGamma = (gexData.strikes[strikes[i]]?.call_gamma || 0) + (gexData.strikes[strikes[i]]?.put_gamma || 0);
-    const nextGamma = (gexData.strikes[strikes[i + 1]]?.call_gamma || 0) + (gexData.strikes[strikes[i + 1]]?.put_gamma || 0);
-    
-    if (currentGamma > 0 && nextGamma < 0) {
-      flipPoint = (strikes[i] + strikes[i + 1]) / 2;
-      break;
-    }
-  }
-  
-  return {
-    netGex: totalCallGex + totalPutGex,
-    flipPoint: flipPoint,
-    totalCallGex: totalCallGex,
-    totalPutGex: totalPutGex,
-    largestGammaStrike: largestGammaStrike,
-    gammaWalls: gammaWalls.slice(0, 4) // Top 4 gamma walls
-  };
-}
-
-function getFallbackGexData(symbol) {
-  return {
-    symbol: symbol,
-    current_price: 425.50 + (Math.random() - 0.5) * 10,
-    net_gex: (Math.random() - 0.5) * 2000000000,
-    gex_flip_point: 420.00 + (Math.random() - 0.5) * 10,
-    total_call_gex: Math.random() * 3000000000,
-    total_put_gex: -Math.random() * 1500000000,
-    largest_gamma_strike: Math.round((425 + (Math.random() - 0.5) * 20) / 5) * 5,
-    gamma_walls: [
-      { strike: 420, gamma: Math.random() * 1000000000, type: 'support' },
-      { strike: 425, gamma: Math.random() * 1500000000, type: 'resistance' },
-      { strike: 430, gamma: Math.random() * 800000000, type: 'resistance' },
-      { strike: 415, gamma: Math.random() * 600000000, type: 'support' }
-    ],
-    timestamp: new Date().toISOString(),
-    fallback: true
-  };
-}
-
-function getFallbackFlowData(symbol) {
-  return {
-    symbol: symbol,
-    timestamp: new Date().toISOString(),
-    total_premium: Math.random() * 500000000,
-    call_premium: Math.random() * 300000000,
-    put_premium: Math.random() * 200000000,
-    transactions: Array.from({ length: 10 }, (_, i) => ({
-      id: `txn_${Date.now()}_${i}`,
-      symbol: symbol,
-      type: Math.random() > 0.5 ? 'call' : 'put',
-      strike: Math.round((425 + (Math.random() - 0.5) * 50) / 5) * 5,
-      expiry: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      premium: parseFloat((Math.random() * 50).toFixed(2)),
-      volume: Math.floor(Math.random() * 1000) + 1,
-      side: Math.random() > 0.5 ? 'buy' : 'sell',
-      timestamp: new Date(Date.now() - Math.random() * 60 * 60 * 1000).toISOString()
-    })),
-    fallback: true
-  };
-}
-
-function getFallbackDarkpoolData(symbol) {
-  return {
-    symbol: symbol,
-    timestamp: new Date().toISOString(),
-    total_volume: Math.floor(Math.random() * 10000000) + 1000000,
-    dark_pool_percentage: parseFloat((Math.random() * 40 + 10).toFixed(2)),
-    lit_volume: Math.floor(Math.random() * 15000000) + 5000000,
-    dark_volume: Math.floor(Math.random() * 8000000) + 2000000,
-    venues: [
-      { name: 'UBS ATS', volume: Math.floor(Math.random() * 2000000) + 500000, percentage: parseFloat((Math.random() * 25 + 5).toFixed(2)) },
-      { name: 'Crossfinder', volume: Math.floor(Math.random() * 1500000) + 300000, percentage: parseFloat((Math.random() * 20 + 3).toFixed(2)) },
-      { name: 'SIGMA X', volume: Math.floor(Math.random() * 1800000) + 400000, percentage: parseFloat((Math.random() * 22 + 4).toFixed(2)) }
-    ],
-    fallback: true
-  };
-}
-
-function getFallbackVolatilityData(symbol) {
-  return {
-    symbol: symbol,
-    timestamp: new Date().toISOString(),
-    implied_volatility: parseFloat((Math.random() * 0.5 + 0.1).toFixed(4)),
-    historical_volatility: parseFloat((Math.random() * 0.4 + 0.08).toFixed(4)),
-    volatility_skew: parseFloat((Math.random() * 0.1 - 0.05).toFixed(4)),
-    term_structure: Array.from({ length: 8 }, (_, i) => ({
-      days_to_expiry: [7, 14, 30, 60, 90, 120, 180, 360][i],
-      implied_vol: parseFloat((Math.random() * 0.3 + 0.15).toFixed(4))
-    })),
-    put_call_ratio: parseFloat((Math.random() * 2 + 0.5).toFixed(2)),
-    fallback: true
-  };
-}
-
-function getFallbackGreeksData(symbol) {
-  return {
-    symbol: symbol,
-    timestamp: new Date().toISOString(),
-    spot_price: 425.50 + (Math.random() - 0.5) * 10,
-    total_delta: parseFloat(((Math.random() - 0.5) * 2000000).toFixed(2)),
-    total_gamma: parseFloat((Math.random() * 500000).toFixed(2)),
-    total_theta: parseFloat((-Math.random() * 100000).toFixed(2)),
-    total_vega: parseFloat((Math.random() * 800000).toFixed(2)),
-    by_expiry: generateGreeksByExpiry(),
-    portfolio_greeks: {
-      call_delta: parseFloat((Math.random() * 1000000).toFixed(4)),
-      put_delta: parseFloat((-Math.random() * 1000000).toFixed(4)),
-      call_gamma: parseFloat((Math.random() * 100000).toFixed(4)),
-      put_gamma: parseFloat((-Math.random() * 100000).toFixed(4)),
-      call_charm: parseFloat((Math.random() * 1000000).toFixed(4)),
-      put_charm: parseFloat((-Math.random() * 500000).toFixed(4))
-    },
-    fallback: true
-  };
-}
-
-function generateGreeksByExpiry() {
-  return Array.from({ length: 5 }, (_, i) => {
-    const expiry = new Date();
-    expiry.setDate(expiry.getDate() + (i + 1) * 7);
-    return {
-      expiry: expiry.toISOString().split('T')[0],
-      call_delta: parseFloat((Math.random() * 1000000).toFixed(4)),
-      put_delta: parseFloat((-Math.random() * 1000000).toFixed(4)),
-      call_gamma: parseFloat((Math.random() * 100000).toFixed(4)),
-      put_gamma: parseFloat((-Math.random() * 100000).toFixed(4)),
-      call_theta: parseFloat((-Math.random() * 50000).toFixed(4)),
-      put_theta: parseFloat((-Math.random() * 50000).toFixed(4)),
-      call_vega: parseFloat((Math.random() * 200000).toFixed(4)),
-      put_vega: parseFloat((Math.random() * 200000).toFixed(4))
-    };
-  });
 }
