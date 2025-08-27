@@ -5,8 +5,11 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Head>
-        <script src="https://cdn.tailwindcss.com"></script>
         <title>Quantum Trading Suite</title>
+        {/* Only use CDN in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <script src="https://cdn.tailwindcss.com"></script>
+        )}
       </Head>
       <Component {...pageProps} />
     </>
