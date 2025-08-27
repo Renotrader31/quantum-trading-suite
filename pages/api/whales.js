@@ -1,10 +1,10 @@
 // pages/api/whales.js
-// Real Unusual Whales API Integration with correct response structures
-// Based on actual API documentation provided
+// REAL Unusual Whales API Integration - Based on Dan's official API support response
+// Corrected endpoints, base URL, and authentication format
 
 export default async function handler(req, res) {
   const { type, ticker = 'SPY', expiry, strike, days = 30 } = req.query;
-  
+
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -14,140 +14,242 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const UW_API_KEY = process.env.UNUSUAL_WHALES_API_KEY;
-  
-  if (!UW_API_KEY) {
-    console.log('❌ Unusual Whales API key not found in environment variables');
+  const UW_TOKEN = process.env.UNUSUAL_WHALES_API_KEY || process.env.UW_TOKEN;
+
+  if (!UW_TOKEN) {
+    console.log('âŒ Unusual Whales API key not found in environment variables');
     return res.status(500).json({ 
       error: 'API key not configured',
-      message: 'Unusual Whales API key not found in environment variables'
+      message: 'Unusual Whales API key not found. Set UNUSUAL_WHALES_API_KEY or UW_TOKEN'
     });
   }
 
-  const BASE_URL = 'https://api.unusualwhales.com/api/v1';
-  
+  // REAL API structure from Dan's response
+  const BASE_URL = 'https://api.unusualwhales.com/api/stock';
+
   try {
     let endpoint = '';
-    let params = new URLSearchParams();
-    
-    // Build endpoint based on type with real API paths
+    let params = {};
+
+    // Build endpoint based on type with REAL API paths from Dan
     switch (type) {
-      case 'darkpools':
-        endpoint = `/darkpools/${ticker}`;
-        break;
-        
-      case 'gex':
-        endpoint = `/gex/${ticker}`;
-        break;
-        
       case 'greeks':
-        endpoint = `/greeks/${ticker}`;
-        if (expiry) params.append('expiry', expiry);
-        if (strike) params.append('strike', strike);
+        endpoint = `${BASE_URL}/${ticker}/greeks`;
+        if (expiry) params.expiry = expiry;
         break;
-        
+
       case 'options':
-        endpoint = `/options-flow/${ticker}`;
-        params.append('days', days);
+      case 'option-contracts':
+        endpoint = `${BASE_URL}/${ticker}/option-contracts`;
+        if (expiry) params.expiry = expiry;
         break;
-        
-      case 'stocks':
-        endpoint = `/stocks/${ticker}`;
+
+      case 'darkpools':
+        endpoint = `${BASE_URL}/${ticker}/darkpools`;
         break;
-        
-      case 'volatility':
-        endpoint = `/volatility/${ticker}`;
+
+      case 'gex':
+        endpoint = `${BASE_URL}/${ticker}/gex`;
         break;
-        
+
       case 'flow':
-        endpoint = `/flow/${ticker}`;
-        params.append('days', days);
+        endpoint = `${BASE_URL}/${ticker}/flow`;
         break;
-        
+
+      case 'volatility':
+        endpoint = `${BASE_URL}/${ticker}/volatility`;
+        break;
+
+      case 'stocks':
+      case 'bars':
+        endpoint = `${BASE_URL}/${ticker}/bars`;
+        break;
+
       default:
-        return res.status(400).json({ error: 'Invalid type parameter' });
+        return res.status(400).json({ error: 'Invalid type parameter. Use: greeks, options, darkpools, gex, flow, volatility, stocks' });
     }
 
-    const url = `${BASE_URL}${endpoint}${params.toString() ? `?${params.toString()}` : ''}`;
-    
-    console.log(`🔥 Fetching from UW API: ${endpoint}`);
-    
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${UW_API_KEY}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'QuantumTradingSuite/1.0'
-      },
-      timeout: 10000
+    // Build URL with parameters
+    const url = new URL(endpoint);
+    Object.keys(params).forEach(key => {
+      if (params[key]) url.searchParams.append(key, params[key]);
+    });
+
+    console.log(`ðŸ”¥ Fetching from REAL UW API: ${url.toString()}`);
+
+    // REAL headers format from Dan's working example
+    const headers = {
+      'Accept': 'application/json, text/plain',
+      'Authorization': UW_TOKEN  // NOT "Bearer token" - just the token directly!
+    };
+
+    const response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: headers,
+      timeout: 15000
     });
 
     if (!response.ok) {
-      console.log(`❌ UW API Error: ${response.status} ${response.statusText}`);
-      throw new Error(`API request failed: ${response.status}`);
+      const errorText = await response.text();
+      console.log(`âŒ UW API Error: ${response.status} ${response.statusText}`);
+      console.log(`âŒ Error response: ${errorText}`);
+      throw new Error(`API request failed: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    
-    // Process and normalize data based on type with real field mappings
+
+    // Process and normalize data based on type
     let processedData;
-    
+
     switch (type) {
-      case 'darkpools':
-        processedData = processDarkPoolsData(data);
-        break;
-        
-      case 'gex':
-        processedData = processGEXData(data);
-        break;
-        
       case 'greeks':
         processedData = processGreeksData(data);
         break;
-        
+
       case 'options':
+      case 'option-contracts':
+        processedData = processOptionsData(data);
+        break;
+
+      case 'darkpools':
+        processedData = processDarkPoolsData(data);
+        break;
+
+      case 'gex':
+        processedData = processGEXData(data);
+        break;
+
       case 'flow':
-        processedData = processOptionsFlowData(data);
+        processedData = processFlowData(data);
         break;
-        
-      case 'stocks':
-        processedData = processStocksData(data);
-        break;
-        
+
       case 'volatility':
         processedData = processVolatilityData(data);
         break;
-        
+
+      case 'stocks':
+      case 'bars':
+        processedData = processStocksData(data);
+        break;
+
       default:
         processedData = data;
     }
 
-    console.log(`✅ Successfully fetched ${type} data for ${ticker}`);
-    return res.status(200).json(processedData);
+    console.log(`âœ… Successfully fetched ${type} data for ${ticker} - Records: ${processedData?.data?.length || 'N/A'}`);
+    return res.status(200).json({
+      success: true,
+      ticker,
+      type,
+      timestamp: new Date().toISOString(),
+      ...processedData
+    });
 
   } catch (error) {
-    console.error(`❌ Unusual Whales API Error:`, error.message);
-    
-    // Return fallback data structure to prevent frontend crashes
-    const fallbackData = generateFallbackData(type, ticker);
-    
-    return res.status(200).json({
-      ...fallbackData,
-      _meta: {
-        source: 'fallback',
-        error: error.message,
-        timestamp: new Date().toISOString()
-      }
+    console.error(`âŒ Unusual Whales API Error:`, error.message);
+
+    // Return structured error response
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+      ticker,
+      type,
+      timestamp: new Date().toISOString(),
+      fallback: generateFallbackData(type, ticker)
     });
   }
 }
 
-// Process Dark Pools data with real field mappings
-function processDarkPoolsData(data) {
-  if (!data?.data) return { trades: [] };
-  
+// Process Greeks data with real field mappings from documentation
+function processGreeksData(data) {
+  if (!data?.data) return { data: [] };
+
   return {
-    trades: data.data.map(trade => ({
-      // Real field mappings from API documentation
+    data: data.data.map(item => ({
+      // Core identifiers
+      ticker: item.ticker,
+      date: item.date,
+      expiry: item.expiry,
+      strike: parseFloat(item.strike) || 0,
+
+      // Call Greeks
+      call_delta: parseFloat(item.call_delta) || 0,
+      call_gamma: parseFloat(item.call_gamma) || 0,
+      call_theta: parseFloat(item.call_theta) || 0,
+      call_vega: parseFloat(item.call_vega) || 0,
+      call_rho: parseFloat(item.call_rho) || 0,
+      call_charm: parseFloat(item.call_charm) || 0,
+      call_vanna: parseFloat(item.call_vanna) || 0,
+      call_volatility: parseFloat(item.call_volatility) || 0,
+      call_option_symbol: item.call_option_symbol,
+
+      // Put Greeks
+      put_delta: parseFloat(item.put_delta) || 0,
+      put_gamma: parseFloat(item.put_gamma) || 0,
+      put_theta: parseFloat(item.put_theta) || 0,
+      put_vega: parseFloat(item.put_vega) || 0,
+      put_rho: parseFloat(item.put_rho) || 0,
+      put_charm: parseFloat(item.put_charm) || 0,
+      put_vanna: parseFloat(item.put_vanna) || 0,
+      put_volatility: parseFloat(item.put_volatility) || 0,
+      put_option_symbol: item.put_option_symbol,
+
+      // Flow data if available
+      dir_delta_flow: parseFloat(item.dir_delta_flow) || 0,
+      dir_vega_flow: parseFloat(item.dir_vega_flow) || 0,
+      total_delta_flow: parseFloat(item.total_delta_flow) || 0,
+      total_vega_flow: parseFloat(item.total_vega_flow) || 0,
+      transactions: item.transactions || 0,
+      volume: item.volume || 0,
+      timestamp: item.timestamp
+    }))
+  };
+}
+
+// Process Option Contracts data
+function processOptionsData(data) {
+  if (!data?.data) return { data: [] };
+
+  return {
+    data: data.data.map(option => ({
+      // Option identifiers
+      option_symbol: option.option_symbol,
+      option_type: option.option_type,
+      strike: parseFloat(option.strike) || 0,
+      expiry: option.expiry,
+
+      // Greeks
+      delta: parseFloat(option.delta) || 0,
+      gamma: parseFloat(option.gamma) || 0,
+      theta: parseFloat(option.theta) || 0,
+      vega: parseFloat(option.vega) || 0,
+      rho: parseFloat(option.rho) || 0,
+      implied_volatility: parseFloat(option.implied_volatility) || 0,
+
+      // Pricing
+      bid: parseFloat(option.bid) || 0,
+      ask: parseFloat(option.ask) || 0,
+      last: parseFloat(option.last) || 0,
+      mark: parseFloat(option.mark) || 0,
+
+      // Volume and Interest
+      volume: option.volume || 0,
+      open_interest: option.open_interest || 0,
+
+      // Additional fields
+      underlying_price: parseFloat(option.underlying_price) || 0,
+      time_to_expiry: parseFloat(option.time_to_expiry) || 0,
+      updated_at: option.updated_at
+    }))
+  };
+}
+
+// Process Dark Pools data
+function processDarkPoolsData(data) {
+  if (!data?.data) return { data: [] };
+
+  return {
+    data: data.data.map(trade => ({
       ticker: trade.ticker,
       price: parseFloat(trade.price) || 0,
       size: trade.size || 0,
@@ -167,13 +269,12 @@ function processDarkPoolsData(data) {
   };
 }
 
-// Process GEX data with real field mappings
+// Process GEX data
 function processGEXData(data) {
-  if (!data?.data) return { gex_data: [] };
-  
+  if (!data?.data) return { data: [] };
+
   return {
-    gex_data: data.data.map(item => ({
-      // Real field mappings from API documentation
+    data: data.data.map(item => ({
       price: parseFloat(item.price) || 0,
       time: item.time,
       gamma_per_one_percent_move_dir: parseFloat(item.gamma_per_one_percent_move_dir) || 0,
@@ -184,136 +285,74 @@ function processGEXData(data) {
       charm_per_one_percent_move_vol: parseFloat(item.charm_per_one_percent_move_vol) || 0,
       vanna_per_one_percent_move_dir: parseFloat(item.vanna_per_one_percent_move_dir) || 0,
       vanna_per_one_percent_move_oi: parseFloat(item.vanna_per_one_percent_move_oi) || 0,
-      vanna_per_one_percent_move_vol: parseFloat(item.vanna_per_one_percent_move_vol) || 0,
-      
-      // Detailed breakdown if available
-      call_gamma_oi: parseFloat(item.call_gamma_oi) || 0,
-      call_gamma_vol: parseFloat(item.call_gamma_vol) || 0,
-      put_gamma_oi: parseFloat(item.put_gamma_oi) || 0,
-      put_gamma_vol: parseFloat(item.put_gamma_vol) || 0
+      vanna_per_one_percent_move_vol: parseFloat(item.vanna_per_one_percent_move_vol) || 0
     }))
   };
 }
 
-// Process Greeks data with real field mappings  
-function processGreeksData(data) {
-  if (!data?.data) return { greeks: [] };
-  
-  return {
-    greeks: data.data.map(item => ({
-      // Real field mappings from API documentation
-      date: item.date,
-      expiry: item.expiry,
-      strike: item.strike,
-      
-      // Call Greeks
-      call_delta: parseFloat(item.call_delta) || 0,
-      call_gamma: parseFloat(item.call_gamma) || 0,
-      call_theta: parseFloat(item.call_theta) || 0,
-      call_vega: parseFloat(item.call_vega) || 0,
-      call_rho: parseFloat(item.call_rho) || 0,
-      call_charm: parseFloat(item.call_charm) || 0,
-      call_vanna: parseFloat(item.call_vanna) || 0,
-      call_volatility: parseFloat(item.call_volatility) || 0,
-      call_option_symbol: item.call_option_symbol,
-      
-      // Put Greeks
-      put_delta: parseFloat(item.put_delta) || 0,
-      put_gamma: parseFloat(item.put_gamma) || 0,
-      put_theta: parseFloat(item.put_theta) || 0,
-      put_vega: parseFloat(item.put_vega) || 0,
-      put_rho: parseFloat(item.put_rho) || 0,
-      put_charm: parseFloat(item.put_charm) || 0,
-      put_vanna: parseFloat(item.put_vanna) || 0,
-      put_volatility: parseFloat(item.put_volatility) || 0,
-      put_option_symbol: item.put_option_symbol,
-      
-      // Flow data if available
-      dir_delta_flow: parseFloat(item.dir_delta_flow) || 0,
-      dir_vega_flow: parseFloat(item.dir_vega_flow) || 0,
-      total_delta_flow: parseFloat(item.total_delta_flow) || 0,
-      total_vega_flow: parseFloat(item.total_vega_flow) || 0,
-      transactions: item.transactions || 0,
-      volume: item.volume || 0,
-      ticker: item.ticker,
-      timestamp: item.timestamp
-    }))
-  };
-}
+// Process Flow data
+function processFlowData(data) {
+  if (!data?.data) return { data: [] };
 
-// Process Options Flow data with real field mappings
-function processOptionsFlowData(data) {
-  if (!data?.data) return { flows: [] };
-  
   return {
-    flows: data.data.map(flow => ({
-      // Real field mappings from API documentation
+    data: data.data.map(flow => ({
       id: flow.id,
       ticker: flow.underlying_symbol || flow.ticker,
       full_name: flow.full_name,
       sector: flow.sector,
       industry_type: flow.industry_type,
-      marketcap: parseFloat(flow.marketcap) || 0,
-      
-      // Option details
+
       option_chain_id: flow.option_chain_id,
       option_type: flow.option_type,
       strike: parseFloat(flow.strike) || 0,
       expiry: flow.expiry,
       executed_at: flow.executed_at,
-      
-      // Pricing
+
       price: parseFloat(flow.price) || 0,
       premium: parseFloat(flow.premium) || 0,
       underlying_price: parseFloat(flow.underlying_price) || 0,
-      theo: parseFloat(flow.theo) || 0,
-      
-      // Greeks
+
       delta: parseFloat(flow.delta) || 0,
       gamma: parseFloat(flow.gamma) || 0,
       theta: parseFloat(flow.theta) || 0,
       vega: parseFloat(flow.vega) || 0,
-      rho: parseFloat(flow.rho) || 0,
-      implied_volatility: parseFloat(flow.implied_volatility) || 0,
-      
-      // Volume breakdown
+
       size: flow.size || 0,
       volume: flow.volume || 0,
       ask_vol: flow.ask_vol || 0,
       bid_vol: flow.bid_vol || 0,
-      mid_vol: flow.mid_vol || 0,
-      multi_vol: flow.multi_vol || 0,
-      no_side_vol: flow.no_side_vol || 0,
-      stock_multi_vol: flow.stock_multi_vol || 0,
-      
-      // Market data
+
       exchange: flow.exchange,
-      nbbo_ask: parseFloat(flow.nbbo_ask) || 0,
-      nbbo_bid: parseFloat(flow.nbbo_bid) || 0,
-      ewma_nbbo_ask: parseFloat(flow.ewma_nbbo_ask) || 0,
-      ewma_nbbo_bid: parseFloat(flow.ewma_nbbo_bid) || 0,
-      
-      // Metadata
-      open_interest: flow.open_interest || 0,
-      tags: flow.tags || [],
-      canceled: flow.canceled || false,
-      er_time: flow.er_time,
-      next_earnings_date: flow.next_earnings_date,
-      flow_alert_id: flow.flow_alert_id,
-      rule_id: flow.rule_id,
-      report_flags: flow.report_flags || [],
-      upstream_condition_detail: flow.upstream_condition_detail
+      tags: flow.tags || []
     }))
   };
 }
 
-// Process Stocks data with real field mappings
-function processStocksData(data) {
-  if (!data?.data) return { bars: [] };
-  
+// Process Volatility data
+function processVolatilityData(data) {
+  if (!data?.data) return { data: [] };
+
+  const volatilityData = Array.isArray(data.data) ? data.data : [data.data];
+
   return {
-    bars: data.data.map(bar => ({
-      // Real field mappings from API documentation
+    data: volatilityData.map(vol => ({
+      date: vol.date,
+      ticker: vol.ticker,
+      price: parseFloat(vol.price) || 0,
+      implied_volatility: parseFloat(vol.implied_volatility) || parseFloat(vol.iv) || 0,
+      realized_volatility: parseFloat(vol.realized_volatility) || parseFloat(vol.rv) || 0,
+      iv_rank: parseFloat(vol.iv_rank) || 0,
+      volatility: parseFloat(vol.volatility) || 0
+    }))
+  };
+}
+
+// Process Stocks/Bars data
+function processStocksData(data) {
+  if (!data?.data) return { data: [] };
+
+  return {
+    data: data.data.map(bar => ({
       open: parseFloat(bar.open) || 0,
       high: parseFloat(bar.high) || 0,
       low: parseFloat(bar.low) || 0,
@@ -327,95 +366,26 @@ function processStocksData(data) {
   };
 }
 
-// Process Volatility data with real field mappings
-function processVolatilityData(data) {
-  if (!data?.data) return { volatility: [] };
-  
-  // Handle both array and object responses
-  const volatilityData = Array.isArray(data.data) ? data.data : [data.data];
-  
-  return {
-    volatility: volatilityData.map(vol => ({
-      // Real field mappings from API documentation
-      date: vol.date,
-      ticker: vol.ticker,
-      price: parseFloat(vol.price) || 0,
-      
-      // Implied Volatility
-      implied_volatility: parseFloat(vol.implied_volatility) || parseFloat(vol.iv) || 0,
-      iv_high: parseFloat(vol.iv_high) || 0,
-      iv_low: parseFloat(vol.iv_low) || 0,
-      iv_rank: parseFloat(vol.iv_rank) || parseFloat(vol.iv_rank_1y) || 0,
-      
-      // Realized Volatility
-      realized_volatility: parseFloat(vol.realized_volatility) || parseFloat(vol.rv) || 0,
-      rv_high: parseFloat(vol.rv_high) || 0,
-      rv_low: parseFloat(vol.rv_low) || 0,
-      
-      // Term Structure
-      volatility: parseFloat(vol.volatility) || 0,
-      dte: vol.dte,
-      expiry: vol.expiry,
-      implied_move: parseFloat(vol.implied_move) || 0,
-      implied_move_perc: parseFloat(vol.implied_move_perc) || 0,
-      
-      // Percentile data
-      days: vol.days,
-      percentile: parseFloat(vol.percentile) || 0,
-      
-      // Timestamps
-      unshifted_rv_date: vol.unshifted_rv_date,
-      updated_at: vol.updated_at
-    }))
-  };
-}
-
 // Generate fallback data to prevent crashes
 function generateFallbackData(type, ticker) {
-  const timestamp = new Date().toISOString();
-  
   switch (type) {
-    case 'darkpools':
-      return {
-        trades: [],
-        _fallback: true
-      };
-      
-    case 'gex':
-      return {
-        gex_data: [],
-        _fallback: true
-      };
-      
     case 'greeks':
-      return {
-        greeks: [],
-        _fallback: true
-      };
-      
+      return { data: [] };
     case 'options':
+    case 'option-contracts':
+      return { data: [] };
+    case 'darkpools':
+      return { data: [] };
+    case 'gex':
+      return { data: [] };
     case 'flow':
-      return {
-        flows: [],
-        _fallback: true
-      };
-      
-    case 'stocks':
-      return {
-        bars: [],
-        _fallback: true
-      };
-      
+      return { data: [] };
     case 'volatility':
-      return {
-        volatility: [],
-        _fallback: true
-      };
-      
+      return { data: [] };
+    case 'stocks':
+    case 'bars':
+      return { data: [] };
     default:
-      return {
-        data: [],
-        _fallback: true
-      };
+      return { data: [] };
   }
 }
