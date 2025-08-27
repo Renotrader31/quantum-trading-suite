@@ -76,22 +76,36 @@ export default async function handler(req, res) {
 // Function to scan a single stock
 async function scanSingleStock(symbol) {
   try {
-    // Get Greeks data from Unusual Whales
-    const greeksResponse = await fetch(`https://api.unusualwhales.com/api/stock/${symbol}/greeks`, {
-  headers: {
-    'Accept': 'application/json, text/plain',
-    'Authorization': UW_API_KEY  // Direct token, no "Bearer" or "token" prefix
-  }
-});
+    // Use the EXACT same format as your working whales.js
+    const url = `https://api.unusualwhales.com/api/stock/${symbol}/greeks`;
+    const headers = {
+      'Accept': 'application/json, text/plain',
+      'Authorization': UW_API_KEY  // Direct token, no "Bearer" or "token" prefix
+    };
+
+    console.log('Fetching:', url);
+    console.log('Headers:', headers);
+
+    const greeksResponse = await fetch(url, {
+      method: 'GET',
+      headers: headers,
+      timeout: 30000
+    });
+
+    console.log('Response status:', greeksResponse.status);
 
     if (!greeksResponse.ok) {
-      throw new Error(`Greeks API failed: ${greeksResponse.status}`);
+      throw new Error(`Greeks API failed: ${greeksResponse.status} ${greeksResponse.statusText}`);
     }
 
     const greeksData = await greeksResponse.json();
+    console.log('Response data keys:', Object.keys(greeksData));
+    
+    // Check the response structure - your whales.js shows it should be greeksData.data.data
     const greeks = greeksData.data?.data || [];
 
     if (!greeks.length) {
+      console.log('No Greeks data for', symbol);
       return null;
     }
 
