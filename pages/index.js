@@ -10,11 +10,21 @@ export default function Home() {
   const [marketData, setMarketData] = useState({});
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [isClient, setIsClient] = useState(false);
+  const [currentTime, setCurrentTime] = useState('');
 
   useEffect(() => {
+    setIsClient(true);
+    setCurrentTime(new Date().toLocaleTimeString());
     fetchMarketData();
     const interval = setInterval(fetchMarketData, 30000); // Update every 30 seconds
-    return () => clearInterval(interval);
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000); // Update time every second
+    return () => {
+      clearInterval(interval);
+      clearInterval(timeInterval);
+    };
   }, []);
 
   const fetchMarketData = async () => {
@@ -126,7 +136,7 @@ export default function Home() {
                 </span>
               </div>
               <div className="text-gray-400 text-sm">
-                {lastUpdate || new Date().toLocaleTimeString()}
+                {isClient ? (lastUpdate || currentTime) : 'Loading...'}
               </div>
               <div className="text-xs text-gray-500">
                 {symbolCount} symbols • {gainers}↑ • {losers}↓
@@ -173,7 +183,7 @@ export default function Home() {
             Market Data: {symbolCount} symbols loaded
           </div>
           <div>
-            Last Update: {lastUpdate || 'Never'}
+            Last Update: {isClient ? (lastUpdate || 'Never') : 'Loading...'}
           </div>
         </div>
       </div>

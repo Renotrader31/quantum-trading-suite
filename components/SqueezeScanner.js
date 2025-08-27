@@ -18,6 +18,7 @@ export default function ProfessionalScannerWithVercel() {
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [expandedRows, setExpandedRows] = useState({});
+  const [isClient, setIsClient] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,6 +44,11 @@ export default function ProfessionalScannerWithVercel() {
     maxDTC: 10,
     minShortInterest: 15
   });
+
+  // Initialize client-side rendering
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Connect to SSE stream for real-time updates
   const connectToStream = useCallback(() => {
@@ -349,7 +355,7 @@ export default function ProfessionalScannerWithVercel() {
               )}
             </div>
             
-            {lastUpdate && (
+            {lastUpdate && isClient && (
               <span className="text-sm text-gray-400">
                 Updated: {new Date(lastUpdate).toLocaleTimeString()}
               </span>

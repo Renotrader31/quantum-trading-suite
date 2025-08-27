@@ -23,9 +23,12 @@ const Dashboard = () => {
   ]);
 
   const [loading, setLoading] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+    setLastUpdate(new Date());
     // Try to fetch real data, but don't crash if it fails
     fetchMarketDataSafely();
     const interval = setInterval(() => {
@@ -103,7 +106,7 @@ const Dashboard = () => {
               </span>
             </div>
             <div className="text-right text-sm text-gray-400">
-              Last Update: {lastUpdate.toLocaleTimeString()}
+              Last Update: {isClient && lastUpdate ? lastUpdate.toLocaleTimeString() : 'Loading...'}
             </div>
           </div>
         </div>
