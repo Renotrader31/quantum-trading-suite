@@ -91,12 +91,14 @@ async function scanSingleStock(symbol) {
 
     console.log('Fetching:', url);
     console.log('Headers:', headers);
-
-    const greeksResponse = await fetch(url, {
-      method: 'GET',
-      headers: headers,
-      timeout: 30000
-    });
+const greeksResponse = await fetch(`https://api.unusualwhales.com/api/stock/${symbol}/greeks`, {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json, text/plain',
+    'Authorization': UW_TOKEN  // Changed from UW_API_KEY to UW_TOKEN
+  },
+  timeout: 30000
+});
 
     console.log('Response status:', greeksResponse.status);
 
