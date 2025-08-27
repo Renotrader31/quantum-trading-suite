@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-const Dashboard = () => {
+const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefresh, lastUpdate: propsLastUpdate }) => {
   const [marketData, setMarketData] = useState({
-    spy: { price: 425.50, change: 2.30, changePercent: 0.54 },
-    qqq: { price: 375.20, change: -1.45, changePercent: -0.38 },
-    iwm: { price: 195.80, change: 0.85, changePercent: 0.43 },
-    vix: { price: 18.25, change: -0.75, changePercent: -3.95 }
+    SPY: { symbol: 'SPY', price: 646.12, change: 0.15, changePercent: 0.02, volume: 45234567 },
+    QQQ: { symbol: 'QQQ', price: 572.78, change: 0.03, changePercent: 0.01, volume: 32123456 },
+    IWM: { symbol: 'IWM', price: 235.5, change: 0.52, changePercent: 0.22, volume: 18567890 },
+    VIX: { symbol: 'VIX', price: 178.92, change: -1.27, changePercent: -0.71, volume: 0 }
   });
 
   const [sectorData, setSectorData] = useState([
@@ -16,28 +16,45 @@ const Dashboard = () => {
   ]);
 
   const [topMovers, setTopMovers] = useState([
-    { symbol: 'NVDA', price: 485.20, change: 12.50, changePercent: 2.64, volume: 42000000, sector: 'Technology' },
-    { symbol: 'TSLA', price: 245.80, change: -5.20, changePercent: -2.07, volume: 38000000, sector: 'Consumer Disc' },
-    { symbol: 'AAPL', price: 175.50, change: 2.30, changePercent: 1.33, volume: 45000000, sector: 'Technology' },
-    { symbol: 'MSFT', price: 375.90, change: 1.80, changePercent: 0.48, volume: 28000000, sector: 'Technology' }
+    { symbol: 'NVDA', name: 'NVIDIA Corp', price: 181.9, change: 0.07, changePercent: 0.04, volume: 106004396, sector: 'Technology' },
+    { symbol: 'AAPL', name: 'Apple Inc', price: 229.7, change: 0.17, changePercent: 0.07, volume: 15401356, sector: 'Technology' },
+    { symbol: 'MSFT', name: 'Microsoft Corp', price: 505.13, change: 0.61, changePercent: 0.12, volume: 7519022, sector: 'Technology' },
+    { symbol: 'TSLA', name: 'Tesla Inc', price: 351.18, change: -0.14, changePercent: -0.04, volume: 41100137, sector: 'Consumer Disc' },
+    { symbol: 'AMD', name: 'Advanced Micro Devices', price: 167.17, change: 0.33, changePercent: 0.2, volume: 16780006, sector: 'Technology' },
+    { symbol: 'META', name: 'Meta Platforms', price: 745, change: -1.21, changePercent: -0.16, volume: 4131018, sector: 'Technology' }
   ]);
 
   const [loading, setLoading] = useState(false);
+  const actualLoading = propsLoading !== undefined ? propsLoading : loading;
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
     setLastUpdate(new Date());
-    // Try to fetch real data, but don't crash if it fails
-    fetchMarketDataSafely();
-    const interval = setInterval(() => {
-      fetchMarketDataSafely();
-      setLastUpdate(new Date());
-    }, 30000); // Update every 30 seconds
-
-    return () => clearInterval(interval);
-  }, []);
+    
+    // Use props data if available, otherwise keep fallback data
+    if (propsMarketData && Object.keys(propsMarketData).length > 0) {
+      // Convert props market data to proper format
+      const indices = {};
+      const movers = [];
+      
+      Object.values(propsMarketData).forEach(stock => {
+        if (['SPY', 'QQQ', 'IWM', 'VIX'].includes(stock.symbol)) {
+          indices[stock.symbol] = stock;
+        } else {
+          movers.push(stock);
+        }
+      });
+      
+      if (Object.keys(indices).length > 0) {
+        setMarketData(indices);
+      }
+      if (movers.length > 0) {
+        setTopMovers(movers);
+      }
+    }
+  }, [propsMarketData]);
 
   const fetchMarketDataSafely = async () => {
     try {
@@ -100,9 +117,9 @@ const Dashboard = () => {
           
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}></div>
+              <div className={`w-3 h-3 rounded-full ${actualLoading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}></div>
               <span className="text-sm text-gray-400">
-                {loading ? 'Updating...' : 'Live Data'}
+                {actualLoading ? 'Updating...' : 'Live Data'}
               </span>
             </div>
             <div className="text-right text-sm text-gray-400">

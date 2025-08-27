@@ -34,15 +34,15 @@ export default function ProfessionalScannerWithVercel() {
   const eventSourceRef = useRef(null);
   const refreshIntervalRef = useRef(null);
 
-  // Advanced filters
+  // Advanced filters - Fixed to show more stocks
   const [advancedFilters, setAdvancedFilters] = useState({
-    minHolyGrail: 70,
-    minUnusual: 2,
+    minHolyGrail: 10,  // Lowered from 70 to 10
+    minUnusual: 1,     // Lowered from 2 to 1  
     minSweeps: 1,
-    minFlow: 60,
-    minGamma: 5,
-    maxDTC: 10,
-    minShortInterest: 15
+    minFlow: 20,       // Lowered from 60 to 20
+    minGamma: 2,       // Lowered from 5 to 2
+    maxDTC: 15,        // Raised from 10 to 15
+    minShortInterest: 10  // Lowered from 15 to 10
   });
 
   // Initialize client-side rendering
