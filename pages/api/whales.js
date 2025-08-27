@@ -1,391 +1,270 @@
 // pages/api/whales.js
-// REAL Unusual Whales API Integration - Based on Dan's official API support response
-// Corrected endpoints, base URL, and authentication format
+// COMPREHENSIVE DEBUG VERSION - Unusual Whales API Integration
+// Created to identify exact cause of persistent 400 errors
 
+// ===== ENVIRONMENT & CONFIG VALIDATION =====
+console.log('\n=== UNUSUAL WHALES API DEBUG STARTUP ===');
+console.log('Node.js Version:', process.version);
+console.log('Environment:', process.env.NODE_ENV || 'development');
+
+// Check for API key in multiple environment variable names
+const UW_TOKEN = process.env.UNUSUAL_WHALES_API_KEY || process.env.UW_TOKEN;
+console.log('Environment Variables Check:');
+console.log('- UNUSUAL_WHALES_API_KEY exists:', !!process.env.UNUSUAL_WHALES_API_KEY);
+console.log('- UW_TOKEN exists:', !!process.env.UW_TOKEN);
+console.log('- Final UW_TOKEN length:', UW_TOKEN ? UW_TOKEN.length : 'MISSING');
+console.log('- Token preview (first 10 chars):', UW_TOKEN ? UW_TOKEN.substring(0, 10) + '...' : 'NOT FOUND');
+
+// Correct API configuration based on Dan's official response
+const BASE_URL = 'https://api.unusualwhales.com/api/stock';
+console.log('- Base URL:', BASE_URL);
+
+// ===== ENDPOINT MAPPINGS =====
+const ENDPOINT_MAP = {
+  greeks: 'greeks',
+  options_chain: 'options-chain',
+  quote: 'quote',
+  summary: 'summary',
+  financials: 'financials',
+  news: 'news',
+  insider_trading: 'insider-trading',
+  institutional_holdings: 'institutional-holdings',
+  short_interest: 'short-interest',
+  earnings: 'earnings',
+  dividend: 'dividend',
+  splits: 'splits'
+};
+console.log('Available endpoints:', Object.keys(ENDPOINT_MAP));
+
+// ===== REQUEST BUILDER =====
+function buildRequest(ticker, endpoint) {
+  const url = `${BASE_URL}/${ticker}/${endpoint}`;
+
+  // Correct authentication format (NOT "Bearer token")
+  const headers = {
+    'Accept': 'application/json, text/plain',
+    'Authorization': UW_TOKEN  // Direct token, no "Bearer" prefix
+  };
+
+  console.log('\n=== REQUEST DETAILS ===');
+  console.log('Full URL:', url);
+  console.log('Headers:', JSON.stringify(headers, null, 2));
+
+  return { url, headers };
+}
+
+// ===== DEBUG ENDPOINT =====
+function handleDebugRequest(ticker = 'SPY') {
+  console.log('\n=== DEBUG MODE ACTIVATED ===');
+  console.log('Debug ticker:', ticker);
+
+  const testEndpoint = ENDPOINT_MAP.greeks;
+  const { url, headers } = buildRequest(ticker, testEndpoint);
+
+  return {
+    success: true,
+    debug_info: {
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      api_key_status: {
+        exists: !!UW_TOKEN,
+        length: UW_TOKEN ? UW_TOKEN.length : 0,
+        preview: UW_TOKEN ? UW_TOKEN.substring(0, 10) + '...' : 'MISSING'
+      },
+      request_config: {
+        base_url: BASE_URL,
+        full_url: url,
+        headers: headers,
+        method: 'GET'
+      },
+      available_endpoints: Object.keys(ENDPOINT_MAP),
+      test_instructions: {
+        step1: 'First test this debug endpoint: /api/whales?type=debug&ticker=SPY',
+        step2: 'Then test live API: /api/whales?type=greeks&ticker=SPY',
+        step3: 'Check console logs for detailed error information'
+      }
+    }
+  };
+}
+
+// ===== MAIN API HANDLER =====
 export default async function handler(req, res) {
-  const { type, ticker = 'SPY', expiry, strike, days = 30 } = req.query;
+  const startTime = Date.now();
+  console.log('\n=== NEW API REQUEST ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  console.log('Query params:', req.query);
+  console.log('Timestamp:', new Date().toISOString());
 
-  // CORS headers
+  // CORS headers for browser requests
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return res.status(200).end();
   }
 
-  const UW_TOKEN = process.env.UNUSUAL_WHALES_API_KEY || process.env.UW_TOKEN;
+  if (req.method !== 'GET') {
+    console.log('âŒ Invalid method:', req.method);
+    return res.status(405).json({ error: 'Method not allowed', allowed_methods: ['GET'] });
+  }
 
+  // Extract parameters
+  const { type, ticker = 'SPY' } = req.query;
+
+  console.log('Parameters:');
+  console.log('- Type:', type);
+  console.log('- Ticker:', ticker);
+
+  // Validation
   if (!UW_TOKEN) {
-    console.log('âŒ Unusual Whales API key not found in environment variables');
-    return res.status(500).json({ 
-      error: 'API key not configured',
-      message: 'Unusual Whales API key not found. Set UNUSUAL_WHALES_API_KEY or UW_TOKEN'
+    console.log('âŒ CRITICAL ERROR: No API token found');
+    return res.status(500).json({
+      error: 'API token not configured',
+      debug_info: {
+        checked_vars: ['UNUSUAL_WHALES_API_KEY', 'UW_TOKEN'],
+        found: false,
+        solution: 'Add UNUSUAL_WHALES_API_KEY to your environment variables'
+      }
     });
   }
 
-  // REAL API structure from Dan's response
-  const BASE_URL = 'https://api.unusualwhales.com/api/stock';
-
-  try {
-    let endpoint = '';
-    let params = {};
-
-    // Build endpoint based on type with REAL API paths from Dan
-    switch (type) {
-      case 'greeks':
-        endpoint = `${BASE_URL}/${ticker}/greeks`;
-        if (expiry) params.expiry = expiry;
-        break;
-
-      case 'options':
-      case 'option-contracts':
-        endpoint = `${BASE_URL}/${ticker}/option-contracts`;
-        if (expiry) params.expiry = expiry;
-        break;
-
-      case 'darkpools':
-        endpoint = `${BASE_URL}/${ticker}/darkpools`;
-        break;
-
-      case 'gex':
-        endpoint = `${BASE_URL}/${ticker}/gex`;
-        break;
-
-      case 'flow':
-        endpoint = `${BASE_URL}/${ticker}/flow`;
-        break;
-
-      case 'volatility':
-        endpoint = `${BASE_URL}/${ticker}/volatility`;
-        break;
-
-      case 'stocks':
-      case 'bars':
-        endpoint = `${BASE_URL}/${ticker}/bars`;
-        break;
-
-      default:
-        return res.status(400).json({ error: 'Invalid type parameter. Use: greeks, options, darkpools, gex, flow, volatility, stocks' });
-    }
-
-    // Build URL with parameters
-    const url = new URL(endpoint);
-    Object.keys(params).forEach(key => {
-      if (params[key]) url.searchParams.append(key, params[key]);
+  if (!type) {
+    console.log('âŒ Missing required parameter: type');
+    return res.status(400).json({
+      error: 'Missing required parameter: type',
+      available_types: Object.keys(ENDPOINT_MAP).concat(['debug']),
+      example: '/api/whales?type=greeks&ticker=SPY'
     });
+  }
 
-    console.log(`ðŸ”¥ Fetching from REAL UW API: ${url.toString()}`);
+  // Handle debug mode
+  if (type === 'debug') {
+    console.log('ðŸ” Debug mode requested');
+    const debugResponse = handleDebugRequest(ticker);
+    const elapsed = Date.now() - startTime;
+    console.log(`âœ… Debug response prepared in ${elapsed}ms`);
+    return res.status(200).json(debugResponse);
+  }
 
-    // REAL headers format from Dan's working example
-    const headers = {
-      'Accept': 'application/json, text/plain',
-      'Authorization': UW_TOKEN  // NOT "Bearer token" - just the token directly!
-    };
+  // Validate endpoint
+  const endpoint = ENDPOINT_MAP[type];
+  if (!endpoint) {
+    console.log('âŒ Invalid endpoint type:', type);
+    return res.status(400).json({
+      error: `Invalid type: ${type}`,
+      available_types: Object.keys(ENDPOINT_MAP),
+      example: '/api/whales?type=greeks&ticker=SPY'
+    });
+  }
 
-    const response = await fetch(url.toString(), {
+  // Build and execute request
+  try {
+    console.log('\n=== EXECUTING API REQUEST ===');
+    const { url, headers } = buildRequest(ticker, endpoint);
+
+    console.log('Making fetch request...');
+    const response = await fetch(url, {
       method: 'GET',
       headers: headers,
-      timeout: 15000
+      timeout: 30000  // 30 second timeout
     });
 
+    console.log('\n=== RESPONSE DETAILS ===');
+    console.log('Status:', response.status);
+    console.log('Status Text:', response.statusText);
+    console.log('Headers:', Object.fromEntries(response.headers.entries()));
+
+    // Check if response is ok
     if (!response.ok) {
-      const errorText = await response.text();
-      console.log(`âŒ UW API Error: ${response.status} ${response.statusText}`);
-      console.log(`âŒ Error response: ${errorText}`);
-      throw new Error(`API request failed: ${response.status} - ${errorText}`);
+      console.log('âŒ API ERROR DETECTED');
+      console.log('Status:', response.status);
+      console.log('Status Text:', response.statusText);
+
+      let errorBody = '';
+      try {
+        errorBody = await response.text();
+        console.log('Error Response Body:', errorBody);
+      } catch (bodyError) {
+        console.log('Could not read error response body:', bodyError.message);
+      }
+
+      const elapsed = Date.now() - startTime;
+
+      return res.status(response.status).json({
+        error: `Unusual Whales API Error: ${response.status} ${response.statusText}`,
+        debug_details: {
+          requested_url: url,
+          request_headers: headers,
+          response_status: response.status,
+          response_headers: Object.fromEntries(response.headers.entries()),
+          response_body: errorBody,
+          request_duration_ms: elapsed,
+          timestamp: new Date().toISOString(),
+          troubleshooting: {
+            check_token: 'Verify your Unusual Whales API token is correct',
+            check_permissions: 'Ensure your API plan includes this endpoint',
+            check_ticker: 'Verify the ticker symbol is valid',
+            contact_support: 'Contact Unusual Whales support if error persists'
+          }
+        }
+      });
     }
 
+    // Parse successful response
+    console.log('âœ… Successful response received');
     const data = await response.json();
+    console.log('Response data keys:', Object.keys(data));
+    console.log('Response data preview:', JSON.stringify(data).substring(0, 200) + '...');
 
-    // Process and normalize data based on type
-    let processedData;
+    const elapsed = Date.now() - startTime;
+    console.log(`âœ… Request completed successfully in ${elapsed}ms`);
 
-    switch (type) {
-      case 'greeks':
-        processedData = processGreeksData(data);
-        break;
-
-      case 'options':
-      case 'option-contracts':
-        processedData = processOptionsData(data);
-        break;
-
-      case 'darkpools':
-        processedData = processDarkPoolsData(data);
-        break;
-
-      case 'gex':
-        processedData = processGEXData(data);
-        break;
-
-      case 'flow':
-        processedData = processFlowData(data);
-        break;
-
-      case 'volatility':
-        processedData = processVolatilityData(data);
-        break;
-
-      case 'stocks':
-      case 'bars':
-        processedData = processStocksData(data);
-        break;
-
-      default:
-        processedData = data;
-    }
-
-    console.log(`âœ… Successfully fetched ${type} data for ${ticker} - Records: ${processedData?.data?.length || 'N/A'}`);
     return res.status(200).json({
       success: true,
-      ticker,
-      type,
-      timestamp: new Date().toISOString(),
-      ...processedData
+      data: data,
+      meta: {
+        ticker: ticker,
+        endpoint: type,
+        timestamp: new Date().toISOString(),
+        request_duration_ms: elapsed
+      }
     });
 
-  } catch (error) {
-    console.error(`âŒ Unusual Whales API Error:`, error.message);
+  } catch (fetchError) {
+    console.log('\nâŒ FETCH ERROR OCCURRED');
+    console.log('Error type:', fetchError.constructor.name);
+    console.log('Error message:', fetchError.message);
+    console.log('Full error:', fetchError);
 
-    // Return structured error response
+    const elapsed = Date.now() - startTime;
+
     return res.status(500).json({
-      success: false,
-      error: error.message,
-      ticker,
-      type,
-      timestamp: new Date().toISOString(),
-      fallback: generateFallbackData(type, ticker)
+      error: 'Request failed',
+      debug_details: {
+        error_type: fetchError.constructor.name,
+        error_message: fetchError.message,
+        request_duration_ms: elapsed,
+        timestamp: new Date().toISOString(),
+        possible_causes: [
+          'Network connectivity issues',
+          'API server temporarily unavailable',
+          'Request timeout (30s limit)',
+          'Invalid API token format',
+          'Rate limiting'
+        ]
+      }
     });
   }
 }
 
-// Process Greeks data with real field mappings from documentation
-function processGreeksData(data) {
-  if (!data?.data) return { data: [] };
-
-  return {
-    data: data.data.map(item => ({
-      // Core identifiers
-      ticker: item.ticker,
-      date: item.date,
-      expiry: item.expiry,
-      strike: parseFloat(item.strike) || 0,
-
-      // Call Greeks
-      call_delta: parseFloat(item.call_delta) || 0,
-      call_gamma: parseFloat(item.call_gamma) || 0,
-      call_theta: parseFloat(item.call_theta) || 0,
-      call_vega: parseFloat(item.call_vega) || 0,
-      call_rho: parseFloat(item.call_rho) || 0,
-      call_charm: parseFloat(item.call_charm) || 0,
-      call_vanna: parseFloat(item.call_vanna) || 0,
-      call_volatility: parseFloat(item.call_volatility) || 0,
-      call_option_symbol: item.call_option_symbol,
-
-      // Put Greeks
-      put_delta: parseFloat(item.put_delta) || 0,
-      put_gamma: parseFloat(item.put_gamma) || 0,
-      put_theta: parseFloat(item.put_theta) || 0,
-      put_vega: parseFloat(item.put_vega) || 0,
-      put_rho: parseFloat(item.put_rho) || 0,
-      put_charm: parseFloat(item.put_charm) || 0,
-      put_vanna: parseFloat(item.put_vanna) || 0,
-      put_volatility: parseFloat(item.put_volatility) || 0,
-      put_option_symbol: item.put_option_symbol,
-
-      // Flow data if available
-      dir_delta_flow: parseFloat(item.dir_delta_flow) || 0,
-      dir_vega_flow: parseFloat(item.dir_vega_flow) || 0,
-      total_delta_flow: parseFloat(item.total_delta_flow) || 0,
-      total_vega_flow: parseFloat(item.total_vega_flow) || 0,
-      transactions: item.transactions || 0,
-      volume: item.volume || 0,
-      timestamp: item.timestamp
-    }))
-  };
-}
-
-// Process Option Contracts data
-function processOptionsData(data) {
-  if (!data?.data) return { data: [] };
-
-  return {
-    data: data.data.map(option => ({
-      // Option identifiers
-      option_symbol: option.option_symbol,
-      option_type: option.option_type,
-      strike: parseFloat(option.strike) || 0,
-      expiry: option.expiry,
-
-      // Greeks
-      delta: parseFloat(option.delta) || 0,
-      gamma: parseFloat(option.gamma) || 0,
-      theta: parseFloat(option.theta) || 0,
-      vega: parseFloat(option.vega) || 0,
-      rho: parseFloat(option.rho) || 0,
-      implied_volatility: parseFloat(option.implied_volatility) || 0,
-
-      // Pricing
-      bid: parseFloat(option.bid) || 0,
-      ask: parseFloat(option.ask) || 0,
-      last: parseFloat(option.last) || 0,
-      mark: parseFloat(option.mark) || 0,
-
-      // Volume and Interest
-      volume: option.volume || 0,
-      open_interest: option.open_interest || 0,
-
-      // Additional fields
-      underlying_price: parseFloat(option.underlying_price) || 0,
-      time_to_expiry: parseFloat(option.time_to_expiry) || 0,
-      updated_at: option.updated_at
-    }))
-  };
-}
-
-// Process Dark Pools data
-function processDarkPoolsData(data) {
-  if (!data?.data) return { data: [] };
-
-  return {
-    data: data.data.map(trade => ({
-      ticker: trade.ticker,
-      price: parseFloat(trade.price) || 0,
-      size: trade.size || 0,
-      premium: parseFloat(trade.premium) || 0,
-      volume: trade.volume || 0,
-      executed_at: trade.executed_at,
-      market_center: trade.market_center,
-      nbbo_ask: parseFloat(trade.nbbo_ask) || 0,
-      nbbo_bid: parseFloat(trade.nbbo_bid) || 0,
-      nbbo_ask_quantity: trade.nbbo_ask_quantity || 0,
-      nbbo_bid_quantity: trade.nbbo_bid_quantity || 0,
-      canceled: trade.canceled || false,
-      ext_hour_sold_codes: trade.ext_hour_sold_codes,
-      tracking_id: trade.tracking_id,
-      trade_settlement: trade.trade_settlement
-    }))
-  };
-}
-
-// Process GEX data
-function processGEXData(data) {
-  if (!data?.data) return { data: [] };
-
-  return {
-    data: data.data.map(item => ({
-      price: parseFloat(item.price) || 0,
-      time: item.time,
-      gamma_per_one_percent_move_dir: parseFloat(item.gamma_per_one_percent_move_dir) || 0,
-      gamma_per_one_percent_move_oi: parseFloat(item.gamma_per_one_percent_move_oi) || 0,
-      gamma_per_one_percent_move_vol: parseFloat(item.gamma_per_one_percent_move_vol) || 0,
-      charm_per_one_percent_move_dir: parseFloat(item.charm_per_one_percent_move_dir) || 0,
-      charm_per_one_percent_move_oi: parseFloat(item.charm_per_one_percent_move_oi) || 0,
-      charm_per_one_percent_move_vol: parseFloat(item.charm_per_one_percent_move_vol) || 0,
-      vanna_per_one_percent_move_dir: parseFloat(item.vanna_per_one_percent_move_dir) || 0,
-      vanna_per_one_percent_move_oi: parseFloat(item.vanna_per_one_percent_move_oi) || 0,
-      vanna_per_one_percent_move_vol: parseFloat(item.vanna_per_one_percent_move_vol) || 0
-    }))
-  };
-}
-
-// Process Flow data
-function processFlowData(data) {
-  if (!data?.data) return { data: [] };
-
-  return {
-    data: data.data.map(flow => ({
-      id: flow.id,
-      ticker: flow.underlying_symbol || flow.ticker,
-      full_name: flow.full_name,
-      sector: flow.sector,
-      industry_type: flow.industry_type,
-
-      option_chain_id: flow.option_chain_id,
-      option_type: flow.option_type,
-      strike: parseFloat(flow.strike) || 0,
-      expiry: flow.expiry,
-      executed_at: flow.executed_at,
-
-      price: parseFloat(flow.price) || 0,
-      premium: parseFloat(flow.premium) || 0,
-      underlying_price: parseFloat(flow.underlying_price) || 0,
-
-      delta: parseFloat(flow.delta) || 0,
-      gamma: parseFloat(flow.gamma) || 0,
-      theta: parseFloat(flow.theta) || 0,
-      vega: parseFloat(flow.vega) || 0,
-
-      size: flow.size || 0,
-      volume: flow.volume || 0,
-      ask_vol: flow.ask_vol || 0,
-      bid_vol: flow.bid_vol || 0,
-
-      exchange: flow.exchange,
-      tags: flow.tags || []
-    }))
-  };
-}
-
-// Process Volatility data
-function processVolatilityData(data) {
-  if (!data?.data) return { data: [] };
-
-  const volatilityData = Array.isArray(data.data) ? data.data : [data.data];
-
-  return {
-    data: volatilityData.map(vol => ({
-      date: vol.date,
-      ticker: vol.ticker,
-      price: parseFloat(vol.price) || 0,
-      implied_volatility: parseFloat(vol.implied_volatility) || parseFloat(vol.iv) || 0,
-      realized_volatility: parseFloat(vol.realized_volatility) || parseFloat(vol.rv) || 0,
-      iv_rank: parseFloat(vol.iv_rank) || 0,
-      volatility: parseFloat(vol.volatility) || 0
-    }))
-  };
-}
-
-// Process Stocks/Bars data
-function processStocksData(data) {
-  if (!data?.data) return { data: [] };
-
-  return {
-    data: data.data.map(bar => ({
-      open: parseFloat(bar.open) || 0,
-      high: parseFloat(bar.high) || 0,
-      low: parseFloat(bar.low) || 0,
-      close: parseFloat(bar.close) || 0,
-      volume: bar.volume || 0,
-      total_volume: bar.total_volume || 0,
-      start_time: bar.start_time,
-      end_time: bar.end_time,
-      market_time: bar.market_time
-    }))
-  };
-}
-
-// Generate fallback data to prevent crashes
-function generateFallbackData(type, ticker) {
-  switch (type) {
-    case 'greeks':
-      return { data: [] };
-    case 'options':
-    case 'option-contracts':
-      return { data: [] };
-    case 'darkpools':
-      return { data: [] };
-    case 'gex':
-      return { data: [] };
-    case 'flow':
-      return { data: [] };
-    case 'volatility':
-      return { data: [] };
-    case 'stocks':
-    case 'bars':
-      return { data: [] };
-    default:
-      return { data: [] };
-  }
-}
+// ===== STARTUP VALIDATION =====
+console.log('\n=== STARTUP VALIDATION COMPLETE ===');
+console.log('API handler loaded successfully');
+console.log('Ready to handle requests');
+console.log('Test endpoints:');
+console.log('- Debug: /api/whales?type=debug&ticker=SPY');
+console.log('- Live API: /api/whales?type=greeks&ticker=SPY');
+console.log('=====================================\n');
