@@ -1,57 +1,81 @@
-// Use the exact same token loading as your working whales.js
+// Based on working whales.js format
+console.log('\n=== BULK SCAN API STARTUP ===');
+
+// Use exact same token loading as working whales.js
 const UW_TOKEN = process.env.UNUSUAL_WHALES_API_KEY || process.env.UW_TOKEN || '29a464c8-9da0-490a-ac24-0d4aa492dcbd';
+console.log('Bulk Scan - Token exists:', !!UW_TOKEN);
+console.log('Bulk Scan - Token length:', UW_TOKEN ? UW_TOKEN.length : 'MISSING');
+console.log('Bulk Scan - Token preview:', UW_TOKEN ? UW_TOKEN.substring(0, 10) + '...' : 'NOT FOUND');
 
-// Debug logging like your whales.js
-console.log('Scan API - Token length:', UW_TOKEN ? UW_TOKEN.length : 'MISSING');
-console.log('Scan API - Token preview:', UW_TOKEN ? UW_TOKEN.substring(0, 10) + '...' : 'NOT FOUND');
-
+const BASE_URL = 'https://api.unusualwhales.com/api/stock';
 
 export default async function handler(req, res) {
+  console.log('\n=== BULK SCAN REQUEST ===');
+  console.log('Method:', req.method);
+  console.log('Timestamp:', new Date().toISOString());
+
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  if (!UW_TOKEN) {
+    console.log('❌ CRITICAL ERROR: No API token found');
+    return res.status(500).json({
+      error: 'API token not configured',
+      debug_info: {
+        checked_vars: ['UNUSUAL_WHALES_API_KEY', 'UW_TOKEN'],
+        found: false
+      }
+    });
   }
 
   try {
     const { symbols, batchSize = 10 } = req.body;
     
-    // Default symbols list (top 100 most active stocks)
+    // Default symbols list
     const defaultSymbols = [
       'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX', 'BABA', 'V',
       'JPM', 'JNJ', 'WMT', 'PG', 'UNH', 'MA', 'HD', 'DIS', 'ADBE', 'PYPL',
-      'CMCSA', 'CRM', 'NFLX', 'PEP', 'ABBV', 'TMO', 'ACN', 'COST', 'AVGO', 'TXN',
-      'NEE', 'LLY', 'ABT', 'DHR', 'NKE', 'MCD', 'CVX', 'WFC', 'BAC', 'ORCL',
-      'KO', 'INTC', 'BMY', 'PFE', 'CSCO', 'AMD', 'COP', 'XOM', 'VZ', 'QCOM',
-      'LOW', 'UPS', 'IBM', 'GS', 'HON', 'AMGN', 'SBUX', 'INTU', 'CAT', 'TGT',
-      'SPGI', 'LMT', 'AXP', 'MMM', 'BLK', 'MDLZ', 'GILD', 'MO', 'SYK', 'CVS',
-      'ISRG', 'ADI', 'REGN', 'NOW', 'ZTS', 'CI', 'TJX', 'SCHW', 'MU', 'PLD',
-      'SO', 'DUK', 'BSX', 'CME', 'EL', 'ICE', 'AON', 'EQIX', 'CL', 'ITW',
-      'APD', 'GD', 'SHW', 'NSC', 'KLAC', 'EMR', 'RACE', 'WM', 'PSA', 'WELL'
+      'CMCSA', 'CRM', 'PEP', 'ABBV', 'TMO', 'ACN', 'COST', 'AVGO', 'TXN',
+      'NEE', 'LLY', 'ABT', 'DHR', 'NKE', 'MCD', 'CVX', 'WFC', 'BAC', 'ORCL'
     ];
 
     const symbolsToScan = symbols || defaultSymbols;
     const results = [];
     const errors = [];
 
+    console.log(`Scanning ${symbolsToScan.length} symbols in batches of ${batchSize}`);
+
     // Process in batches
     for (let i = 0; i < symbolsToScan.length; i += batchSize) {
       const batch = symbolsToScan.slice(i, i + batchSize);
-      const batchPromises = batch.map(symbol => scanSingleStock(symbol));
+      console.log(`Processing batch ${Math.floor(i/batchSize) + 1}: ${batch.join(', ')}`);
       
+      const batchPromises = batch.map(symbol => scanSingleStock(symbol));
       const batchResults = await Promise.allSettled(batchPromises);
       
       batchResults.forEach((result, index) => {
         const symbol = batch[index];
         if (result.status === 'fulfilled' && result.value) {
           results.push(result.value);
+          console.log(`✅ ${symbol}: Success`);
         } else {
-          errors.push({ 
-            symbol, 
-            error: result.reason?.message || 'Failed to scan stock' 
-          });
+          const errorMsg = result.reason?.message || 'Failed to scan stock';
+          errors.push({ symbol, error: errorMsg });
+          console.log(`❌ ${symbol}: ${errorMsg}`);
         }
       });
 
-      // Small delay between batches to avoid rate limiting
+      // Small delay between batches
       if (i + batchSize < symbolsToScan.length) {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
@@ -59,6 +83,8 @@ export default async function handler(req, res) {
 
     // Sort by Holy Grail score
     results.sort((a, b) => b.holyGrail - a.holyGrail);
+
+    console.log(`✅ Bulk scan complete: ${results.length} success, ${errors.length} failed`);
 
     res.json({
       success: true,
@@ -69,7 +95,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Bulk scan error:', error);
+    console.error('❌ Bulk scan error:', error);
     res.status(500).json({ 
       success: false, 
       error: error.message,
@@ -79,41 +105,38 @@ export default async function handler(req, res) {
   }
 }
 
-// Function to scan a single stock
+// Function to scan a single stock - EXACT same format as working whales.js
 async function scanSingleStock(symbol) {
   try {
-    // Use the EXACT same format as your working whales.js
-    const url = `https://api.unusualwhales.com/api/stock/${symbol}/greeks`;
+    // Use exact same format as working whales.js buildRequest function
+    const url = `${BASE_URL}/${symbol}/greeks`;
     const headers = {
       'Accept': 'application/json, text/plain',
-      'Authorization': UW_API_KEY  // Direct token, no "Bearer" or "token" prefix
+      'Authorization': UW_TOKEN  // Direct token, no "Bearer" prefix
     };
 
-    console.log('Fetching:', url);
-    console.log('Headers:', headers);
-const greeksResponse = await fetch(`https://api.unusualwhales.com/api/stock/${symbol}/greeks`, {
-  method: 'GET',
-  headers: {
-    'Accept': 'application/json, text/plain',
-    'Authorization': UW_TOKEN  // Changed from UW_API_KEY to UW_TOKEN
-  },
-  timeout: 30000
-});
+    console.log(`Fetching ${symbol}:`, url);
 
-    console.log('Response status:', greeksResponse.status);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: headers,
+      timeout: 30000
+    });
 
-    if (!greeksResponse.ok) {
-      throw new Error(`Greeks API failed: ${greeksResponse.status} ${greeksResponse.statusText}`);
+    console.log(`${symbol} response status:`, response.status);
+
+    if (!response.ok) {
+      throw new Error(`API failed: ${response.status} ${response.statusText}`);
     }
 
-    const greeksData = await greeksResponse.json();
-    console.log('Response data keys:', Object.keys(greeksData));
+    const data = await response.json();
+    console.log(`${symbol} response keys:`, Object.keys(data));
     
-    // Check the response structure - your whales.js shows it should be greeksData.data.data
-    const greeks = greeksData.data?.data || [];
+    // Check response structure - should match your working whales.js
+    const greeks = data.data?.data || [];
 
     if (!greeks.length) {
-      console.log('No Greeks data for', symbol);
+      console.log(`No Greeks data for ${symbol}`);
       return null;
     }
 
@@ -134,7 +157,7 @@ const greeksResponse = await fetch(`https://api.unusualwhales.com/api/stock/${sy
 
 // Squeeze calculation function
 function calculateSqueezeMetrics(greeks, symbol) {
-  // Mock price data - you can integrate with your price API
+  // Mock price data - you can integrate with your price API later
   const mockPrice = 150 + Math.random() * 100;
   const mockChange = (Math.random() - 0.5) * 10;
 
@@ -172,7 +195,7 @@ function calculateSqueezeMetrics(greeks, symbol) {
   else if (gammaImbalance > 1) holyGrail += 10;
   
   // Additional factors (0-25 points)
-  const unusualMultiplier = 1 + Math.random() * 3; // Mock unusual activity
+  const unusualMultiplier = 1 + Math.random() * 3;
   if (unusualMultiplier > 3) holyGrail += 15;
   else if (unusualMultiplier > 2) holyGrail += 10;
   else if (unusualMultiplier > 1.5) holyGrail += 5;
@@ -187,11 +210,11 @@ function calculateSqueezeMetrics(greeks, symbol) {
     change: mockChange,
     holyGrail,
     holyGrailStatus,
-    squeeze: Math.round(60 + Math.random() * 40), // Mock squeeze score
+    squeeze: Math.round(60 + Math.random() * 40),
     gamma: avgGamma,
-    gex: totalGamma * 1000000, // Mock GEX
-    flow: Math.round(30 + Math.random() * 70), // Mock flow percentage
-    dtc: 2 + Math.random() * 8, // Mock days to cover
+    gex: totalGamma * 1000000,
+    flow: Math.round(30 + Math.random() * 70),
+    dtc: 2 + Math.random() * 8,
     pinRisk: Math.round(Math.random() * 100),
     
     optionsMetrics: {
@@ -239,3 +262,4 @@ function calculateSqueezeMetrics(greeks, symbol) {
   };
 }
 
+console.log('✅ Bulk scan API loaded successfully');
