@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 
 export default function GammaAnalytics() {
-  const [gexData, setGexData] = useState([]);
+
   const [greeksData, setGreeksData] = useState([]);
   const [ticker, setTicker] = useState('SPY');
   const [loading, setLoading] = useState(false);

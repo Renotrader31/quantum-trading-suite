@@ -23,17 +23,37 @@ export default function Home() {
       const response = await fetch('/api/stocks');
       const data = await response.json();
       
-      if (data.metadata?.status === 'success' || data.status === 'success') {
+      if (data.topMovers || data.indices) {
         const dataMap = {};
-        const stocksArray = data.data || [];
         
-        stocksArray.forEach(stock => {
-          dataMap[stock.symbol] = stock;
-        });
+        // Add top movers to the data map
+        if (data.topMovers && Array.isArray(data.topMovers)) {
+          data.topMovers.forEach(stock => {
+            dataMap[stock.symbol] = {
+              ...stock,
+              name: stock.symbol, // AI component expects name field
+            };
+          });
+        }
+        
+        // Add indices to the data map
+        if (data.indices) {
+          Object.entries(data.indices).forEach(([symbol, indexData]) => {
+            dataMap[symbol.toUpperCase()] = {
+              symbol: symbol.toUpperCase(),
+              name: symbol.toUpperCase(),
+              price: indexData.price,
+              change: indexData.change,
+              changePercent: indexData.changePercent,
+              volume: 0,
+              sector: 'Index'
+            };
+          });
+        }
         
         setMarketData(dataMap);
         setLastUpdate(new Date().toLocaleTimeString());
-        console.log(`Updated market data for ${Object.keys(dataMap).length} symbols`);
+        console.log(`✅ Updated market data for ${Object.keys(dataMap).length} symbols`);
       }
     } catch (error) {
       console.error('Error fetching market data:', error);
