@@ -39,12 +39,12 @@ export default async function handler(req, res) {
 async function scanSingleStock(symbol) {
   try {
     // Get Greeks data from Unusual Whales
-    const greeksResponse = await fetch(`https://api.uw.com/api/stock/${symbol}/greeks`, {
-      headers: {
-        'Authorization': `token ${UW_API_KEY}`,
-        'Accept': 'application/json'
-      }
-    });
+   const greeksResponse = await fetch(`https://api.unusualwhales.com/api/stock/${symbol}/greeks`, {
+  headers: {
+    'Accept': 'application/json, text/plain',
+    'Authorization': UW_API_KEY  // Direct token, no prefix
+  }
+});
 
     if (!greeksResponse.ok) {
       throw new Error(`Greeks API failed: ${greeksResponse.status}`);
