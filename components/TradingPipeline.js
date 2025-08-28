@@ -8,6 +8,7 @@ import {
   ArrowRight, ChevronRight, Filter, Search, Download
 } from 'lucide-react';
 import { MultiStrategyEnsemble } from '../lib/multiStrategyEnsemble.js';
+import RiskManagementDashboard from './RiskManagementDashboard.js';
 
 export default function TradingPipeline({ marketData, loading, onRefresh, lastUpdate }) {
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -31,6 +32,10 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
   // 🎯 PRIORITY #2: Multi-Strategy Ensemble
   const [ensembleEngine] = useState(() => new MultiStrategyEnsemble());
   const [ensembleResults, setEnsembleResults] = useState(null);
+  
+  // 🎯 PRIORITY #3: Risk Management System
+  const [portfolioPositions, setPortfolioPositions] = useState([]);
+  const [riskCalculatedPosition, setRiskCalculatedPosition] = useState(null);
 
   useEffect(() => {
     // Auto-run pipeline when market data is available
@@ -380,6 +385,7 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                 { id: 'overview', name: 'Overview', icon: Eye },
                 { id: 'trades', name: 'Actionable Trades', icon: Target },
                 { id: 'ensemble', name: 'Ensemble System', icon: Layers },
+                { id: 'risk', name: 'Risk Management', icon: Shield },
                 { id: 'squeeze', name: 'Squeeze Results', icon: Activity },
                 { id: 'ml', name: 'ML Insights', icon: Brain },
                 { id: 'config', name: 'Configuration', icon: Settings }
@@ -792,6 +798,86 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                     <Layers className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                     <div className="text-gray-400">No ensemble data available</div>
                     <div className="text-sm text-gray-500">Enable ensemble mode in configuration and run the pipeline</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selectedTab === 'risk' && (
+              <div className="space-y-4">
+                <RiskManagementDashboard
+                  positions={portfolioPositions}
+                  portfolioValue={pipelineConfig.maxInvestment}
+                  onPositionSizeCalculated={(size) => {
+                    setRiskCalculatedPosition(size);
+                    alert(`📊 Kelly Criterion Position Size: ${size.kellyPercentage.toFixed(2)}%\nOptimal Size: $${size.optimalSize.toLocaleString()}\nRisk Level: ${size.riskLevel}`);
+                  }}
+                />
+                
+                {/* Active Positions Integration */}
+                <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+                      📊 Portfolio Integration
+                    </h4>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const response = await fetch('/api/trade-entry?action=getActiveTrades');
+                          if (response.ok) {
+                            const data = await response.json();
+                            setPortfolioPositions(data.activeTrades || []);
+                          }
+                        } catch (error) {
+                          console.error('Failed to load portfolio positions:', error);
+                        }
+                      }}
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm"
+                    >
+                      Load Active Positions
+                    </button>
+                  </div>
+                  
+                  <div className="text-sm text-gray-400">
+                    {portfolioPositions.length > 0 ? (
+                      <div>
+                        <p className="mb-2">✅ {portfolioPositions.length} active positions loaded for risk analysis</p>
+                        <div className="text-xs text-gray-500 space-y-1">
+                          {portfolioPositions.slice(0, 3).map((pos, idx) => (
+                            <div key={idx}>• {pos.symbol} - {pos.strategyName}</div>
+                          ))}
+                          {portfolioPositions.length > 3 && <div>+ {portfolioPositions.length - 3} more...</div>}
+                        </div>
+                      </div>
+                    ) : (
+                      <p>No active positions loaded. Click "Load Active Positions" to sync with your Portfolio Tracker.</p>
+                    )}
+                  </div>
+                </div>
+
+                {riskCalculatedPosition && (
+                  <div className="bg-green-900/20 border border-green-600/30 rounded-lg p-4">
+                    <h4 className="text-lg font-semibold text-green-300 mb-2 flex items-center gap-2">
+                      📊 Last Kelly Calculation
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                      <div>
+                        <div className="text-green-200 font-medium">Kelly %:</div>
+                        <div className="text-white">{riskCalculatedPosition.kellyPercentage.toFixed(2)}%</div>
+                      </div>
+                      <div>
+                        <div className="text-green-200 font-medium">Optimal Size:</div>
+                        <div className="text-white">${riskCalculatedPosition.optimalSize.toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-green-200 font-medium">Risk Level:</div>
+                        <div className="text-white">{riskCalculatedPosition.riskLevel}</div>
+                      </div>
+                      <div>
+                        <div className="text-green-200 font-medium">Max Loss:</div>
+                        <div className="text-white">${riskCalculatedPosition.maxLoss.toLocaleString()}</div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
