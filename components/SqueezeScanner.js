@@ -343,7 +343,8 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
     setLoadingTrades(true);
     
     try {
-      // Get trade recommendations for this specific stock
+      // Get trade recommendations with SQUEEZE CONTEXT integration 🎯
+      console.log(`🟢 SQUEEZE INTEGRATION: HG=${stock.holyGrail}, Squeeze=${stock.squeeze}, Momentum=${stock.change || 0}`);
       const response = await fetch(`${API_BASE_URL}/api/options-analyzer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -354,7 +355,19 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
           riskTolerance: 'moderate-aggressive', // Enhanced risk profile
           maxInvestment: 15000, // Higher investment limit
           targetDTE: { min: 30, max: 45 }, // Enhanced DTE targeting
-          precisionMode: true // Enable enhanced features
+          precisionMode: true, // Enable enhanced features
+          // 🚀 NEW: Pass squeeze context for intelligent strategy filtering
+          squeezeContext: {
+            holyGrail: stock.holyGrail,
+            squeeze: stock.squeeze,
+            price: stock.price,
+            volume: stock.volume,
+            momentum: stock.change || 0,
+            gamma: stock.gamma || 0,
+            flow: stock.flow || 0,
+            unusual: stock.unusual || 0,
+            sentiment: stock.flowAnalysis?.sentiment?.score || 50
+          }
         })
       });
       
@@ -362,7 +375,14 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
       
       if (data.success) {
         setTradeRecommendations(data.actionableTrades);
-        console.log(`✅ Found ${data.actionableTrades.length} trade recommendations for ${stock.symbol}`);
+        console.log(`✅ SQUEEZE-ENHANCED: Found ${data.actionableTrades.length} trade recommendations for ${stock.symbol}`);
+        console.log(`📊 Average Probability: ${data.summary?.averageProbability}%, AI Score: ${data.summary?.averageAIScore}`);
+        
+        // Show squeeze context impact
+        if (data.actionableTrades.length > 0) {
+          const avgBonus = data.actionableTrades.reduce((sum, t) => sum + (t.holyGrailBonus || 0), 0) / data.actionableTrades.length;
+          console.log(`🟢 Holy Grail Bonus: +${avgBonus.toFixed(1)} average probability boost`);
+        }
       } else {
         console.error('❌ Failed to get trade recommendations:', data.error);
         setTradeRecommendations([]);
@@ -916,9 +936,12 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
               <div className="flex items-center gap-3">
                 <Target className="w-6 h-6 text-orange-500" />
                 <div>
-                  <h2 className="text-xl font-bold">Trade Analysis - {selectedStock.symbol}</h2>
+                  <h2 className="text-xl font-bold">🎯 Squeeze-Enhanced Analysis - {selectedStock.symbol}</h2>
                   <p className="text-sm text-gray-400">
                     Price: ${selectedStock.price} • Holy Grail: {selectedStock.holyGrail} • Squeeze: {selectedStock.squeeze}
+                  </p>
+                  <p className="text-xs text-blue-300">
+                    🟢 Intelligent strategy filtering based on squeeze signals
                   </p>
                 </div>
               </div>
