@@ -198,30 +198,50 @@ function getNextEarningsDate() {
 }
 
 // Analyze symbol through enhanced 18 strategies with precision
-async function analyzeAllStrategies(symbol, marketData, config) {
-  const strategies = [
-    // Core volatility strategies
-    'straddle', 'strangle', 'ironCondor', 'butterfly', 
-    'shortStraddle', 'shortStrangle', 'ironButterfly',
-    // Directional strategies
-    'callSpread', 'putSpread', 'calendar', 'diagonal',
-    // Income strategies  
-    'coveredCall', 'cashSecuredPut', 'collar',
-    // Advanced strategies
-    'ratio', 'backspread', 'condor', 'jade lizard'
-  ];
+// Import comprehensive strategy system (dynamic import for Next.js compatibility)
+let ALL_STRATEGIES = {};
+let STRATEGY_NAME_MAP = {};
 
+// Load comprehensive strategies
+try {
+  const strategiesModule = require('../../lib/comprehensiveStrategies.js');
+  ALL_STRATEGIES = strategiesModule.ALL_STRATEGIES || {};
+  STRATEGY_NAME_MAP = strategiesModule.STRATEGY_NAME_MAP || {};
+  console.log('✅ Comprehensive strategies loaded:', Object.keys(ALL_STRATEGIES).length);
+} catch (error) {
+  console.error('⚠️ Could not load comprehensive strategies:', error.message);
+  // Fallback to basic strategies
+  ALL_STRATEGIES = {
+    bullCallSpread: { name: 'Bull Call Spread', description: 'Basic bull call spread', winRate: 65, marketBias: 'bullish', riskLevel: 'moderate' }
+  };
+}
+
+// Analyze symbol through comprehensive strategy system
+async function analyzeAllStrategies(symbol, marketData, config) {
+  // Use comprehensive strategy system
+  const strategyKeys = Object.keys(ALL_STRATEGIES);
+  
+  console.log(`🚀 COMPREHENSIVE ANALYSIS: ${strategyKeys.length} strategies for ${symbol}`);
+  console.log(`📊 Strategies:`, strategyKeys.join(', '));
+  
   const results = [];
 
-  for (const strategyName of strategies) {
+  for (const strategyKey of strategyKeys) {
     try {
-      const analysis = await analyzeStrategy(symbol, strategyName, marketData, config);
-      results.push(analysis);
+      console.log(`  🔎 Analyzing ${strategyKey}...`);
+      const strategy = ALL_STRATEGIES[strategyKey];
+      const analysis = await analyzeComprehensiveStrategy(symbol, strategyKey, strategy, marketData, config);
+      if (analysis) {
+        results.push(analysis);
+        console.log(`  ✅ ${strategyKey} completed - Probability: ${analysis.probability}%`);
+      }
     } catch (error) {
-      console.error(`❌ ERROR analyzing ${strategyName} for ${symbol}:`, error.message);
-      console.error(`❌ Stack trace:`, error.stack);
+      console.error(`❌ ERROR analyzing ${strategyKey} for ${symbol}:`, error.message);
+      console.error(`❌ Stack:`, error.stack);
     }
   }
+  
+  console.log(`✅ COMPREHENSIVE ANALYSIS COMPLETE: ${results.length}/${strategyKeys.length} successful`);
 
   return results;
 }
@@ -235,12 +255,9 @@ async function analyzeStrategy(symbol, strategyName, marketData, config) {
   const strategyData = getStrategyTemplate(strategyName);
   
   // ENHANCED: Precise DTE calculations (30-45 days targeting)
-  console.log(`  🔎 DEBUG: Starting enhanced analysis for ${strategyName}...`);
   const optimalDTE = calculateOptimalDTE(strategyName, targetDTE, earnings);
   const expirationDate = getExpirationDate(optimalDTE);
   const riskFreeRate = 0.0525; // Current Fed rate
-  
-  console.log(`  📅 ${strategyName}: Optimal DTE = ${optimalDTE} days (expires ${expirationDate})`);
   
   // AI-powered probability calculation
   let baseProbability = 50;
@@ -306,9 +323,7 @@ async function analyzeStrategy(symbol, strategyName, marketData, config) {
   const maxGain = calculatePreciseMaxGain(strategyName, price, positionSize, optimalDTE, impliedVolatility);
   
   // Enhanced strike price calculations
-  console.log(`  🎯 Calculating precise strikes for ${strategyName}...`);
   const preciseStrikes = calculatePreciseStrikes(strategyName, price, impliedVolatility, optimalDTE, greeks);
-  console.log(`  🎯 Strikes:`, preciseStrikes);
   
   // AI Score combines multiple factors
   let aiScore = probability * 0.4; // 40% weight on probability
@@ -317,14 +332,15 @@ async function analyzeStrategy(symbol, strategyName, marketData, config) {
   aiScore += (100 - impliedVolatility * 100) * 0.2; // 20% weight on IV level
   aiScore += Math.random() * 10; // 10% random factor for variability
   
-  console.log(`  ✅ Enhanced analysis complete for ${strategyName}`);
-  
   return {
-    strategy: strategyName,
+    strategy: strategyKey,
     strategyName: strategyData.name,
     description: strategyData.description,
-    complexity: strategyData.complexity,
+    complexity: mapRiskToComplexity(strategyData.riskLevel),
     riskProfile: riskProfile.level, // NEW: Enhanced risk classification
+    marketBias: strategyData.marketBias, // NEW: Market bias from strategy
+    winRate: strategyData.winRate, // NEW: Strategy win rate
+    bestFor: strategyData.bestFor, // NEW: Best use case
     probability: Math.round(probability),
     aiScore: Math.round(Math.max(0, Math.min(100, aiScore))),
     expectedReturn: parseFloat(expectedReturn.toFixed(2)),
@@ -338,17 +354,19 @@ async function analyzeStrategy(symbol, strategyName, marketData, config) {
     dte: optimalDTE,
     expirationDate,
     entryDate: new Date().toISOString().split('T')[0],
-    timeDecay: calculateEnhancedTimeDecay(strategyName, optimalDTE, greeks),
-    greeks: greeks || {},
-    legs: generatePreciseOptionLegs(strategyName, price, preciseStrikes, optimalDTE, expirationDate),
+    timeDecay: calculateEnhancedTimeDecay(strategyKey, optimalDTE, greeks),
+    greeks: strategyData.greeks || greeks || {},
+    legs: comprehensiveLegs, // Use comprehensive strategy legs
     strikes: preciseStrikes,
     marketCondition: assessEnhancedMarketCondition(change, impliedVolatility, volume, earnings),
     earningsRisk: isEarningsRisk(earnings, optimalDTE),
     recommendation: getEnhancedRecommendation(probability, riskProfile, aiScore),
     // Additional precision metrics
-    breakevens: calculateBreakevens(strategyName, preciseStrikes, price),
-    profitZone: calculateProfitZone(strategyName, preciseStrikes, price, impliedVolatility),
-    liquidityScore: calculateLiquidityScore(volume, marketData.openInterest)
+    breakevens: calculateBreakevens(strategyKey, preciseStrikes, price),
+    profitZone: calculateProfitZone(strategyKey, preciseStrikes, price, impliedVolatility),
+    liquidityScore: calculateLiquidityScore(volume, marketData.openInterest),
+    // NEW: AI reasoning from comprehensive strategy
+    aiReasoning: strategyData.aiReasoning
   };
 }
 
@@ -382,7 +400,8 @@ function getStrategyTemplate(strategyName) {
     // Advanced strategies
     ratio: { name: 'Call Ratio Spread', description: 'Profit from moderate directional moves', complexity: 'Advanced', baseRisk: 'moderate-aggressive' },
     backspread: { name: 'Call Backspread', description: 'Profit from large moves with credit received', complexity: 'Expert', baseRisk: 'aggressive' },
-    'jade lizard': { name: 'Jade Lizard', description: 'High probability income strategy', complexity: 'Expert', baseRisk: 'moderate-aggressive' }
+
+    jadeLizard: { name: 'Jade Lizard', description: 'High probability income strategy', complexity: 'Expert', baseRisk: 'moderate-aggressive' }
   };
   
   return templates[strategyName] || { name: strategyName, description: 'Advanced options strategy', complexity: 'Intermediate', baseRisk: 'moderate' };
@@ -764,5 +783,119 @@ function calculateLiquidityScore(volume, openInterest) {
   return Math.round(volumeScore + oiScore);
 }
 
-console.log('✅ ENHANCED Options Strategy Analyzer API loaded successfully');
-console.log('🔥 New Features: Precise strikes, 30-45 DTE targeting, moderate-aggressive profiling');
+// Helper functions for comprehensive strategy integration
+function assessMarketBias(change, impliedVolatility) {
+  if (change > 2 && impliedVolatility < 0.25) return 'BULLISH';
+  if (change < -2 && impliedVolatility < 0.25) return 'BEARISH';
+  if (Math.abs(change) < 1 && impliedVolatility < 0.2) return 'NEUTRAL';
+  if (impliedVolatility > 0.35) return 'HIGH_VOLATILITY';
+  return 'NEUTRAL';
+}
+
+function mapRiskToComplexity(riskLevel) {
+  const riskMap = {
+    'low': 'Beginner',
+    'moderate': 'Intermediate', 
+    'high': 'Advanced',
+    'aggressive': 'Expert'
+  };
+  return riskMap[riskLevel] || 'Intermediate';
+}
+
+function generateComprehensiveLegs(strategy, price, dte, expirationDate) {
+  try {
+    // Calculate strikes based on strategy requirements
+    const strikes = calculateStrategicStrikes(strategy, price);
+    
+    // Generate legs using the strategy's own generator
+    const legs = strategy.generateLegs({
+      ...strikes,
+      expiry: expirationDate,
+      contracts: 1
+    });
+    
+    // Convert to our format with enhanced data
+    return legs.map(leg => ({
+      type: leg.optionType?.toLowerCase() || 'call',
+      action: leg.action?.toLowerCase() || 'buy',
+      strike: leg.strike,
+      expiry: expirationDate,
+      dte: dte,
+      quantity: leg.quantity || 1,
+      premium: leg.strike !== 'N/A' ? estimatePremium(leg.optionType?.toLowerCase(), leg.strike, price, dte) : 0,
+      description: leg.description
+    }));
+  } catch (error) {
+    console.log(`Warning: Could not generate comprehensive legs for ${strategy.name}: ${error.message}`);
+    // Fallback to basic legs
+    return [{
+      type: 'call',
+      action: 'buy', 
+      strike: Math.round(price),
+      expiry: expirationDate,
+      dte: dte,
+      quantity: 1,
+      premium: estimatePremium('call', Math.round(price), price, dte),
+      description: `Basic ${strategy.name} position`
+    }];
+  }
+}
+
+function calculateStrategicStrikes(strategy, price) {
+  const atm = Math.round(price);
+  const otmCall = Math.round(price * 1.05); // 5% OTM call
+  const otmPut = Math.round(price * 0.95);  // 5% OTM put
+  const itmCall = Math.round(price * 0.95); // 5% ITM call
+  const itmPut = Math.round(price * 1.05);  // 5% ITM put
+  
+  // Return strikes based on strategy name
+  switch (strategy.name) {
+    case 'Bull Call Spread':
+      return { longStrike: atm, shortStrike: otmCall };
+    case 'Bull Put Spread':
+      return { shortStrike: otmPut, longStrike: Math.round(price * 0.90) };
+    case 'Bear Call Spread':
+      return { shortStrike: atm, longStrike: otmCall };
+    case 'Bear Put Spread':
+      return { longStrike: atm, shortStrike: otmPut };
+    case 'Long Straddle':
+      return { strike: atm };
+    case 'Long Strangle':
+      return { callStrike: otmCall, putStrike: otmPut };
+    case 'Iron Condor':
+      return {
+        putSellStrike: otmPut,
+        putBuyStrike: Math.round(price * 0.90),
+        callSellStrike: otmCall,
+        callBuyStrike: Math.round(price * 1.10)
+      };
+    case 'Iron Butterfly':
+      return {
+        centerStrike: atm,
+        wingStrike1: otmPut,
+        wingStrike2: otmCall
+      };
+    case 'Covered Call':
+      return { callStrike: otmCall, stockShares: 100 };
+    case 'Cash-Secured Put':
+      return { putStrike: otmPut, cashRequired: otmPut * 100 };
+    default:
+      return { strike: atm };
+  }
+}
+
+function extractStrikesFromLegs(legs) {
+  const strikes = {};
+  legs.forEach((leg, index) => {
+    if (leg.strike && leg.strike !== 'N/A') {
+      strikes[`strike${index + 1}`] = leg.strike;
+      if (leg.type === 'call') strikes.call = leg.strike;
+      if (leg.type === 'put') strikes.put = leg.strike;
+    }
+  });
+  return strikes;
+}
+
+console.log('✅ COMPREHENSIVE Options Strategy Analyzer API loaded successfully');
+console.log('🚀 Integrated with comprehensive strategy system - 10 proven strategies');
+console.log('🎯 Enhanced Features: Precise strikes, 30-45 DTE targeting, comprehensive legs, AI reasoning');

@@ -348,9 +348,11 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
         body: JSON.stringify({
           symbols: [stock.symbol],
           maxTrades: 8, // Get more trades for this specific stock
-          minProbability: 60,
-          riskTolerance: 'moderate',
-          maxInvestment: 10000
+          minProbability: 55, // Lower threshold for more recommendations
+          riskTolerance: 'moderate-aggressive', // Enhanced risk profile
+          maxInvestment: 15000, // Higher investment limit
+          targetDTE: { min: 30, max: 45 }, // Enhanced DTE targeting
+          precisionMode: true // Enable enhanced features
         })
       });
       
