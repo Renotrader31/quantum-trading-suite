@@ -1,29 +1,29 @@
-// Options Strategy Types and Enums
+// Options Strategy Types and Enums - CommonJS for Next.js compatibility
 
-export const OptionType = {
+const OptionType = {
   CALL: 'call',
   PUT: 'put'
 };
 
-export const ActionType = {
+const ActionType = {
   BUY: 'buy',
   SELL: 'sell'
 };
 
-export const MarketBias = {
+const MarketBias = {
   BULLISH: 'bullish',
   BEARISH: 'bearish',
   NEUTRAL: 'neutral'
 };
 
-export const RiskLevel = {
+const RiskLevel = {
   LOW: 'low',
   MODERATE: 'moderate',
   HIGH: 'high',
   AGGRESSIVE: 'aggressive'
 };
 
-export default {
+module.exports = {
   OptionType,
   ActionType,
   MarketBias,

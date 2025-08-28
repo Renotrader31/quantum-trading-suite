@@ -230,10 +230,20 @@ async function analyzeAllStrategies(symbol, marketData, config) {
     try {
       console.log(`  🔎 Analyzing ${strategyKey}...`);
       const strategy = ALL_STRATEGIES[strategyKey];
+      
+      if (!strategy) {
+        console.error(`  ⚠️ Strategy ${strategyKey} not found in ALL_STRATEGIES`);
+        continue;
+      }
+      
+      console.log(`  📊 Strategy loaded: ${strategy.name} (${strategy.marketBias})`);
       const analysis = await analyzeComprehensiveStrategy(symbol, strategyKey, strategy, marketData, config);
+      
       if (analysis) {
         results.push(analysis);
         console.log(`  ✅ ${strategyKey} completed - Probability: ${analysis.probability}%`);
+      } else {
+        console.log(`  ⚠️ ${strategyKey} returned null/undefined analysis`);
       }
     } catch (error) {
       console.error(`❌ ERROR analyzing ${strategyKey} for ${symbol}:`, error.message);
@@ -246,16 +256,19 @@ async function analyzeAllStrategies(symbol, marketData, config) {
   return results;
 }
 
-// Enhanced strategy analysis with precise DTE targeting and risk profiling
-async function analyzeStrategy(symbol, strategyName, marketData, config) {
+// COMPREHENSIVE strategy analysis using user's strategy system
+async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config) {
   const { price, impliedVolatility, change, volume, beta, greeks, earnings } = marketData;
   const { riskTolerance, maxInvestment, targetDTE, precisionMode } = config;
   
-  // Strategy-specific analysis with enhanced templates
-  const strategyData = getStrategyTemplate(strategyName);
+  // Use comprehensive strategy data
+  const strategyData = strategy;
+  
+  console.log(`    🔍 Analyzing ${strategy.name} for ${symbol}`);
+  console.log(`    🎯 Market Bias: ${strategy.marketBias}, Win Rate: ${strategy.winRate}%`);
   
   // ENHANCED: Precise DTE calculations (30-45 days targeting)
-  const optimalDTE = calculateOptimalDTE(strategyName, targetDTE, earnings);
+  const optimalDTE = calculateOptimalDTE(strategyKey, targetDTE, earnings);
   const expirationDate = getExpirationDate(optimalDTE);
   const riskFreeRate = 0.0525; // Current Fed rate
   
@@ -299,7 +312,7 @@ async function analyzeStrategy(symbol, strategyName, marketData, config) {
   }
   
   // ENHANCED: Moderate to moderate-aggressive risk profiling
-  const riskProfile = getEnhancedRiskProfile(riskTolerance, strategyName, marketData);
+  const riskProfile = getEnhancedRiskProfile(riskTolerance, strategyKey, marketData);
   baseProbability *= riskProfile.multiplier;
   
   // Enhanced Greeks-based probability adjustments
@@ -314,11 +327,11 @@ async function analyzeStrategy(symbol, strategyName, marketData, config) {
   const probability = Math.max(20, Math.min(95, Math.round(baseProbability)));
   
   // Calculate position sizing using Kelly Criterion
-  const kellyFraction = calculateKellyFraction(probability, strategyName);
+  const kellyFraction = calculateKellyFraction(probability, strategyKey);
   const positionSize = Math.min(maxInvestment * kellyFraction, maxInvestment * 0.1); // Max 10% of capital
   
   // ENHANCED: Precise expected returns with Greeks
-  const expectedReturn = calculateEnhancedReturn(strategyName, price, impliedVolatility, optimalDTE, greeks);
+  const expectedReturn = calculateEnhancedReturn(strategyKey, price, impliedVolatility, optimalDTE, greeks);
   const maxLoss = calculatePreciseMaxLoss(strategyName, price, positionSize, optimalDTE, impliedVolatility);
   const maxGain = calculatePreciseMaxGain(strategyName, price, positionSize, optimalDTE, impliedVolatility);
   
