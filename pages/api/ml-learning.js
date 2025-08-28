@@ -36,6 +36,12 @@ export default async function handler(req, res) {
       case 'strategy_feedback':
         learningResult = await processStrategyFeedback(trade, feedback);
         break;
+      case 'trade_entry':
+        learningResult = await processTradeEntry(trade);
+        break;
+      case 'trade_completion':
+        learningResult = await processTradeCompletion(trade);
+        break;
       default:
         throw new Error(`Unknown learning type: ${type}`);
     }
@@ -63,24 +69,31 @@ async function processUserSelection(trade) {
   console.log(`🎯 NEURAL NETWORK TRAINING: ${strategyName} for ${trade.symbol}`);
   console.log(`📊 Data richness: ${Object.keys(trade).length} top-level properties`);
   
-  // 🧠 Train Neural Network Engine if comprehensive trade data available
+  // 🧠 NOTE: User Selection = PREFERENCE Learning, NOT Outcome Learning
+  // We don't know if this trade will be successful yet!
+  // This trains preference patterns, not prediction accuracy
   let neuralNetworkResults = null;
+  
+  console.log(`🎯 PREFERENCE LEARNING: User selected ${strategyName} - training preference patterns, NOT outcomes`);
+  
   if (trade.marketData && trade.tradeExecution && trade.riskMetrics) {
     try {
       const { NeuralNetworkEngine } = await import('../../lib/neuralNetworkEngine.js');
       const neuralEngine = new NeuralNetworkEngine();
       
-      // Create training data from user selection
+      // 🚨 IMPORTANT: This is PREFERENCE learning, not outcome learning
+      // We assume neutral outcome since we don't know the real result yet
       const trainingData = {
         symbol: trade.symbol,
         marketData: trade.marketData,
         result: {
-          percentReturn: 5.0, // Simulated positive outcome for user selection
-          timestamp: new Date().toISOString()
+          percentReturn: 0.0, // NEUTRAL - we don't know the outcome yet!
+          timestamp: new Date().toISOString(),
+          type: 'PREFERENCE_LEARNING' // Mark as preference, not outcome
         }
       };
       
-      // Train the neural network
+      // Train preference patterns (not prediction accuracy)
       neuralEngine.train(trainingData);
       
       // Get updated model stats
@@ -88,17 +101,19 @@ async function processUserSelection(trade) {
       
       neuralNetworkResults = {
         modelTrained: true,
+        trainingType: 'PREFERENCE_LEARNING',
         newAccuracy: modelStats.accuracy,
         trainingDataSize: modelStats.trainingDataSize,
         patternsLearned: modelStats.patternsLearned,
         features: modelStats.features,
-        architecture: modelStats.architecture
+        architecture: modelStats.architecture,
+        note: 'Trained user preferences, not trade outcomes'
       };
       
-      console.log(`🧠 Neural network trained successfully:`, neuralNetworkResults);
+      console.log(`🎯 Preference learning completed:`, neuralNetworkResults);
       
     } catch (error) {
-      console.error('Neural network training error:', error);
+      console.error('Preference learning error:', error);
       neuralNetworkResults = { error: error.message };
     }
   }
@@ -715,4 +730,109 @@ function optimizeExitStrategy(trade) {
   }
 }
 
-console.log('✅ Enhanced ML Learning API loaded successfully with comprehensive data processing');
+// Process actual trade entry (when user actually enters the trade)
+async function processTradeEntry(trade) {
+  console.log(`📋 TRADE ENTRY: ${trade.symbol} ${trade.strategy} - Recording actual trade entry`);
+  
+  try {
+    const { default: TradeTracker } = await import('../../lib/tradeTracker.js');
+    const tracker = new TradeTracker();
+    
+    const tradeId = tracker.recordTradeEntry({
+      symbol: trade.symbol,
+      strategyName: trade.strategy,
+      entryPrice: trade.entryPrice,
+      strikes: trade.strikes || [],
+      expiration: trade.expiration,
+      dte: trade.dte,
+      positionSize: trade.positionSize,
+      maxLoss: trade.maxLoss,
+      maxGain: trade.maxGain,
+      squeezeContext: trade.squeezeContext,
+      marketConditions: trade.marketData,
+      neuralNetworkPrediction: trade.neuralNetworkPrediction,
+      aiScore: trade.aiScore,
+      probability: trade.probability
+    });
+    
+    return {
+      success: true,
+      tradeId,
+      message: 'Trade entry recorded - ready for outcome tracking',
+      activeTrades: tracker.getActiveTrades().length
+    };
+    
+  } catch (error) {
+    console.error('Trade entry processing error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Process actual trade completion with real outcomes (THIS trains prediction accuracy)
+async function processTradeCompletion(trade) {
+  console.log(`✅ TRADE COMPLETION: ${trade.tradeId} - Recording REAL outcome for ML training`);
+  
+  try {
+    const { default: TradeTracker } = await import('../../lib/tradeTracker.js');
+    const tracker = new TradeTracker();
+    
+    // Record the actual trade outcome
+    const mlTrainingData = tracker.recordTradeOutcome(trade.tradeId, {
+      exitPrice: trade.exitPrice,
+      actualReturn: trade.actualReturn,
+      percentReturn: trade.percentReturn,
+      exitReason: trade.exitReason
+    });
+    
+    // NOW train the neural network with REAL outcomes
+    let neuralNetworkResults = null;
+    if (mlTrainingData) {
+      try {
+        const { NeuralNetworkEngine } = await import('../../lib/neuralNetworkEngine.js');
+        const neuralEngine = new NeuralNetworkEngine();
+        
+        // Train with ACTUAL outcomes - this improves prediction accuracy
+        neuralEngine.train(mlTrainingData);
+        
+        const modelStats = neuralEngine.getModelStats();
+        
+        neuralNetworkResults = {
+          modelTrained: true,
+          trainingType: 'OUTCOME_LEARNING',
+          newAccuracy: modelStats.accuracy,
+          trainingDataSize: modelStats.trainingDataSize,
+          patternsLearned: modelStats.patternsLearned,
+          features: modelStats.features,
+          architecture: modelStats.architecture,
+          note: 'Trained with REAL trade outcomes - improves prediction accuracy'
+        };
+        
+        console.log(`🎯 Outcome learning completed - accuracy improved:`, neuralNetworkResults);
+        
+      } catch (error) {
+        console.error('Outcome learning error:', error);
+        neuralNetworkResults = { error: error.message };
+      }
+    }
+    
+    // Get performance stats
+    const performanceStats = tracker.getPerformanceStats();
+    const strategyPerformance = tracker.getStrategyPerformance();
+    
+    return {
+      success: true,
+      message: 'Trade outcome recorded and ML trained with real results',
+      tradeOutcome: mlTrainingData,
+      neuralNetworkResults,
+      performanceStats,
+      strategyPerformance: strategyPerformance[mlTrainingData.strategy],
+      completedTrades: tracker.getCompletedTrades().length
+    };
+    
+  } catch (error) {
+    console.error('Trade completion processing error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+console.log('✅ Enhanced ML Learning API loaded with REAL trade outcome tracking');

@@ -488,7 +488,19 @@ async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config
     aiReasoning: enhanceAIReasoning(strategyData.aiReasoning, squeezeContext, probability),
     // NEW: Squeeze integration metrics
     squeezeAlignment: assessSqueezeAlignment(strategyKey, squeezeContext),
-    holyGrailBonus: squeezeContext ? Math.max(0, parseInt(squeezeContext.holyGrail) - 50) : 0
+    holyGrailBonus: squeezeContext ? Math.max(0, parseInt(squeezeContext.holyGrail) - 50) : 0,
+    
+    // 🎯 PRIORITY #1: SURGICAL EXECUTION DETAILS
+    executionPlan: generateSurgicalExecutionPlan(
+      strategyKey, 
+      price, 
+      preciseStrikes, 
+      generateComprehensiveLegs(strategy, price, optimalDTE, expirationDate),
+      maxGain, 
+      maxLoss, 
+      optimalDTE, 
+      impliedVolatility
+    )
   };
 }
 
@@ -690,7 +702,21 @@ function calculatePreciseMaxGain(strategyKey, price, positionSize, dte, iv) {
 // ENHANCED: Precise strike calculations based on market data and Greeks
 function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
   const atm = Math.round(price);
-  const priceMove = price * iv * Math.sqrt(dte / 365); // Expected 1-sigma move
+  
+  // SANITY CHECK: Cap implied volatility to prevent wild calculations
+  const cappedIV = Math.min(Math.max(iv || 0.25, 0.10), 2.0); // Cap between 10% and 200%
+  
+  // Expected 1-sigma move with sanity limits
+  let priceMove = price * cappedIV * Math.sqrt(dte / 365);
+  
+  // ADDITIONAL SANITY CHECK: Cap price move to reasonable percentage of stock price
+  const maxMovePercent = 0.5; // Max 50% move for strike calculations
+  priceMove = Math.min(priceMove, price * maxMovePercent);
+  
+  // Debug logging for wild strikes
+  if (priceMove > price * 0.3) {
+    console.warn(`🚨 Large priceMove detected: ${priceMove.toFixed(2)} for ${strategyKey} on stock price ${price}, IV: ${iv}, DTE: ${dte}`);
+  }
   
   // Strategy-specific strike calculations
   const strikes = {};
@@ -705,6 +731,10 @@ function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
       // Place strikes at ~0.3 delta for optimal risk/reward
       strikes.call = Math.round(atm + priceMove * 0.6);
       strikes.put = Math.round(atm - priceMove * 0.6);
+      
+      // SANITY CHECK: Keep within reasonable bounds (±15% of stock price)
+      strikes.call = Math.min(strikes.call, atm + price * 0.15);
+      strikes.put = Math.max(strikes.put, atm - price * 0.15);
       break;
       
     case 'ironCondor':
@@ -715,21 +745,53 @@ function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
       strikes.buyCall = sellCall + Math.round(price * 0.05);
       strikes.sellPut = sellPut;
       strikes.buyPut = sellPut - Math.round(price * 0.05);
+      
+      // SANITY CHECK: Ensure strikes are reasonable
+      strikes.sellCall = Math.min(strikes.sellCall, atm + price * 0.2);
+      strikes.buyCall = Math.min(strikes.buyCall, atm + price * 0.3);
+      strikes.sellPut = Math.max(strikes.sellPut, atm - price * 0.2);
+      strikes.buyPut = Math.max(strikes.buyPut, atm - price * 0.3);
       break;
       
     case 'callSpread':
       strikes.buyCall = Math.round(atm + priceMove * 0.2); // Slightly OTM
       strikes.sellCall = strikes.buyCall + Math.round(price * 0.04);
+      
+      // SANITY CHECK: Keep call spreads reasonable
+      strikes.buyCall = Math.min(strikes.buyCall, atm + price * 0.1);
+      strikes.sellCall = Math.min(strikes.sellCall, atm + price * 0.2);
       break;
       
     case 'putSpread':
       strikes.sellPut = Math.round(atm - priceMove * 0.2); // Slightly OTM
       strikes.buyPut = strikes.sellPut - Math.round(price * 0.04);
+      
+      // SANITY CHECK: Keep put spreads reasonable
+      strikes.sellPut = Math.max(strikes.sellPut, atm - price * 0.1);
+      strikes.buyPut = Math.max(strikes.buyPut, atm - price * 0.2);
       break;
       
     default:
       strikes.primary = atm;
   }
+  
+  // FINAL SANITY CHECK: Ensure all strikes are reasonable relative to stock price
+  Object.keys(strikes).forEach(key => {
+    const strike = strikes[key];
+    if (typeof strike === 'number') {
+      // Check if strike is more than 100% away from stock price
+      if (strike > price * 2.0 || strike < price * 0.5) {
+        console.warn(`🚨 Extreme strike detected: ${key}: ${strike} for stock price ${price}, capping it`);
+        
+        // Cap extreme strikes
+        if (strike > price * 2.0) {
+          strikes[key] = Math.round(price * 1.5); // Max 50% above
+        } else if (strike < price * 0.5) {
+          strikes[key] = Math.round(price * 0.5); // Min 50% below
+        }
+      }
+    }
+  });
   
   return strikes;
 }
@@ -755,6 +817,160 @@ function calculateEnhancedTimeDecay(strategyKey, dte, greeks) {
   }
   
   return parseFloat(decay.toFixed(4));
+}
+
+// 🎯 SURGICAL EXECUTION DETAILS - Priority #1 Enhancement
+function generateSurgicalExecutionPlan(strategyKey, price, strikes, legs, maxGain, maxLoss, dte, iv) {
+  const executionPlan = {
+    // Entry Strategy
+    entry: {
+      orderType: 'LIMIT',
+      timing: 'MARKET_OPEN', // or 'MID_SESSION', 'POWER_HOUR'
+      priceImprovement: 0.02, // Try to get 2 cents better than mid price
+      maxSlippage: 0.05, // Don't pay more than 5 cents over limit
+      notes: []
+    },
+    
+    // Profit Taking Strategy  
+    profitTargets: [],
+    
+    // Risk Management
+    riskManagement: {
+      stopLoss: null,
+      timeStops: [],
+      adjustmentTriggers: [],
+      maxDaysToHold: Math.min(Math.floor(dte * 0.75), 21) // Exit by 75% of DTE or 21 days
+    },
+    
+    // Exit Strategy
+    exitStrategy: {
+      preferredExit: 'PROFIT_TARGET',
+      emergencyExit: 'STOP_LOSS',
+      timeDecayExit: null,
+      rollStrategy: null
+    },
+    
+    // Order Management
+    orderManagement: {
+      bracket: false, // OCO bracket order
+      conditional: false, // Conditional orders
+      multiLeg: legs.length > 1,
+      commission: legs.length * 0.65 // Estimate $0.65 per leg
+    }
+  };
+
+  // Strategy-specific execution plans
+  switch (strategyKey) {
+    case 'ironCondor':
+      // High probability, limited profit strategy
+      executionPlan.entry.timing = 'MID_SESSION'; // Better fills in middle of day
+      executionPlan.entry.notes.push('Enter when IV > 25th percentile');
+      executionPlan.entry.notes.push('Avoid earnings announcements within DTE');
+      
+      executionPlan.profitTargets = [
+        { percent: 25, action: 'CLOSE_25%', trigger: maxGain * 0.25, timeLimit: Math.floor(dte * 0.2) },
+        { percent: 50, action: 'CLOSE_50%', trigger: maxGain * 0.50, timeLimit: Math.floor(dte * 0.4) },
+        { percent: 75, action: 'CLOSE_100%', trigger: maxGain * 0.75, timeLimit: Math.floor(dte * 0.6) }
+      ];
+      
+      executionPlan.riskManagement.stopLoss = {
+        type: 'PERCENTAGE',
+        trigger: Math.abs(maxLoss * 2.0), // Stop at 200% of max theoretical loss
+        notes: 'Close if trade moves against theoretical max loss'
+      };
+      
+      executionPlan.riskManagement.timeStops = [
+        { dte: 21, action: 'REVIEW_POSITION', reason: '3 weeks to expiration - high gamma risk' },
+        { dte: 14, action: 'CLOSE_OR_ROLL', reason: '2 weeks to expiration - time decay accelerating' },
+        { dte: 7, action: 'MANDATORY_CLOSE', reason: '1 week to expiration - pin risk high' }
+      ];
+      break;
+
+    case 'straddle':
+      // Volatility expansion play
+      executionPlan.entry.timing = 'PRE_MARKET'; // Get in before volatility expansion
+      executionPlan.entry.notes.push('Enter when IV < 50th percentile');
+      executionPlan.entry.notes.push('Best before earnings or events');
+      
+      executionPlan.profitTargets = [
+        { percent: 100, action: 'CLOSE_50%', trigger: maxGain * 1.0, timeLimit: Math.floor(dte * 0.3) },
+        { percent: 200, action: 'CLOSE_25%', trigger: maxGain * 2.0, timeLimit: Math.floor(dte * 0.5) },
+        { percent: 300, action: 'LET_RIDE', trigger: maxGain * 3.0, timeLimit: Math.floor(dte * 0.7) }
+      ];
+      
+      executionPlan.riskManagement.stopLoss = {
+        type: 'TIME_DECAY',
+        trigger: Math.abs(maxLoss * 0.5), // Stop at 50% loss due to time decay
+        notes: 'Close if theta burn exceeds expected gamma gains'
+      };
+      break;
+
+    case 'strangle':
+      // Lower cost volatility play
+      executionPlan.entry.timing = 'MARKET_OPEN';
+      executionPlan.entry.notes.push('Enter when IV rank < 30');
+      executionPlan.entry.notes.push('Lower cost alternative to straddle');
+      
+      executionPlan.profitTargets = [
+        { percent: 50, action: 'CLOSE_50%', trigger: maxGain * 0.5, timeLimit: Math.floor(dte * 0.4) },
+        { percent: 100, action: 'CLOSE_100%', trigger: maxGain * 1.0, timeLimit: Math.floor(dte * 0.6) }
+      ];
+      break;
+
+    case 'callSpread':
+    case 'putSpread':
+      // Directional limited risk plays
+      const isCall = strategyKey === 'callSpread';
+      executionPlan.entry.timing = 'POWER_HOUR'; // Last hour often has directional moves
+      executionPlan.entry.notes.push(`${isCall ? 'Bullish' : 'Bearish'} directional bias required`);
+      executionPlan.entry.notes.push('Best when IV is elevated');
+      
+      executionPlan.profitTargets = [
+        { percent: 50, action: 'CLOSE_50%', trigger: maxGain * 0.5, timeLimit: Math.floor(dte * 0.5) },
+        { percent: 80, action: 'CLOSE_100%', trigger: maxGain * 0.8, timeLimit: Math.floor(dte * 0.7) }
+      ];
+      
+      executionPlan.riskManagement.adjustmentTriggers = [
+        {
+          condition: `Stock ${isCall ? 'falls below' : 'rises above'} ${isCall ? strikes.buyCall : strikes.sellPut}`,
+          action: 'CONSIDER_ROLL',
+          notes: `${isCall ? 'Bullish' : 'Bearish'} thesis challenged`
+        }
+      ];
+      break;
+
+    default:
+      // Generic execution plan
+      executionPlan.profitTargets = [
+        { percent: 50, action: 'CLOSE_50%', trigger: maxGain * 0.5, timeLimit: Math.floor(dte * 0.5) },
+        { percent: 100, action: 'CLOSE_100%', trigger: maxGain * 1.0, timeLimit: Math.floor(dte * 0.7) }
+      ];
+  }
+
+  // Universal time-based exits
+  if (dte > 45) {
+    executionPlan.riskManagement.timeStops.push({
+      dte: 45, 
+      action: 'REVIEW_POSITION', 
+      reason: 'Long-term position review'
+    });
+  }
+  
+  if (dte > 30) {
+    executionPlan.riskManagement.timeStops.push({
+      dte: 30, 
+      action: 'CONSIDER_ADJUSTMENTS', 
+      reason: 'One month to expiration - plan adjustments'
+    });
+  }
+
+  // Order management settings
+  if (executionPlan.profitTargets.length > 0) {
+    executionPlan.orderManagement.bracket = true;
+    executionPlan.orderManagement.conditional = true;
+  }
+
+  return executionPlan;
 }
 
 // ENHANCED: Precise option legs with calculated strikes and dates

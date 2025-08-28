@@ -1,0 +1,643 @@
+{
+  "activeTrades": [
+    [
+      "INTC_undefined_mevsvcj6_7ufpf",
+      {
+        "id": "INTC_undefined_mevsvcj6_7ufpf",
+        "symbol": "INTC",
+        "strategy": "Bull Call Spread",
+        "entryDate": "2025-08-28T19:31:46.099Z",
+        "entryPrice": 24.93,
+        "strikes": {
+          "primary": 82
+        },
+        "expiration": "2025-10-03",
+        "dte": 30,
+        "positionSize": 1500,
+        "maxLoss": -728.16,
+        "maxGain": 8.86,
+        "mlContext": {
+          "squeezeContext": {
+            "holyGrail": 75,
+            "squeeze": 88,
+            "gamma": 0.036,
+            "flow": 60,
+            "gex": 911496,
+            "darkPool": {
+              "ratio": 0.02,
+              "volume": 11478338,
+              "trades": 844
+            },
+            "optionsMetrics": {
+              "totalVolume": 5513509,
+              "callVolume": 18840490,
+              "putVolume": 23443955,
+              "putCallRatio": 2.02,
+              "volumeOIRatio": 0.55,
+              "netPremium": -8507077,
+              "ivRank": 52,
+              "atmIV": 25.1,
+              "skew": 1.12,
+              "term": "CONTANGO"
+            },
+            "technicals": {
+              "rsi": 73
+            }
+          },
+          "marketConditions": {
+            "price": 24.93,
+            "volume": 47986897,
+            "change": 0.3,
+            "beta": 0.68
+          },
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:31:46.099Z"
+      }
+    ],
+    [
+      "SPY_undefined_mevsw03w_3o7s5",
+      {
+        "id": "SPY_undefined_mevsw03w_3o7s5",
+        "symbol": "SPY",
+        "entryDate": "2025-08-28T19:32:16.653Z",
+        "entryPrice": 0,
+        "strikes": {
+          "primary": 646
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1000,
+        "maxLoss": -483.89,
+        "maxGain": 41.18,
+        "mlContext": {
+          "squeezeContext": {
+            "probability": 95
+          },
+          "marketConditions": {},
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:32:16.653Z"
+      }
+    ],
+    [
+      "SPY_undefined_mevswk54_tg7af",
+      {
+        "id": "SPY_undefined_mevswk54_tg7af",
+        "symbol": "SPY",
+        "entryDate": "2025-08-28T19:32:42.616Z",
+        "entryPrice": 0,
+        "strikes": {
+          "primary": 646
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1000,
+        "maxLoss": -483.89,
+        "maxGain": 41.18,
+        "mlContext": {
+          "squeezeContext": {
+            "probability": 95
+          },
+          "marketConditions": {},
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:32:42.616Z"
+      }
+    ],
+    [
+      "SPY_undefined_mevsyjp9_odqqy",
+      {
+        "id": "SPY_undefined_mevsyjp9_odqqy",
+        "symbol": "SPY",
+        "entryDate": "2025-08-28T19:34:15.357Z",
+        "entryPrice": 0,
+        "strikes": {
+          "primary": 646
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1000,
+        "maxLoss": -483.89,
+        "maxGain": 41.18,
+        "mlContext": {
+          "squeezeContext": {
+            "probability": 95
+          },
+          "marketConditions": {},
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:34:15.357Z"
+      }
+    ],
+    [
+      "T_undefined_mevt5ho9_s30k1",
+      {
+        "id": "T_undefined_mevt5ho9_s30k1",
+        "symbol": "T",
+        "strategy": "Bull Call Spread",
+        "entryDate": "2025-08-28T19:39:39.321Z",
+        "entryPrice": 28.98,
+        "strikes": {
+          "primary": 505
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1500,
+        "maxLoss": -726.57,
+        "maxGain": 31.91,
+        "mlContext": {
+          "squeezeContext": {
+            "holyGrail": 68,
+            "squeeze": 84,
+            "gamma": 0.034,
+            "flow": 82,
+            "gex": 858381,
+            "darkPool": {
+              "ratio": 0.36,
+              "volume": 5694849,
+              "trades": 315
+            },
+            "optionsMetrics": {
+              "totalVolume": 2061325,
+              "callVolume": 6949601,
+              "putVolume": 7559958,
+              "putCallRatio": 1.53,
+              "volumeOIRatio": 0.9,
+              "netPremium": -7799842,
+              "ivRank": 100,
+              "atmIV": 54.8,
+              "skew": 0.8,
+              "term": "CONTANGO"
+            },
+            "technicals": {
+              "rsi": 73
+            }
+          },
+          "marketConditions": {
+            "price": 28.98,
+            "volume": 15344192,
+            "change": -0.29,
+            "beta": 1.46
+          },
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 59
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:39:39.321Z"
+      }
+    ],
+    [
+      "QQQ_undefined_mevt62jl_58v3g",
+      {
+        "id": "QQQ_undefined_mevt62jl_58v3g",
+        "symbol": "QQQ",
+        "strategy": "bearCallSpread",
+        "entryDate": "2025-08-28T19:40:06.369Z",
+        "entryPrice": 0,
+        "strikes": {
+          "primary": 573
+        },
+        "expiration": "2025-10-03",
+        "dte": 30,
+        "positionSize": 1000,
+        "maxLoss": -491.64,
+        "maxGain": 62.96,
+        "mlContext": {
+          "squeezeContext": {
+            "probability": 95
+          },
+          "marketConditions": {},
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:40:06.369Z"
+      }
+    ],
+    [
+      "DIS_undefined_mevtctzt_3cuvw",
+      {
+        "id": "DIS_undefined_mevtctzt_3cuvw",
+        "symbol": "DIS",
+        "strategy": "Bull Call Spread",
+        "entryDate": "2025-08-28T19:45:21.881Z",
+        "entryPrice": 117.47,
+        "strikes": {
+          "primary": 201
+        },
+        "expiration": "2025-10-03",
+        "dte": 30,
+        "positionSize": 1500,
+        "maxLoss": -718.03,
+        "maxGain": 19.82,
+        "mlContext": {
+          "squeezeContext": {
+            "holyGrail": 60,
+            "squeeze": 80,
+            "gamma": 0.035,
+            "flow": 94,
+            "gex": 868884,
+            "darkPool": {
+              "ratio": 0.47,
+              "volume": 1006014,
+              "trades": 230
+            },
+            "optionsMetrics": {
+              "totalVolume": 415550,
+              "callVolume": 1201424,
+              "putVolume": 971693,
+              "putCallRatio": 2.24,
+              "volumeOIRatio": 0.08,
+              "netPremium": -9269874,
+              "ivRank": 100,
+              "atmIV": 54.7,
+              "skew": 0.81,
+              "term": "BACKWARDATION"
+            },
+            "technicals": {
+              "rsi": 69
+            }
+          },
+          "marketConditions": {
+            "price": 117.47,
+            "volume": 3748036,
+            "change": -0.53,
+            "beta": 0.91
+          },
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:45:21.881Z"
+      }
+    ],
+    [
+      "GOOGL_undefined_mevtdn7w_ckvxj",
+      {
+        "id": "GOOGL_undefined_mevtdn7w_ckvxj",
+        "symbol": "GOOGL",
+        "strategy": "bearCallSpread",
+        "entryDate": "2025-08-28T19:45:59.756Z",
+        "entryPrice": 0,
+        "strikes": {
+          "primary": 195
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1000,
+        "maxLoss": -506.61,
+        "maxGain": 18.46,
+        "mlContext": {
+          "squeezeContext": {
+            "probability": 95
+          },
+          "marketConditions": {},
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:45:59.756Z"
+      }
+    ],
+    [
+      "BABA_undefined_mevtitwh_gkwio",
+      {
+        "id": "BABA_undefined_mevtitwh_gkwio",
+        "symbol": "BABA",
+        "strategy": "Long Straddle",
+        "entryDate": "2025-08-28T19:50:01.697Z",
+        "entryPrice": 119.85,
+        "strikes": {
+          "primary": 451
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1500,
+        "maxLoss": -767.67,
+        "maxGain": 45.74,
+        "mlContext": {
+          "squeezeContext": {
+            "holyGrail": 71,
+            "squeeze": 86,
+            "gamma": 0.034,
+            "flow": 59,
+            "gex": 859044,
+            "darkPool": {
+              "ratio": 0.09,
+              "volume": 2449348,
+              "trades": 562
+            },
+            "optionsMetrics": {
+              "totalVolume": 1704168,
+              "callVolume": 6984712,
+              "putVolume": 5271439,
+              "putCallRatio": 2.01,
+              "volumeOIRatio": 0.83,
+              "netPremium": 9207038,
+              "ivRank": 100,
+              "atmIV": 51.8,
+              "skew": 1.15,
+              "term": "BACKWARDATION"
+            },
+            "technicals": {
+              "rsi": 66
+            }
+          },
+          "marketConditions": {
+            "price": 119.85,
+            "volume": 12343444,
+            "change": -1.95,
+            "beta": 1.41
+          },
+          "neuralNetworkPrediction": 0,
+          "aiScore": 81,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:50:01.697Z"
+      }
+    ],
+    [
+      "INTC_undefined_mevtjdqm_49jol",
+      {
+        "id": "INTC_undefined_mevtjdqm_49jol",
+        "symbol": "INTC",
+        "strategy": "bearCallSpread",
+        "entryDate": "2025-08-28T19:50:27.406Z",
+        "entryPrice": 0,
+        "strikes": {
+          "primary": 51
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1000,
+        "maxLoss": -476.09,
+        "maxGain": 3.64,
+        "mlContext": {
+          "squeezeContext": {
+            "probability": 95
+          },
+          "marketConditions": {},
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:50:27.406Z"
+      }
+    ],
+    [
+      "HOOD_undefined_mevtrr44_wpyym",
+      {
+        "id": "HOOD_undefined_mevtrr44_wpyym",
+        "symbol": "HOOD",
+        "strategy": "Bull Call Spread",
+        "entryDate": "2025-08-28T19:56:57.988Z",
+        "entryPrice": 103.72,
+        "strikes": {
+          "primary": 217
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1500,
+        "maxLoss": -756.99,
+        "maxGain": 20.82,
+        "mlContext": {
+          "squeezeContext": {
+            "holyGrail": 59,
+            "squeeze": 80,
+            "gamma": 0.036,
+            "flow": 76,
+            "gex": 894931,
+            "darkPool": {
+              "ratio": 0.27,
+              "volume": 5422722,
+              "trades": 215
+            },
+            "optionsMetrics": {
+              "totalVolume": 2714549,
+              "callVolume": 8935087,
+              "putVolume": 6856100,
+              "putCallRatio": 1.61,
+              "volumeOIRatio": 2.67,
+              "netPremium": 9630226,
+              "ivRank": 46,
+              "atmIV": 22.6,
+              "skew": 0.92,
+              "term": "BACKWARDATION"
+            },
+            "technicals": {
+              "rsi": 24
+            }
+          },
+          "marketConditions": {
+            "price": 103.72,
+            "volume": 22773878,
+            "change": 0.78,
+            "beta": 1.76
+          },
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:56:57.988Z"
+      }
+    ],
+    [
+      "AMD_undefined_mevtsbyq_xr30a",
+      {
+        "id": "AMD_undefined_mevtsbyq_xr30a",
+        "symbol": "AMD",
+        "strategy": "ironCondor",
+        "entryDate": "2025-08-28T19:57:25.010Z",
+        "entryPrice": 0,
+        "strikes": {
+          "sellCall": 176,
+          "buyCall": 184,
+          "sellPut": 158,
+          "buyPut": 150
+        },
+        "expiration": "2025-10-03",
+        "dte": 30,
+        "positionSize": 1000,
+        "maxLoss": -322.97,
+        "maxGain": 12.42,
+        "mlContext": {
+          "squeezeContext": {
+            "probability": 95
+          },
+          "marketConditions": {},
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T19:57:25.011Z"
+      }
+    ],
+    [
+      "AMZN_undefined_mevua2i4_3i8qx",
+      {
+        "id": "AMZN_undefined_mevua2i4_3i8qx",
+        "symbol": "AMZN",
+        "strategy": "Bull Put Spread",
+        "entryDate": "2025-08-28T20:11:12.556Z",
+        "entryPrice": 231.6,
+        "strikes": {
+          "primary": 205
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1500,
+        "maxLoss": -746.17,
+        "maxGain": 17.09,
+        "mlContext": {
+          "squeezeContext": {
+            "holyGrail": 78,
+            "squeeze": 89,
+            "gamma": 0.034,
+            "flow": 43,
+            "gex": 859220,
+            "darkPool": {
+              "ratio": 0.16,
+              "volume": 3121182,
+              "trades": 193
+            },
+            "optionsMetrics": {
+              "totalVolume": 4015781,
+              "callVolume": 17480508,
+              "putVolume": 6661673,
+              "putCallRatio": 0.9,
+              "volumeOIRatio": 0.27,
+              "netPremium": -8180903,
+              "ivRank": 100,
+              "atmIV": 53.3,
+              "skew": 1.18,
+              "term": "BACKWARDATION"
+            },
+            "technicals": {
+              "rsi": 74
+            }
+          },
+          "marketConditions": {
+            "price": 231.6,
+            "volume": 29254099,
+            "change": 1.08,
+            "beta": 1.44
+          },
+          "neuralNetworkPrediction": 0,
+          "aiScore": 75,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T20:11:12.556Z"
+      }
+    ],
+    [
+      "SPY_undefined_mevubc7h_e3ml7",
+      {
+        "id": "SPY_undefined_mevubc7h_e3ml7",
+        "symbol": "SPY",
+        "strategy": "bullCallSpread",
+        "entryDate": "2025-08-28T20:12:11.789Z",
+        "entryPrice": 648.93,
+        "strikes": {
+          "primary": 646
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1000,
+        "maxLoss": -517.92,
+        "maxGain": 69.64,
+        "mlContext": {
+          "squeezeContext": {
+            "probability": 91
+          },
+          "marketConditions": {},
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 91
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T20:12:11.789Z"
+      }
+    ],
+    [
+      "CVX_undefined_mevupx3c_ih1hh",
+      {
+        "id": "CVX_undefined_mevupx3c_ih1hh",
+        "symbol": "CVX",
+        "strategy": "Bull Call Spread",
+        "entryDate": "2025-08-28T20:23:32.041Z",
+        "entryPrice": 159.32,
+        "strikes": {
+          "primary": 217
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1500,
+        "maxLoss": -756.55,
+        "maxGain": 19.84,
+        "mlContext": {
+          "squeezeContext": {
+            "holyGrail": 64,
+            "squeeze": 82,
+            "gamma": 0.034,
+            "flow": 75,
+            "gex": 858089,
+            "darkPool": {
+              "ratio": 0.26,
+              "volume": 1972572,
+              "trades": 926
+            },
+            "optionsMetrics": {
+              "totalVolume": 1111362,
+              "callVolume": 2383597,
+              "putVolume": 3025938,
+              "putCallRatio": 0.82,
+              "volumeOIRatio": 1.8,
+              "netPremium": -7223746,
+              "ivRank": 89,
+              "atmIV": 43.7,
+              "skew": 0.8,
+              "term": "CONTANGO"
+            },
+            "technicals": {
+              "rsi": 65
+            }
+          },
+          "marketConditions": {
+            "price": 159.32,
+            "volume": 7463542,
+            "change": 0.05,
+            "beta": 1.62
+          },
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T20:23:32.041Z"
+      }
+    ]
+  ],
+  "completedTrades": []
+}

@@ -580,11 +580,74 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
           result: mlResult.learningResult
         });
         
-        // Keep modal open briefly to show success feedback
+        // 🎯 ALSO RECORD TRADE ENTRY for Trade Tracker
+        try {
+          const tradeEntryData = {
+            symbol: selectedStock.symbol,
+            strategyName: trade.strategyKey || trade.strategyName,
+            entryPrice: selectedStock.price || 0,
+            strikes: enhancedTradeData.tradeExecution.strikes,
+            expiration: enhancedTradeData.tradeExecution.expirationDate,
+            dte: enhancedTradeData.tradeExecution.dte,
+            positionSize: enhancedTradeData.strategyDetails.positionSize || 1,
+            maxLoss: enhancedTradeData.strategyDetails.maxLoss || 0,
+            maxGain: enhancedTradeData.strategyDetails.expectedReturn || 0,
+            
+            // ML Context for correlation tracking
+            squeezeContext: enhancedTradeData.squeezeContext,
+            marketConditions: enhancedTradeData.marketData,
+            neuralNetworkPrediction: mlResult.learningResult?.neuralNetworkResults?.confidence || 0,
+            aiScore: enhancedTradeData.strategyDetails.aiScore || 0,
+            probability: enhancedTradeData.strategyDetails.probability || 0
+          };
+
+          const tradeEntryResponse = await fetch(`${API_BASE_URL}/api/trade-entry`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'recordEntry',
+              tradeData: tradeEntryData
+            })
+          });
+
+          if (tradeEntryResponse.ok) {
+            const tradeResult = await tradeEntryResponse.json();
+            console.log('📋 Trade entry recorded in TradeTracker:', tradeResult.tradeId);
+            
+            // Update ML success with trade tracking info
+            setMlSuccess({
+              strategy: trade.strategyKey || trade.strategyName,
+              symbol: selectedStock.symbol,
+              result: {
+                ...mlResult.learningResult,
+                tradeTracked: true,
+                tradeId: tradeResult.tradeId,
+                activeTrades: tradeResult.activeTrades
+              }
+            });
+          } else {
+            console.warn('⚠️ Trade entry recording failed:', tradeEntryResponse.status);
+          }
+        } catch (tradeTrackError) {
+          console.error('❌ Error recording trade entry:', tradeTrackError);
+          // Don't fail the whole process if trade tracking fails
+          // Update ML success to show partial success
+          setMlSuccess({
+            strategy: trade.strategyKey || trade.strategyName,
+            symbol: selectedStock.symbol,
+            result: {
+              ...mlResult.learningResult,
+              tradeTracked: false,
+              tradeTrackingError: tradeTrackError.message
+            }
+          });
+        }
+
+        // Keep modal open much longer to show success feedback
         setTimeout(() => {
           setShowTradeModal(false);
           setMlSuccess(null); // Clear success state when modal closes
-        }, 3500); // Keep modal open for 3.5 seconds to show success feedback
+        }, 8000); // Keep modal open for 8 seconds to show success feedback
         
       } else {
         console.warn('⚠️ ML learning API returned error status:', mlResponse.status);
@@ -618,6 +681,52 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
         setShowTradeModal(false);
         setMlSuccess(null);
       }, 2500);
+    }
+  };
+
+  // Handle individual stock analysis
+  const handleIndividualAnalysis = async (symbol) => {
+    console.log(`🔍 Individual analysis for ${symbol}...`);
+    
+    try {
+      // First get squeeze data for this stock
+      const scanResponse = await fetch(`${API_BASE_URL}/api/enhanced-scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symbols: [symbol],
+          integrateLiveData: true
+        })
+      });
+      
+      const scanData = await scanResponse.json();
+      
+      if (scanData.success && scanData.results && scanData.results.length > 0) {
+        const stockData = scanData.results[0];
+        
+        // Use the scanned stock data for trade analysis
+        handleStockClick(stockData, { stopPropagation: () => {} });
+        
+        // Add to alerts if available
+        if (typeof addAlert === 'function') {
+          addAlert({
+            type: 'INDIVIDUAL_ANALYSIS',
+            symbol: symbol,
+            message: `Individual analysis started for ${symbol} | Holy Grail: ${stockData.holyGrail || 'N/A'}`,
+            severity: 'medium',
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        console.log(`✅ Individual analysis complete for ${symbol}:`, stockData);
+      } else {
+        console.error('❌ Failed to scan individual stock:', scanData.error || 'No data returned');
+        alert(`❌ Could not analyze ${symbol}. Please try again or check if the symbol is valid.`);
+      }
+      
+    } catch (error) {
+      console.error('❌ Error in individual analysis:', error);
+      alert(`❌ Error analyzing ${symbol}: ${error.message}`);
     }
   };
 
@@ -1178,26 +1287,67 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
               </button>
             </div>
 
-            {/* ML Success Banner */}
+            {/* ML Success Banner - PROMINENT FEEDBACK */}
             {mlSuccess && (
-              <div className="bg-green-900/30 border-l-4 border-green-500 px-6 py-4 mx-6 mt-4 rounded-r-lg">
-                <div className="flex items-center gap-3">
-                  <div className="text-green-400 text-xl">🧠✅</div>
-                  <div>
-                    <div className="text-green-300 font-semibold">
-                      ML Training Successful! {mlSuccess.strategy} → Neural Network
+              <div className="bg-gradient-to-r from-green-900/60 to-green-800/60 border-2 border-green-500 px-6 py-6 mx-4 mt-4 rounded-xl shadow-2xl animate-pulse">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="text-green-400 text-3xl animate-bounce">🧠✅</div>
+                    <div>
+                      <div className="text-green-200 font-bold text-lg">
+                        ML TRAINING + PORTFOLIO TRACKING SUCCESSFUL!
+                      </div>
+                      <div className="text-green-300 font-semibold text-base">
+                        {mlSuccess.strategy} → Neural Network Enhanced
+                      </div>
+                      <div className="text-green-400 text-sm mt-2 grid grid-cols-2 gap-4">
+                        <div>
+                          🎯 Symbol: <span className="font-semibold text-white">{mlSuccess.symbol}</span>
+                        </div>
+                        <div>
+                          📊 Accuracy: <span className="font-semibold text-white">{mlSuccess.result?.accuracy || 'N/A'}%</span>
+                        </div>
+                        <div>
+                          🔧 Models Updated: <span className="font-semibold text-white">{mlSuccess.result?.modelsUpdated || 0}</span>
+                        </div>
+                        <div>
+                          🧠 Neural Net: <span className="font-semibold text-white">
+                            {mlSuccess.result?.neuralNetworkResults?.modelTrained ? 
+                              `✅ Trained (${mlSuccess.result.neuralNetworkResults.features} features)` : '❌ Error'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-green-500 text-sm mt-2 bg-green-900/40 rounded p-2">
+                        📈 Training Data: <span className="text-white font-semibold">{mlSuccess.result?.trainingDataSize || 0}</span> samples • 
+                        Patterns: <span className="text-white font-semibold">{mlSuccess.result?.patternsLearned || 0}</span> learned • 
+                        Architecture: <span className="text-white font-semibold">{mlSuccess.result?.neuralNetworkResults?.architecture || 'N/A'}</span>
+                      </div>
+                      
+                      {/* Trade Tracking Status */}
+                      {mlSuccess.result?.tradeTracked && (
+                        <div className="text-blue-400 text-sm mt-2 bg-blue-900/40 rounded p-2 flex items-center gap-2">
+                          🎯 <span className="font-semibold">Trade Automatically Added to Portfolio Tracker!</span>
+                          <div className="text-blue-300 text-xs">
+                            ID: {mlSuccess.result.tradeId?.slice(-8) || 'N/A'} • Active Trades: {mlSuccess.result.activeTrades || 0}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Trade Tracking Warning */}
+                      {mlSuccess.result?.tradeTracked === false && mlSuccess.result?.tradeTrackingError && (
+                        <div className="text-yellow-400 text-sm mt-2 bg-yellow-900/40 rounded p-2 flex items-center gap-2">
+                          ⚠️ <span className="font-semibold">ML Training Successful, Portfolio Tracking Failed</span>
+                          <div className="text-yellow-300 text-xs">
+                            Error: {mlSuccess.result.tradeTrackingError} • Check Portfolio Tracker manually
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div className="text-green-400 text-sm mt-1">
-                      🎯 {mlSuccess.symbol} • Accuracy: {mlSuccess.result?.accuracy || 'N/A'}% • 
-                      Models Updated: {mlSuccess.result?.modelsUpdated || 0} • 
-                      Neural Network: {mlSuccess.result?.neuralNetworkResults?.modelTrained ? 
-                        `✅ Trained (${mlSuccess.result.neuralNetworkResults.features} features)` : '❌ Error'}
-                    </div>
-                    <div className="text-green-500 text-xs mt-1">
-                      📈 Training Data: {mlSuccess.result?.trainingDataSize || 0} samples • 
-                      Patterns: {mlSuccess.result?.patternsLearned || 0} learned • 
-                      Architecture: {mlSuccess.result?.neuralNetworkResults?.architecture || 'N/A'}
-                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-green-400 text-sm">Modal closes in:</div>
+                    <div className="text-green-200 text-2xl font-bold">8s</div>
+                    <div className="text-green-500 text-xs mt-1">Reading time...</div>
                   </div>
                 </div>
               </div>
@@ -1281,6 +1431,86 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                               )}
                             </div>
                           </div>
+
+                          {/* 🎯 SURGICAL EXECUTION PLAN */}
+                          {trade.executionPlan && (
+                            <div className="mt-2 text-xs bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-600/50 rounded p-3">
+                              <div className="font-bold text-purple-300 mb-2 flex items-center gap-1">
+                                🎯 Surgical Execution Plan
+                              </div>
+                              
+                              {/* Entry Strategy */}
+                              <div className="mb-2">
+                                <div className="text-purple-200 font-medium">📈 Entry Strategy:</div>
+                                <div className="text-gray-300 ml-2">
+                                  <span className="text-blue-400">{trade.executionPlan.entry?.orderType}</span> order at{' '}
+                                  <span className="text-green-400">{trade.executionPlan.entry?.timing}</span>
+                                  {trade.executionPlan.entry?.notes && trade.executionPlan.entry.notes[0] && (
+                                    <div className="text-yellow-300 text-xs mt-1">💡 {trade.executionPlan.entry.notes[0]}</div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Profit Targets */}
+                              {trade.executionPlan.profitTargets && trade.executionPlan.profitTargets.length > 0 && (
+                                <div className="mb-2">
+                                  <div className="text-purple-200 font-medium">🎯 Profit Targets:</div>
+                                  <div className="ml-2 space-y-1">
+                                    {trade.executionPlan.profitTargets.slice(0, 2).map((target, idx) => (
+                                      <div key={idx} className="text-green-400 text-xs">
+                                        {target.percent}% profit → {target.action} (${target.trigger?.toFixed(0)} by day {target.timeLimit})
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Risk Management */}
+                              {trade.executionPlan.riskManagement && (
+                                <div className="mb-2">
+                                  <div className="text-purple-200 font-medium">🛡️ Risk Management:</div>
+                                  <div className="ml-2 text-red-300 text-xs">
+                                    Stop Loss: {trade.executionPlan.riskManagement.stopLoss?.type || 'Dynamic'} 
+                                    {trade.executionPlan.riskManagement.stopLoss?.trigger && 
+                                      ` at $${Math.abs(trade.executionPlan.riskManagement.stopLoss.trigger).toFixed(0)}`
+                                    }
+                                  </div>
+                                  <div className="ml-2 text-yellow-300 text-xs">
+                                    Max Hold: {trade.executionPlan.riskManagement.maxDaysToHold || 21} days
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Time Stops */}
+                              {trade.executionPlan.riskManagement?.timeStops && trade.executionPlan.riskManagement.timeStops.length > 0 && (
+                                <div className="mb-2">
+                                  <div className="text-purple-200 font-medium">⏰ Time Exits:</div>
+                                  <div className="ml-2">
+                                    {trade.executionPlan.riskManagement.timeStops.slice(0, 2).map((stop, idx) => (
+                                      <div key={idx} className="text-orange-300 text-xs">
+                                        {stop.dte} DTE → {stop.action}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Order Management */}
+                              <div className="flex items-center justify-between text-xs">
+                                <div className="text-gray-400">
+                                  Est. Commission: ${trade.executionPlan.orderManagement?.commission?.toFixed(2) || '0.65'}
+                                </div>
+                                <div className="flex gap-2">
+                                  {trade.executionPlan.orderManagement?.bracket && (
+                                    <span className="bg-blue-900/50 text-blue-300 px-1 rounded">OCO</span>
+                                  )}
+                                  {trade.executionPlan.orderManagement?.multiLeg && (
+                                    <span className="bg-purple-900/50 text-purple-300 px-1 rounded">Multi-Leg</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                         
                         <div className="text-center">
@@ -1464,34 +1694,6 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
   );
 }
 
-// Handle individual stock analysis
-const handleIndividualAnalysis = async (symbol) => {
-  console.log(`🔍 Individual analysis for ${symbol}...`);
-  
-  try {
-    // First get squeeze data for this stock
-    const scanResponse = await fetch(`${API_BASE_URL}/api/scan/${symbol}`);
-    const scanData = await scanResponse.json();
-    
-    if (scanData.success) {
-      // Use the scanned stock data for trade analysis
-      handleStockClick(scanData.data, { stopPropagation: () => {} });
-      
-      // Add to alerts
-      addAlert({
-        type: 'INDIVIDUAL_ANALYSIS',
-        symbol: symbol,
-        message: `Individual analysis started for ${symbol}`,
-        severity: 'medium',
-        timestamp: new Date().toISOString()
-      });
-    } else {
-      console.error('❌ Failed to scan individual stock:', scanData.error);
-    }
-    
-  } catch (error) {
-    console.error('❌ Error in individual analysis:', error);
-  }
-};
+
 
 

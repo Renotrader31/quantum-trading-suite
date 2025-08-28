@@ -18,6 +18,19 @@ export default function Home() {
   useEffect(() => {
     setIsClient(true);
     setCurrentTime(new Date().toLocaleTimeString());
+    
+    // Check for URL parameters to set initial tab
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam === 'tradetracker') {
+      setActiveMode('dashboard'); // Dashboard contains the TradeTracker
+      // Use setTimeout to ensure the component has mounted before triggering modal
+      setTimeout(() => {
+        const event = new CustomEvent('openTradeTracker');
+        window.dispatchEvent(event);
+      }, 1000);
+    }
+    
     fetchMarketData();
     const interval = setInterval(fetchMarketData, 30000); // Update every 30 seconds
     const timeInterval = setInterval(() => {

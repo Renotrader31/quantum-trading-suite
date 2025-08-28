@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import TradeTracker from './TradeTracker.js';
 
 const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefresh, lastUpdate: propsLastUpdate }) => {
+  const [showTradeTracker, setShowTradeTracker] = useState(false);
   const [marketData, setMarketData] = useState({}); // Start with empty data, populate from enhanced API
 
   const [sectorData, setSectorData] = useState([
@@ -43,6 +45,16 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
       }
     }
   }, [propsMarketData]);
+
+  // Listen for external events to open TradeTracker
+  useEffect(() => {
+    const handleOpenTradeTracker = () => {
+      setShowTradeTracker(true);
+    };
+
+    window.addEventListener('openTradeTracker', handleOpenTradeTracker);
+    return () => window.removeEventListener('openTradeTracker', handleOpenTradeTracker);
+  }, []);
 
   const fetchMarketDataSafely = async () => {
     try {
@@ -130,6 +142,16 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
           </div>
           
           <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setShowTradeTracker(!showTradeTracker)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                showTradeTracker 
+                  ? 'bg-purple-600 text-white' 
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              🎯 Trade Tracker
+            </button>
             <div className="flex items-center space-x-2">
               <div className={`w-3 h-3 rounded-full ${actualLoading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}></div>
               <span className="text-sm text-gray-400">
@@ -244,6 +266,26 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
           )}
         </div>
       </div>
+
+      {/* Trade Tracker Modal */}
+      {showTradeTracker && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur z-50 overflow-y-auto">
+          <div className="min-h-screen p-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-white">Trade Tracker</h2>
+                <button
+                  onClick={() => setShowTradeTracker(false)}
+                  className="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-white transition-colors"
+                >
+                  ✕ Close
+                </button>
+              </div>
+              <TradeTracker />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

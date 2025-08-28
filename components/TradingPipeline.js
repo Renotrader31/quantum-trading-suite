@@ -7,6 +7,7 @@ import {
   Settings, Play, Pause, RefreshCw, Bell, ArrowUpRight,
   ArrowRight, ChevronRight, Filter, Search, Download
 } from 'lucide-react';
+import { MultiStrategyEnsemble } from '../lib/multiStrategyEnsemble.js';
 
 export default function TradingPipeline({ marketData, loading, onRefresh, lastUpdate }) {
   const [pipelineRunning, setPipelineRunning] = useState(false);
@@ -19,9 +20,15 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
     maxTrades: 4,
     riskTolerance: 'moderate',
     maxInvestment: 10000,
-    enableMLLearning: true
+    enableMLLearning: true,
+    enableEnsemble: true // NEW: Enable multi-strategy ensemble
   });
   const [selectedTab, setSelectedTab] = useState('overview');
+  const [processingTrade, setProcessingTrade] = useState(null);
+  
+  // 🎯 PRIORITY #2: Multi-Strategy Ensemble
+  const [ensembleEngine] = useState(() => new MultiStrategyEnsemble());
+  const [ensembleResults, setEnsembleResults] = useState(null);
 
   useEffect(() => {
     // Auto-run pipeline when market data is available
@@ -29,6 +36,114 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
       setTimeout(() => runTradingPipeline(), 2000);
     }
   }, [marketData]);
+
+  // Handle selecting and tracking a trade directly from TradingPipeline
+  const handleSelectAndTrack = async (trade) => {
+    console.log(`🎯 Selecting and tracking trade: ${trade.strategyName} for ${trade.symbol}`);
+    
+    setProcessingTrade(trade.symbol);
+    
+    try {
+      // First, send to ML learning system
+      const enhancedTradeData = {
+        ...trade,
+        selectionTime: new Date().toISOString(),
+        userSelectionId: `${trade.symbol}_${Date.now()}`,
+        source: 'trading_pipeline'
+      };
+
+      const mlResponse = await fetch('/api/ml-learning', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'user_selection',
+          trade: enhancedTradeData,
+          meta: {
+            version: '3.0_pipeline',
+            source: 'trading_pipeline',
+            timestamp: new Date().toISOString()
+          }
+        })
+      });
+
+      let mlResult = null;
+      if (mlResponse.ok) {
+        mlResult = await mlResponse.json();
+        console.log('✅ Trade fed to ML system:', mlResult);
+      }
+
+      // Second, record in trade tracker
+      // Get proper entry price from multiple sources
+      let entryPrice = trade.currentPrice || trade.price || trade.stockPrice || 0;
+      
+      // If still no price, try to get from market data or make API call
+      if (entryPrice === 0 && trade.symbol) {
+        try {
+          // Try to get current price from a quick API call
+          const priceResponse = await fetch('/api/enhanced-scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              symbols: [trade.symbol],
+              integrateLiveData: true
+            })
+          });
+          
+          if (priceResponse.ok) {
+            const priceData = await priceResponse.json();
+            if (priceData.success && priceData.results && priceData.results[0]) {
+              entryPrice = priceData.results[0].price || 0;
+            }
+          }
+        } catch (priceError) {
+          console.warn('Could not fetch current price for', trade.symbol, priceError);
+        }
+      }
+      
+      const tradeEntryData = {
+        symbol: trade.symbol,
+        strategyName: trade.strategyName || trade.strategy || 'TradingPipeline Strategy',
+        entryPrice: entryPrice,
+        strikes: trade.strikes || [],
+        expiration: trade.expirationDate || new Date(Date.now() + (35 * 24 * 60 * 60 * 1000)).toISOString().split('T')[0],
+        dte: trade.dte || 35,
+        positionSize: trade.positionSize || 1,
+        maxLoss: trade.maxLoss || 0,
+        maxGain: trade.expectedReturn || 0,
+        
+        // ML Context
+        squeezeContext: { holyGrail: trade.holyGrail, probability: trade.probability },
+        marketConditions: { sector: trade.sector },
+        neuralNetworkPrediction: mlResult?.learningResult?.neuralNetworkResults?.confidence || 0,
+        aiScore: trade.aiScore || trade.mlScore || 0,
+        probability: trade.probability || 0
+      };
+
+      const tradeEntryResponse = await fetch('/api/trade-entry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'recordEntry',
+          tradeData: tradeEntryData
+        })
+      });
+
+      if (tradeEntryResponse.ok) {
+        const tradeResult = await tradeEntryResponse.json();
+        console.log('📋 Trade recorded in portfolio tracker:', tradeResult.tradeId);
+        
+        // Show success notification
+        alert(`✅ ${trade.strategyName} for ${trade.symbol} added to portfolio!\n\nTrade ID: ${tradeResult.tradeId}\nActive Trades: ${tradeResult.activeTrades}\n\nCheck Portfolio Tracker to monitor this trade.`);
+      }
+
+      setProcessingTrade(null);
+      
+    } catch (error) {
+      console.error('❌ Error selecting and tracking trade:', error);
+      alert(`❌ Error: ${error.message}`);
+      setProcessingTrade(null);
+    }
+  };
 
   const runTradingPipeline = async () => {
     setPipelineRunning(true);
@@ -46,7 +161,42 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
       
       if (data.success) {
         setPipelineResults(data);
-        setActionableTrades(data.actionableTrades || []);
+        
+        // 🎯 PRIORITY #2: Apply Multi-Strategy Ensemble if enabled
+        if (pipelineConfig.enableEnsemble && data.actionableTrades?.length > 0) {
+          console.log('🎯 Applying Multi-Strategy Ensemble optimization...');
+          
+          // Get current portfolio context for risk management
+          let portfolioContext = null;
+          try {
+            const portfolioResponse = await fetch('/api/trade-entry?action=getActiveTrades');
+            if (portfolioResponse.ok) {
+              const portfolioData = await portfolioResponse.json();
+              portfolioContext = {
+                activeTrades: portfolioData.activeTrades || [],
+                totalAllocated: portfolioData.totalAllocated || 0
+              };
+            }
+          } catch (portErr) {
+            console.warn('Could not fetch portfolio context:', portErr);
+          }
+          
+          // Generate ensemble recommendations
+          const ensembleOutput = await ensembleEngine.generateEnsembleRecommendations(
+            marketData || {},
+            data.actionableTrades,
+            portfolioContext
+          );
+          
+          setEnsembleResults(ensembleOutput);
+          setActionableTrades(ensembleOutput.recommendations);
+          
+          console.log(`✅ Ensemble optimization complete: ${ensembleOutput.recommendations.length} optimized trades`);
+          console.log(`📊 Market Regime: ${ensembleOutput.marketRegime.primary} (${ensembleOutput.marketRegime.confidence}% confidence)`);
+        } else {
+          setActionableTrades(data.actionableTrades || []);
+        }
+        
         console.log('✅ Pipeline completed successfully!', data.summary);
       } else {
         console.error('❌ Pipeline failed:', data.error);
@@ -219,6 +369,7 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
               {[
                 { id: 'overview', name: 'Overview', icon: Eye },
                 { id: 'trades', name: 'Actionable Trades', icon: Target },
+                { id: 'ensemble', name: 'Ensemble System', icon: Layers },
                 { id: 'squeeze', name: 'Squeeze Results', icon: Activity },
                 { id: 'ml', name: 'ML Insights', icon: Brain },
                 { id: 'config', name: 'Configuration', icon: Settings }
@@ -293,8 +444,17 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-semibold">Actionable Trades</h3>
-                  <div className="text-sm text-gray-400">
-                    {actionableTrades.length} trades • Last updated: {lastUpdate || 'Never'}
+                  <div className="flex items-center gap-4">
+                    <button
+                      onClick={() => window.open('/?tab=tradetracker', '_blank')}
+                      className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                    >
+                      📊 Portfolio Tracker
+                      <ArrowUpRight className="w-4 h-4" />
+                    </button>
+                    <div className="text-sm text-gray-400">
+                      {actionableTrades.length} trades • Last updated: {lastUpdate || 'Never'}
+                    </div>
                   </div>
                 </div>
                 
@@ -302,7 +462,7 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                   <div className="space-y-4">
                     {actionableTrades.map((trade, index) => (
                       <div key={index} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                        <div className="grid grid-cols-6 gap-4 items-center">
+                        <div className="grid grid-cols-7 gap-4 items-center">
                           <div>
                             <div className="font-bold text-lg text-blue-400">{trade.symbol}</div>
                             <div className="text-sm text-gray-400">{trade.strategyName}</div>
@@ -344,12 +504,132 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                             </div>
                             <div className="text-xs text-gray-400">Risk:Reward</div>
                           </div>
+                          
+                          <div className="text-center">
+                            <button
+                              onClick={() => handleSelectAndTrack(trade)}
+                              disabled={processingTrade === trade.symbol}
+                              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                                processingTrade === trade.symbol
+                                  ? 'bg-yellow-600 text-white cursor-not-allowed'
+                                  : 'bg-green-600 hover:bg-green-700'
+                              }`}
+                            >
+                              {processingTrade === trade.symbol ? (
+                                <div className="flex items-center gap-1">
+                                  <RefreshCw className="w-3 h-3 animate-spin" />
+                                  Processing...
+                                </div>
+                              ) : (
+                                'Select & Track'
+                              )}
+                            </button>
+                          </div>
                         </div>
                         
+                        {/* ML Factors */}
                         {trade.mlFactors && (
                           <div className="mt-3 pt-3 border-t border-gray-700">
                             <div className="text-sm text-gray-300">
                               <strong>ML Insights:</strong> {trade.mlFactors.join(' • ')}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 🎯 ENSEMBLE METADATA */}
+                        {trade.ensembleGroup && (
+                          <div className="mt-3 pt-3 border-t border-gray-700">
+                            <div className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-600/30 rounded p-3">
+                              <div className="font-bold text-blue-300 mb-2 text-sm flex items-center gap-1">
+                                🎯 Ensemble Strategy
+                              </div>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                                {/* Strategy Group */}
+                                <div>
+                                  <div className="text-blue-200 font-medium mb-1">📊 Group:</div>
+                                  <div className="text-gray-300">
+                                    {trade.ensembleGroup}
+                                  </div>
+                                </div>
+
+                                {/* Ensemble Weight */}
+                                <div>
+                                  <div className="text-blue-200 font-medium mb-1">⚖️ Weight:</div>
+                                  <div className="text-purple-400 font-semibold">
+                                    {(trade.ensembleWeight * 100).toFixed(1)}%
+                                  </div>
+                                </div>
+
+                                {/* Group Ranking */}
+                                <div>
+                                  <div className="text-blue-200 font-medium mb-1">🏆 Rank:</div>
+                                  <div className="text-yellow-400">
+                                    #{trade.groupRank} of {trade.totalInGroup}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Ensemble Score */}
+                              {trade.ensembleScore && (
+                                <div className="mt-2 text-xs text-green-300 bg-green-900/20 rounded px-2 py-1">
+                                  🎯 Ensemble Score: {trade.ensembleScore}/100
+                                </div>
+                              )}
+
+                              {/* Portfolio Allocation */}
+                              {trade.portfolioAllocation && (
+                                <div className="mt-2 text-xs text-blue-300 bg-blue-900/20 rounded px-2 py-1">
+                                  💼 Portfolio Allocation: {trade.portfolioAllocation}%
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 🎯 SURGICAL EXECUTION PLAN */}
+                        {trade.executionPlan && (
+                          <div className="mt-3 pt-3 border-t border-gray-700">
+                            <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 border border-purple-600/30 rounded p-3">
+                              <div className="font-bold text-purple-300 mb-2 text-sm flex items-center gap-1">
+                                🎯 Execution Plan
+                              </div>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                                {/* Entry Strategy */}
+                                <div>
+                                  <div className="text-purple-200 font-medium mb-1">📈 Entry:</div>
+                                  <div className="text-gray-300">
+                                    {trade.executionPlan.entry?.orderType} at {trade.executionPlan.entry?.timing}
+                                  </div>
+                                </div>
+
+                                {/* Profit Targets */}
+                                <div>
+                                  <div className="text-purple-200 font-medium mb-1">🎯 Targets:</div>
+                                  <div className="text-green-400">
+                                    {trade.executionPlan.profitTargets && trade.executionPlan.profitTargets[0] ? 
+                                      `${trade.executionPlan.profitTargets[0].percent}% profit` : 
+                                      'Dynamic'
+                                    }
+                                  </div>
+                                </div>
+
+                                {/* Risk Management */}
+                                <div>
+                                  <div className="text-purple-200 font-medium mb-1">🛡️ Risk:</div>
+                                  <div className="text-red-300">
+                                    Max {trade.executionPlan.riskManagement?.maxDaysToHold || 21} days
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Quick Notes */}
+                              {trade.executionPlan.entry?.notes && trade.executionPlan.entry.notes[0] && (
+                                <div className="mt-2 text-xs text-yellow-300 bg-yellow-900/20 rounded px-2 py-1">
+                                  💡 {trade.executionPlan.entry.notes[0]}
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
@@ -361,6 +641,147 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                     <Target className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                     <div className="text-gray-400">No actionable trades available</div>
                     <div className="text-sm text-gray-500">Run the pipeline to generate trades</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selectedTab === 'ensemble' && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Layers className="w-6 h-6 text-purple-500" />
+                  Multi-Strategy Ensemble System
+                </h3>
+                
+                {ensembleResults ? (
+                  <div className="space-y-6">
+                    {/* Market Regime Assessment */}
+                    <div className="bg-gray-800 rounded-lg p-4">
+                      <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-blue-400" />
+                        Market Regime Assessment
+                      </h4>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-400">
+                            {ensembleResults.marketRegime.primary.replace('_', ' ').toUpperCase()}
+                          </div>
+                          <div className="text-sm text-gray-400">Primary Regime</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-400">
+                            {ensembleResults.marketRegime.confidence}%
+                          </div>
+                          <div className="text-sm text-gray-400">Confidence</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-purple-400">
+                            {ensembleResults.portfolioMetrics.diversificationScore}%
+                          </div>
+                          <div className="text-sm text-gray-400">Diversification</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-orange-400">
+                            {Object.keys(ensembleResults.ensembleWeights).length}
+                          </div>
+                          <div className="text-sm text-gray-400">Active Strategies</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Strategy Weights */}
+                    <div className="bg-gray-800 rounded-lg p-4">
+                      <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <BarChart3 className="w-5 h-5 text-green-400" />
+                        Dynamic Strategy Weights
+                      </h4>
+                      
+                      <div className="space-y-3">
+                        {Object.entries(ensembleResults.ensembleWeights).map(([strategyName, weights]) => (
+                          <div key={strategyName} className="flex items-center justify-between p-3 bg-gray-700 rounded">
+                            <div>
+                              <div className="font-medium text-white">{strategyName}</div>
+                              <div className="text-xs text-gray-400">
+                                Win Rate: {weights.performance.wins + weights.performance.losses > 0 ? 
+                                  `${((weights.performance.wins / (weights.performance.wins + weights.performance.losses)) * 100).toFixed(1)}%` : 'No data'}
+                              </div>
+                            </div>
+                            
+                            <div className="text-right">
+                              <div className="flex items-center gap-3">
+                                <div className="text-sm text-gray-300">
+                                  Base: {weights.base}%
+                                </div>
+                                <div className={`text-lg font-bold ${
+                                  parseFloat(weights.current) > parseFloat(weights.base) ? 'text-green-400' :
+                                  parseFloat(weights.current) < parseFloat(weights.base) ? 'text-red-400' :
+                                  'text-gray-300'
+                                }`}>
+                                  {weights.current}%
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Rebalance Signals */}
+                    {ensembleResults.rebalanceSignals && ensembleResults.rebalanceSignals.length > 0 && (
+                      <div className="bg-yellow-900/20 border border-yellow-600/30 rounded-lg p-4">
+                        <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-yellow-400" />
+                          Rebalance Signals
+                        </h4>
+                        
+                        <div className="space-y-2">
+                          {ensembleResults.rebalanceSignals.map((signal, index) => (
+                            <div key={index} className="flex items-center justify-between text-sm">
+                              <span className="text-white">{signal.strategy}</span>
+                              <span className={`font-medium ${
+                                signal.action === 'INCREASE' ? 'text-green-400' : 'text-red-400'
+                              }`}>
+                                {signal.action} ({signal.drift}% drift)
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Portfolio Metrics */}
+                    <div className="bg-gray-800 rounded-lg p-4">
+                      <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-blue-400" />
+                        Portfolio Optimization Metrics
+                      </h4>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-gray-700 rounded p-3 text-center">
+                          <div className="text-2xl font-bold text-blue-400">
+                            {ensembleResults.portfolioMetrics.totalAllocated}
+                          </div>
+                          <div className="text-sm text-gray-400">Total Recommendations</div>
+                        </div>
+                        
+                        <div className="bg-gray-700 rounded p-3 text-center">
+                          <div className="text-2xl font-bold text-red-400">
+                            {ensembleResults.portfolioMetrics.riskConcentration}%
+                          </div>
+                          <div className="text-sm text-gray-400">Risk Concentration</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Layers className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <div className="text-gray-400">No ensemble data available</div>
+                    <div className="text-sm text-gray-500">Enable ensemble mode in configuration and run the pipeline</div>
                   </div>
                 )}
               </div>
@@ -458,6 +879,18 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                       />
                       <label className="text-sm font-medium text-gray-300">
                         Enable ML Learning Engine
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={pipelineConfig.enableEnsemble}
+                        onChange={(e) => setPipelineConfig({...pipelineConfig, enableEnsemble: e.target.checked})}
+                        className="mr-3"
+                      />
+                      <label className="text-sm font-medium text-gray-300">
+                        Enable Multi-Strategy Ensemble
                       </label>
                     </div>
                   </div>
