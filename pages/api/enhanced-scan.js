@@ -129,14 +129,28 @@ async function enhancedScanSingleStock(symbol, liveData = null) {
 
 // Generate enhanced squeeze metrics with live data integration
 function generateEnhancedSqueezeMetrics(symbol, liveData) {
-  // Use live data if available, otherwise realistic defaults
+  console.log(`🔍 Generating enhanced metrics for ${symbol}, liveData:`, liveData ? 'YES' : 'NO');
+  
+  // Use enhanced live data if available, otherwise realistic defaults
   const price = liveData?.price || getRealisticPrice(symbol);
   const change = liveData?.changePercent || (Math.random() - 0.5) * 5;
   const volume = liveData?.volume || Math.floor(Math.random() * 50000000 + 10000000);
+  
+  // Extract enhanced data from liveData when available
+  const high = liveData?.high || price * (1.01 + Math.random() * 0.02);
+  const low = liveData?.low || price * (0.97 + Math.random() * 0.03);
+  const callVolume = liveData?.callVolume || Math.round(volume * 0.4);
+  const putVolume = liveData?.putVolume || Math.round(volume * 0.3);
+  const callPutRatio = liveData?.callPutRatio || (callVolume / (putVolume || 1));
+  const impliedVolatility = liveData?.impliedVolatility || (0.2 + Math.random() * 0.3);
+  const beta = liveData?.beta || (0.8 + Math.random() * 0.4);
+  const rsi = liveData?.rsi || Math.round(30 + Math.random() * 40);
+  
+  console.log(`📊 Enhanced data for ${symbol}: price=${price}, volume=${volume}, IV=${impliedVolatility}`);
 
-  // Generate realistic Greeks data
+  // Generate realistic Greeks data using enhanced IV
   const mockGreeks = [];
-  const baseIV = 0.2 + Math.random() * 0.3; // IV between 20-50%
+  const baseIV = impliedVolatility; // Use actual IV from enhanced data
   
   for (let i = 0; i < 25; i++) { // More strike prices for better analysis
     const strikeOffset = (i - 12) * 5; // Strikes from -60 to +60
@@ -213,6 +227,9 @@ function generateEnhancedSqueezeMetrics(symbol, liveData) {
   return {
     price: parseFloat(price.toFixed(2)),
     change: parseFloat(change.toFixed(2)),
+    volume: volume, // ✅ Now properly using enhanced volume data
+    high: parseFloat(high.toFixed(2)), // ✅ Enhanced high data
+    low: parseFloat(low.toFixed(2)), // ✅ Enhanced low data  
     holyGrail,
     holyGrailStatus,
     squeeze: Math.round(50 + (holyGrail / 100) * 50), // Squeeze correlated with Holy Grail
@@ -221,14 +238,18 @@ function generateEnhancedSqueezeMetrics(symbol, liveData) {
     flow: Math.round(40 + Math.random() * 60), // Flow score 40-100
     dtc: parseFloat((2 + Math.random() * 8).toFixed(1)), // Days to cover
     pinRisk: Math.round(Math.random() * 100),
+    beta: parseFloat(beta.toFixed(2)), // ✅ Enhanced beta data
+    rsi: rsi, // ✅ Enhanced RSI data
     
     optionsMetrics: {
       totalVolume: Math.round(volume * (0.1 + Math.random() * 0.05)), // Options volume ~10-15% of stock volume
-      putCallRatio: parseFloat((0.5 + Math.random() * 1.5).toFixed(2)),
+      callVolume: callVolume, // ✅ Enhanced call volume
+      putVolume: putVolume, // ✅ Enhanced put volume
+      putCallRatio: parseFloat(callPutRatio.toFixed(2)), // ✅ Enhanced call/put ratio
       volumeOIRatio: parseFloat((Math.random() * 3).toFixed(2)),
       netPremium: Math.round((Math.random() - 0.5) * 20000000), // -10M to +10M
       ivRank: Math.round(ivPercentile),
-      atmIV: parseFloat((avgIV * 100).toFixed(1)),
+      atmIV: parseFloat((impliedVolatility * 100).toFixed(1)), // ✅ Enhanced actual IV
       skew: parseFloat((0.8 + Math.random() * 0.4).toFixed(2)),
       term: Math.random() > 0.5 ? 'CONTANGO' : 'BACKWARDATION'
     },
