@@ -379,8 +379,8 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
         {/* Results Tabs */}
         <div className="bg-gray-900 rounded-lg border border-gray-800">
           {/* Tab Navigation */}
-          <div className="border-b border-gray-800 px-6 py-3">
-            <div className="flex space-x-6">
+          <div className="border-b border-gray-800 px-4 py-3">
+            <div className="flex flex-wrap gap-2 md:gap-4">
               {[
                 { id: 'overview', name: 'Overview', icon: Eye },
                 { id: 'trades', name: 'Actionable Trades', icon: Target },
@@ -393,14 +393,14 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                 <button
                   key={tab.id}
                   onClick={() => setSelectedTab(tab.id)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors ${
                     selectedTab === tab.id 
-                      ? 'bg-purple-600 text-white' 
-                      : 'text-gray-400 hover:text-white'
+                      ? 'bg-purple-600 text-white border-2 border-purple-400' 
+                      : 'text-gray-400 hover:text-white hover:bg-gray-700 border-2 border-transparent'
                   }`}
                 >
-                  <tab.icon className="w-4 h-4" />
-                  {tab.name}
+                  <tab.icon className="w-4 h-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">{tab.name}</span>
                 </button>
               ))}
             </div>
@@ -458,18 +458,21 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
 
             {selectedTab === 'trades' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">Actionable Trades</h3>
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                  <div>
+                    <h3 className="text-2xl font-bold text-white">Actionable Trades</h3>
+                    <p className="text-gray-400">{actionableTrades.length} trades available • Last updated: {lastUpdate || 'Never'}</p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                     <button
                       onClick={() => window.open('/?tab=tradetracker', '_blank')}
-                      className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                      className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg font-bold transition-colors flex items-center gap-2 text-white border-2 border-purple-400"
                     >
                       📊 Portfolio Tracker
-                      <ArrowUpRight className="w-4 h-4" />
+                      <ArrowUpRight className="w-5 h-5" />
                     </button>
-                    <div className="text-sm text-gray-400">
-                      {actionableTrades.length} trades • Last updated: {lastUpdate || 'Never'}
+                    <div className="text-sm text-gray-300 bg-gray-700 px-3 py-2 rounded-lg">
+                      Pipeline Status: {pipelineRunning ? 'Running...' : 'Ready'}
                     </div>
                   </div>
                 </div>
