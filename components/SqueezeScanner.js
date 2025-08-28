@@ -35,6 +35,8 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
   const [showTradeModal, setShowTradeModal] = useState(false);
   const [tradeRecommendations, setTradeRecommendations] = useState([]);
   const [loadingTrades, setLoadingTrades] = useState(false);
+  const [processingTrade, setProcessingTrade] = useState(null); // Track which trade is being processed
+  const [mlSuccess, setMlSuccess] = useState(null); // Track successful ML processing
   const eventSourceRef = useRef(null);
   const refreshIntervalRef = useRef(null);
 
@@ -400,6 +402,9 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
   const handleTradeSelection = async (trade) => {
     console.log(`🎯 ENHANCED TRADE SELECTION: ${trade.strategyKey || trade.strategyName} for ${selectedStock.symbol}`);
     
+    // Set processing state
+    setProcessingTrade(trade.strategyKey || trade.strategyName);
+    
     // Calculate additional execution details
     const currentDate = new Date();
     const entryDate = trade.entryDate || currentDate.toISOString().split('T')[0];
@@ -551,7 +556,7 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
           addAlert({
             type: 'TRADE_SELECTED',
             symbol: selectedStock.symbol,
-            message: `🧠 ${trade.strategyKey || trade.strategyName} → ML Learning | ${selectedStock.symbol} | Accuracy: ${mlResult.accuracy || 'N/A'}% | Models trained: ${mlResult.modelsUpdated || 0}`,
+            message: `🧠 ${trade.strategyKey || trade.strategyName} → ML Learning | ${selectedStock.symbol} | Accuracy: ${mlResult.learningResult?.accuracy || 'N/A'}% | Models: ${mlResult.learningResult?.modelsUpdated || 0} | Neural Net: ${mlResult.learningResult?.neuralNetworkResults?.modelTrained ? '✅ Trained' : '❌'}`,
             severity: 'medium',
             timestamp: new Date().toISOString(),
             mlFeedback: mlResult
@@ -560,33 +565,59 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
 
         // Log ML learning effectiveness
         console.log('🎯 ML Learning Stats:', {
-          modelsUpdated: mlResult.modelsUpdated || 0,
-          accuracy: mlResult.accuracy || 'N/A',
-          patternsLearned: mlResult.patternsLearned || 0,
-          trainingDataSize: mlResult.trainingDataSize || 0
+          modelsUpdated: mlResult.learningResult?.modelsUpdated || 0,
+          accuracy: mlResult.learningResult?.accuracy || 'N/A',
+          patternsLearned: mlResult.learningResult?.patternsLearned || 0,
+          trainingDataSize: mlResult.learningResult?.trainingDataSize || 0,
+          neuralNetwork: mlResult.learningResult?.neuralNetworkResults
         });
+
+        // Clear processing state and show success feedback
+        setProcessingTrade(null);
+        setMlSuccess({
+          strategy: trade.strategyKey || trade.strategyName,
+          symbol: selectedStock.symbol,
+          result: mlResult.learningResult
+        });
+        
+        // Keep modal open briefly to show success feedback
+        setTimeout(() => {
+          setShowTradeModal(false);
+          setMlSuccess(null); // Clear success state when modal closes
+        }, 3500); // Keep modal open for 3.5 seconds to show success feedback
+        
       } else {
         console.warn('⚠️ ML learning API returned error status:', mlResponse.status);
+        setProcessingTrade(null);
+        setMlSuccess(null);
+        
+        // Show error and close modal after delay
+        setTimeout(() => {
+          setShowTradeModal(false);
+        }, 2000);
       }
-      
-      // Close modal
-      setShowTradeModal(false);
       
     } catch (error) {
       console.error('❌ Error feeding trade to ML system:', error);
-      // Still close the modal even if ML feeding fails
-      setShowTradeModal(false);
+      setProcessingTrade(null);
+      setMlSuccess(null);
       
       // Add error alert
       if (typeof addAlert === 'function') {
         addAlert({
           type: 'ERROR',
           symbol: selectedStock.symbol,
-          message: `Failed to feed ${trade.strategyKey || trade.strategyName} to ML system`,
+          message: `Failed to feed ${trade.strategyKey || trade.strategyName} to ML system: ${error.message}`,
           severity: 'high',
           timestamp: new Date().toISOString()
         });
       }
+      
+      // Close modal after showing error
+      setTimeout(() => {
+        setShowTradeModal(false);
+        setMlSuccess(null);
+      }, 2500);
     }
   };
 
@@ -1147,6 +1178,31 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
               </button>
             </div>
 
+            {/* ML Success Banner */}
+            {mlSuccess && (
+              <div className="bg-green-900/30 border-l-4 border-green-500 px-6 py-4 mx-6 mt-4 rounded-r-lg">
+                <div className="flex items-center gap-3">
+                  <div className="text-green-400 text-xl">🧠✅</div>
+                  <div>
+                    <div className="text-green-300 font-semibold">
+                      ML Training Successful! {mlSuccess.strategy} → Neural Network
+                    </div>
+                    <div className="text-green-400 text-sm mt-1">
+                      🎯 {mlSuccess.symbol} • Accuracy: {mlSuccess.result?.accuracy || 'N/A'}% • 
+                      Models Updated: {mlSuccess.result?.modelsUpdated || 0} • 
+                      Neural Network: {mlSuccess.result?.neuralNetworkResults?.modelTrained ? 
+                        `✅ Trained (${mlSuccess.result.neuralNetworkResults.features} features)` : '❌ Error'}
+                    </div>
+                    <div className="text-green-500 text-xs mt-1">
+                      📈 Training Data: {mlSuccess.result?.trainingDataSize || 0} samples • 
+                      Patterns: {mlSuccess.result?.patternsLearned || 0} learned • 
+                      Architecture: {mlSuccess.result?.neuralNetworkResults?.architecture || 'N/A'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Modal Content */}
             <div className="p-6">
               {loadingTrades ? (
@@ -1254,17 +1310,37 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                         <div className="text-center">
                           <button
                             onClick={() => handleTradeSelection(trade)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
-                              trade.aiScore >= 85 ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg' :
-                              trade.aiScore >= 70 ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md' :
-                              'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white'
+                            disabled={processingTrade === (trade.strategyKey || trade.strategyName)}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform ${
+                              processingTrade === (trade.strategyKey || trade.strategyName) 
+                                ? 'bg-yellow-600 text-white cursor-wait scale-95' 
+                                : `hover:scale-105 ${
+                                    trade.aiScore >= 85 ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg' :
+                                    trade.aiScore >= 70 ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md' :
+                                    'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white'
+                                  }`
                             }`}
-                            title={`Feed comprehensive trade data to ML Learning System (AI Score: ${trade.aiScore || 0}/100)`}
+                            title={
+                              processingTrade === (trade.strategyKey || trade.strategyName)
+                                ? "Processing ML training..."
+                                : `Feed comprehensive trade data to ML Learning System (AI Score: ${trade.aiScore || 0}/100)`
+                            }
                           >
-                            🧠 Select & Learn
-                            <div className="text-xs opacity-75 mt-0.5">
-                              Feed to ML
-                            </div>
+                            {processingTrade === (trade.strategyKey || trade.strategyName) ? (
+                              <>
+                                ⏳ Training ML...
+                                <div className="text-xs opacity-75 mt-0.5">
+                                  Processing 25+ features
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                🧠 Select & Learn
+                                <div className="text-xs opacity-75 mt-0.5">
+                                  Feed to ML
+                                </div>
+                              </>
+                            )}
                           </button>
                           
                           {/* Enhanced feedback indicators */}
