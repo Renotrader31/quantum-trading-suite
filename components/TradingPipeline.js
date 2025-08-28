@@ -883,6 +883,221 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
               </div>
             )}
 
+            {selectedTab === 'squeeze' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold">Squeeze Scanner Results</h3>
+                  <div className="text-sm text-gray-400">
+                    {pipelineResults?.squeezeData?.length || 0} candidates scanned
+                  </div>
+                </div>
+
+                {pipelineResults?.squeezeData && pipelineResults.squeezeData.length > 0 ? (
+                  <div className="space-y-4">
+                    {pipelineResults.squeezeData.map((candidate, index) => (
+                      <div key={candidate.symbol} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+                        <div className="grid grid-cols-8 gap-4 items-center">
+                          <div>
+                            <div className="font-bold text-lg text-blue-400">{candidate.symbol}</div>
+                            <div className="text-sm text-gray-400">${candidate.price}</div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className={`text-lg font-bold ${candidate.holyGrail >= 70 ? 'text-green-400' : candidate.holyGrail >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                              {candidate.holyGrail}
+                            </div>
+                            <div className="text-xs text-gray-400">Holy Grail</div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className={`text-lg font-bold ${candidate.squeeze >= 80 ? 'text-green-400' : candidate.squeeze >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
+                              {candidate.squeeze}
+                            </div>
+                            <div className="text-xs text-gray-400">Squeeze</div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-purple-400">
+                              {candidate.gamma?.toFixed(3)}
+                            </div>
+                            <div className="text-xs text-gray-400">Gamma</div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-orange-400">
+                              {candidate.flow}
+                            </div>
+                            <div className="text-xs text-gray-400">Flow</div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-green-400">
+                              {formatCurrency(candidate.volume)}
+                            </div>
+                            <div className="text-xs text-gray-400">Volume</div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-yellow-400">
+                              {candidate.rsi}
+                            </div>
+                            <div className="text-xs text-gray-400">RSI</div>
+                          </div>
+                          
+                          <div className="text-center">
+                            <div className={`px-2 py-1 rounded text-xs font-medium ${
+                              candidate.enhanced?.riskScore <= 40 ? 'bg-green-600' :
+                              candidate.enhanced?.riskScore <= 70 ? 'bg-yellow-600' : 'bg-red-600'
+                            }`}>
+                              {candidate.enhanced?.riskScore || 'N/A'}
+                            </div>
+                            <div className="text-xs text-gray-400 mt-1">Risk Score</div>
+                          </div>
+                        </div>
+                        
+                        {/* Additional Details */}
+                        {candidate.enhanced && (
+                          <div className="mt-3 pt-3 border-t border-gray-700 grid grid-cols-4 gap-4 text-sm">
+                            <div>
+                              <span className="text-gray-400">Sector:</span>
+                              <span className="ml-1 text-white">{candidate.enhanced.sectorCategory}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Liquidity:</span>
+                              <span className="ml-1 text-white">{candidate.enhanced.liquidityScore}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">IV Rank:</span>
+                              <span className="ml-1 text-white">{candidate.optionsMetrics?.ivRank}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Put/Call:</span>
+                              <span className="ml-1 text-white">{candidate.optionsMetrics?.putCallRatio?.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Activity className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <div className="text-gray-400">No squeeze candidates available</div>
+                    <div className="text-sm text-gray-500">Run the pipeline to scan for squeeze opportunities</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {selectedTab === 'ml' && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                  <Brain className="w-6 h-6 text-purple-500" />
+                  ML Learning Engine Insights
+                </h3>
+
+                {pipelineResults?.mlData ? (
+                  <div className="space-y-6">
+                    {/* Model Performance */}
+                    <div className="bg-gray-800 rounded-lg p-4">
+                      <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <Cpu className="w-5 h-5 text-green-400" />
+                        Model Performance
+                      </h4>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-400">
+                            {(pipelineResults.mlData.modelAccuracy * 100).toFixed(1)}%
+                          </div>
+                          <div className="text-sm text-gray-400">Model Accuracy</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-400">
+                            {pipelineResults.results?.mlEngine?.tradesProcessed || 0}
+                          </div>
+                          <div className="text-sm text-gray-400">Trades Processed</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-purple-400">
+                            {pipelineResults.results?.mlEngine?.patternsDetected || 0}
+                          </div>
+                          <div className="text-sm text-gray-400">Patterns Detected</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-orange-400">
+                            {pipelineResults.results?.mlEngine?.recommendations || 0}
+                          </div>
+                          <div className="text-sm text-gray-400">Enhanced Trades</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pattern Recognition */}
+                    {pipelineResults.mlData.patternsRecognized && (
+                      <div className="bg-gray-800 rounded-lg p-4">
+                        <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                          <Eye className="w-5 h-5 text-blue-400" />
+                          Pattern Recognition
+                        </h4>
+                        
+                        <div className="space-y-2">
+                          {Object.entries(pipelineResults.mlData.patternsRecognized).map(([pattern, confidence]) => (
+                            <div key={pattern} className="flex items-center justify-between p-3 bg-gray-700 rounded">
+                              <span className="font-medium text-white">{pattern.replace(/_/g, ' ').toUpperCase()}</span>
+                              <div className="flex items-center gap-3">
+                                <div className="w-32 bg-gray-600 rounded-full h-2">
+                                  <div 
+                                    className="bg-blue-500 h-2 rounded-full"
+                                    style={{ width: `${confidence * 100}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-sm font-medium">{(confidence * 100).toFixed(0)}%</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Learning Progress */}
+                    <div className="bg-gray-800 rounded-lg p-4">
+                      <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-yellow-400" />
+                        Learning Progress
+                      </h4>
+                      
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Training Data Size</span>
+                          <span className="font-bold text-white">{pipelineResults.mlData.trainingDataSize || 'N/A'}</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Neural Network Confidence</span>
+                          <span className="font-bold text-green-400">{pipelineResults.mlData.neuralNetworkConfidence || 'Learning...'}%</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Strategy Preferences Learned</span>
+                          <span className="font-bold text-purple-400">{pipelineResults.mlData.strategiesLearned || 0}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Brain className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <div className="text-gray-400">No ML insights available</div>
+                    <div className="text-sm text-gray-500">Run the pipeline with ML learning enabled to see insights</div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {selectedTab === 'config' && (
               <div className="space-y-6">
                 <h3 className="text-xl font-semibold mb-4">Pipeline Configuration</h3>
