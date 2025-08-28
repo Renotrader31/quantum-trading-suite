@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefresh, lastUpdate: propsLastUpdate }) => {
-  const [marketData, setMarketData] = useState({
-    SPY: { symbol: 'SPY', price: 646.12, change: 0.15, changePercent: 0.02, volume: 45234567 },
-    QQQ: { symbol: 'QQQ', price: 572.78, change: 0.03, changePercent: 0.01, volume: 32123456 },
-    IWM: { symbol: 'IWM', price: 235.5, change: 0.52, changePercent: 0.22, volume: 18567890 },
-    VIX: { symbol: 'VIX', price: 178.92, change: -1.27, changePercent: -0.71, volume: 0 }
-  });
+  const [marketData, setMarketData] = useState({}); // Start with empty data, populate from enhanced API
 
   const [sectorData, setSectorData] = useState([
     { name: 'Technology', symbol: 'XLK', performance: 1.2, volume: 45000000 },
@@ -15,14 +10,7 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
     { name: 'Energy', symbol: 'XLE', performance: 2.1, volume: 32000000 }
   ]);
 
-  const [topMovers, setTopMovers] = useState([
-    { symbol: 'NVDA', name: 'NVIDIA Corp', price: 181.9, change: 0.07, changePercent: 0.04, volume: 106004396, sector: 'Technology' },
-    { symbol: 'AAPL', name: 'Apple Inc', price: 229.7, change: 0.17, changePercent: 0.07, volume: 15401356, sector: 'Technology' },
-    { symbol: 'MSFT', name: 'Microsoft Corp', price: 505.13, change: 0.61, changePercent: 0.12, volume: 7519022, sector: 'Technology' },
-    { symbol: 'TSLA', name: 'Tesla Inc', price: 351.18, change: -0.14, changePercent: -0.04, volume: 41100137, sector: 'Consumer Disc' },
-    { symbol: 'AMD', name: 'Advanced Micro Devices', price: 167.17, change: 0.33, changePercent: 0.2, volume: 16780006, sector: 'Technology' },
-    { symbol: 'META', name: 'Meta Platforms', price: 745, change: -1.21, changePercent: -0.16, volume: 4131018, sector: 'Technology' }
-  ]);
+  const [topMovers, setTopMovers] = useState([]); // Start with empty data, populate from enhanced API
 
   const [loading, setLoading] = useState(false);
   const actualLoading = propsLoading !== undefined ? propsLoading : loading;
@@ -60,18 +48,44 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
     try {
       setLoading(true);
       
-      // Try to fetch from your API
-      const response = await fetch('/api/stocks?endpoint=market-overview');
+      // Use enhanced-scan API instead of broken stocks API
+      const response = await fetch('/api/enhanced-scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symbols: ['SPY', 'QQQ', 'IWM', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA'],
+          integrateLiveData: true
+        })
+      });
       
       if (response.ok) {
         const data = await response.json();
+        console.log('🔍 Dashboard received enhanced data:', data.success, data.results?.length, 'stocks');
         
-        // Safely update data only if it exists
-        if (data.indices && Object.keys(data.indices).length > 0) {
-          setMarketData(data.indices);
-        }
-        if (data.topMovers && Array.isArray(data.topMovers) && data.topMovers.length > 0) {
-          setTopMovers(data.topMovers);
+        // Process enhanced-scan results
+        if (data.success && data.results && Array.isArray(data.results) && data.results.length > 0) {
+          const indices = {};
+          const movers = [];
+          
+          data.results.forEach(stock => {
+            if (['SPY', 'QQQ', 'IWM', 'VIX'].includes(stock.symbol)) {
+              indices[stock.symbol] = stock;
+            } else {
+              movers.push({
+                ...stock,
+                name: stock.symbol // Add name field if missing
+              });
+            }
+          });
+          
+          if (Object.keys(indices).length > 0) {
+            console.log('📊 Dashboard updating indices:', Object.keys(indices));
+            setMarketData(indices);
+          }
+          if (movers.length > 0) {
+            console.log('📈 Dashboard updating movers:', movers.map(m => m.symbol));
+            setTopMovers(movers);
+          }
         }
         if (data.sectors && Array.isArray(data.sectors) && data.sectors.length > 0) {
           setSectorData(data.sectors);

@@ -196,6 +196,8 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
       
       if (data.success) {
         console.log(`✅ Enhanced scan complete: ${data.scanned} stocks scanned, ${data.liveDataCount} with live data`);
+        console.log('🔍 DEBUG: First stock data:', JSON.stringify(data.results[0], null, 2));
+        console.log('🔍 DEBUG: Data source:', data.dataSource);
         setStocks(data.results);
         setLastUpdate(new Date().toISOString());
         
