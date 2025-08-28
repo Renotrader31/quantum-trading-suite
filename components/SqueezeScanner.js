@@ -31,6 +31,10 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
   const [alerts, setAlerts] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [selectedStock, setSelectedStock] = useState(null);
+  const [showTradeModal, setShowTradeModal] = useState(false);
+  const [tradeRecommendations, setTradeRecommendations] = useState([]);
+  const [loadingTrades, setLoadingTrades] = useState(false);
   const eventSourceRef = useRef(null);
   const refreshIntervalRef = useRef(null);
 
@@ -326,6 +330,48 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
     }
   };
 
+  // Handle stock click for trade analysis
+  const handleStockClick = async (stock, event) => {
+    // Prevent triggering row expansion
+    event.stopPropagation();
+    
+    console.log(`🎯 Analyzing trade opportunities for ${stock.symbol}...`);
+    setSelectedStock(stock);
+    setShowTradeModal(true);
+    setLoadingTrades(true);
+    
+    try {
+      // Get trade recommendations for this specific stock
+      const response = await fetch(`${API_BASE_URL}/api/options-analyzer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symbols: [stock.symbol],
+          maxTrades: 8, // Get more trades for this specific stock
+          minProbability: 60,
+          riskTolerance: 'moderate',
+          maxInvestment: 10000
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setTradeRecommendations(data.actionableTrades);
+        console.log(`✅ Found ${data.actionableTrades.length} trade recommendations for ${stock.symbol}`);
+      } else {
+        console.error('❌ Failed to get trade recommendations:', data.error);
+        setTradeRecommendations([]);
+      }
+      
+    } catch (error) {
+      console.error('❌ Error getting trade recommendations:', error);
+      setTradeRecommendations([]);
+    } finally {
+      setLoadingTrades(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* Header */}
@@ -339,6 +385,38 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
             </div>
           </div>
           <div className="flex items-center gap-4">
+            {/* Individual Ticker Input */}
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Enter ticker (e.g. AAPL)"
+                className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm w-40 uppercase"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    const symbol = e.target.value.trim().toUpperCase();
+                    if (symbol) {
+                      handleIndividualAnalysis(symbol);
+                      e.target.value = '';
+                    }
+                  }
+                }}
+              />
+              <button
+                onClick={() => {
+                  const input = document.querySelector('input[placeholder*="ticker"]');
+                  const symbol = input.value.trim().toUpperCase();
+                  if (symbol) {
+                    handleIndividualAnalysis(symbol);
+                    input.value = '';
+                  }
+                }}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm font-medium"
+                title="Analyze individual stock"
+              >
+                <Target className="w-4 h-4" />
+              </button>
+            </div>
+
             {/* Scan Controls */}
             <button
               onClick={startBulkScan}
@@ -559,7 +637,13 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                       >
                         <td className="p-4">
                           <div className="flex items-center gap-2">
-                            <div className="font-bold text-blue-400">{stock.symbol}</div>
+                            <button
+                              onClick={(e) => handleStockClick(stock, e)}
+                              className="font-bold text-blue-400 hover:text-blue-300 hover:bg-blue-900/30 px-2 py-1 rounded transition-colors"
+                              title="Click to analyze trade opportunities"
+                            >
+                              {stock.symbol}
+                            </button>
                             {stock.lastUpdate && new Date(stock.lastUpdate).getTime() > Date.now() - 60000 && (
                               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" title="Recently updated" />
                             )}
@@ -816,6 +900,203 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
           </div>
         </div>
       </div>
+
+      {/* Trade Analysis Modal */}
+      {showTradeModal && selectedStock && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-gray-900 rounded-lg border border-gray-800 max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Target className="w-6 h-6 text-orange-500" />
+                <div>
+                  <h2 className="text-xl font-bold">Trade Analysis - {selectedStock.symbol}</h2>
+                  <p className="text-sm text-gray-400">
+                    Price: ${selectedStock.price} • Holy Grail: {selectedStock.holyGrail} • Squeeze: {selectedStock.squeeze}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowTradeModal(false)}
+                className="text-gray-400 hover:text-white p-2"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              {loadingTrades ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <RefreshCw className="w-8 h-8 text-blue-400 animate-spin mb-4" />
+                  <div className="text-lg font-medium">Analyzing 15 Strategies...</div>
+                  <div className="text-sm text-gray-400">Finding optimal trade opportunities</div>
+                </div>
+              ) : tradeRecommendations.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">
+                      {tradeRecommendations.length} Trade Recommendations
+                    </h3>
+                    <div className="text-sm text-gray-400">
+                      Avg Probability: {Math.round(tradeRecommendations.reduce((sum, t) => sum + t.probability, 0) / tradeRecommendations.length)}%
+                    </div>
+                  </div>
+
+                  {tradeRecommendations.map((trade, index) => (
+                    <div key={index} className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-blue-600 transition-colors">
+                      <div className="grid grid-cols-5 gap-4 items-center">
+                        <div>
+                          <div className="font-bold text-lg text-orange-400">{trade.strategyName}</div>
+                          <div className="text-sm text-gray-400">{trade.description}</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            Complexity: <span className="text-blue-400">{trade.complexity}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className={`text-xl font-bold ${
+                            trade.probability >= 80 ? 'text-green-400' : 
+                            trade.probability >= 65 ? 'text-yellow-400' : 'text-red-400'
+                          }`}>
+                            {trade.probability}%
+                          </div>
+                          <div className="text-xs text-gray-400">Success Probability</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-green-400">
+                            ${(trade.expectedReturn / 100).toFixed(1)}K
+                          </div>
+                          <div className="text-xs text-gray-400">Expected Return</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-red-400">
+                            ${Math.abs(trade.maxLoss / 100).toFixed(1)}K
+                          </div>
+                          <div className="text-xs text-gray-400">Max Risk</div>
+                        </div>
+                        
+                        <div className="text-center">
+                          <button
+                            onClick={() => handleTradeSelection(trade)}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                          >
+                            Select Trade
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Additional Trade Details */}
+                      <div className="mt-3 pt-3 border-t border-gray-700 grid grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-400">Position Size:</span>
+                          <span className="ml-2 text-white">${(trade.positionSize).toLocaleString()}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Risk/Reward:</span>
+                          <span className="ml-2 text-yellow-400">{trade.riskReward}:1</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">AI Score:</span>
+                          <span className="ml-2 text-purple-400">{trade.aiScore}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Market Condition:</span>
+                          <span className="ml-2 text-blue-400">{trade.marketCondition}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <AlertCircle className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <div className="text-gray-400">No trade recommendations available</div>
+                  <div className="text-sm text-gray-500">Try adjusting the analysis parameters</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+// Handle individual stock analysis
+const handleIndividualAnalysis = async (symbol) => {
+  console.log(`🔍 Individual analysis for ${symbol}...`);
+  
+  try {
+    // First get squeeze data for this stock
+    const scanResponse = await fetch(`${API_BASE_URL}/api/scan/${symbol}`);
+    const scanData = await scanResponse.json();
+    
+    if (scanData.success) {
+      // Use the scanned stock data for trade analysis
+      handleStockClick(scanData.data, { stopPropagation: () => {} });
+      
+      // Add to alerts
+      addAlert({
+        type: 'INDIVIDUAL_ANALYSIS',
+        symbol: symbol,
+        message: `Individual analysis started for ${symbol}`,
+        severity: 'medium',
+        timestamp: new Date().toISOString()
+      });
+    } else {
+      console.error('❌ Failed to scan individual stock:', scanData.error);
+    }
+    
+  } catch (error) {
+    console.error('❌ Error in individual analysis:', error);
+  }
+};
+
+// Handle trade selection and feed to ML
+const handleTradeSelection = async (trade) => {
+  console.log(`🎯 Trade selected: ${trade.strategyName} for ${selectedStock.symbol}`);
+  
+  try {
+    // Feed selected trade to ML learning system
+    const mlResponse = await fetch(`${API_BASE_URL}/api/ml-learning`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'user_selection',
+        trade: {
+          ...trade,
+          symbol: selectedStock.symbol,
+          selectionTime: new Date().toISOString(),
+          squeezeContext: {
+            holyGrail: selectedStock.holyGrail,
+            squeeze: selectedStock.squeeze,
+            gamma: selectedStock.gamma,
+            flow: selectedStock.flow
+          }
+        }
+      })
+    });
+
+    if (mlResponse.ok) {
+      console.log('✅ Trade fed to ML learning system');
+      
+      // Show success notification
+      addAlert({
+        type: 'TRADE_SELECTED',
+        symbol: selectedStock.symbol,
+        message: `${trade.strategyName} selected for ${selectedStock.symbol} - Fed to ML system`,
+        severity: 'medium',
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    // Close modal
+    setShowTradeModal(false);
+    
+  } catch (error) {
+    console.error('❌ Error feeding trade to ML system:', error);
+  }
+};
