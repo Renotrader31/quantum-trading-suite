@@ -728,13 +728,15 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                         <td className="p-4 text-center">
                           <div className="flex gap-2 justify-center">
                             <button 
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
+                              className="bg-orange-600 hover:bg-orange-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center gap-1"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleSingleScan(stock.symbol);
+                                handleStockClick(stock, e);
                               }}
+                              title="Get trade strategies for this stock"
                             >
-                              Refresh
+                              <Target className="w-3 h-3" />
+                              Get Strategies
                             </button>
                           </div>
                         </td>
