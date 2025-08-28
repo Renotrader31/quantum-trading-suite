@@ -49,24 +49,33 @@ export default function MinimalSqueezeScanner() {
     }
   };
 
-  // Simple strategy fetch
+  // Enhanced strategy fetch with squeeze data integration
   const getStrategies = async (stock) => {
-    console.log(`🎯 Getting strategies for ${stock.symbol}...`);
+    console.log(`🎯 Getting strategies for ${stock.symbol} with Holy Grail ${stock.holyGrail}...`);
     setSelectedStock(stock);
     setLoadingStrategies(true);
     setStrategies([]);
 
     try {
+      // Enhanced strategy request with squeeze context
       const response = await fetch('/api/options-analyzer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           symbols: [stock.symbol],
-          maxTrades: 3,
+          maxTrades: 4, // Get more strategies for better selection
           minProbability: 55,
           riskTolerance: 'moderate-aggressive',
           maxInvestment: 10000,
-          targetDTE: { min: 30, max: 45 }
+          targetDTE: { min: 30, max: 45 },
+          // Pass squeeze context for better strategy selection
+          squeezeContext: {
+            holyGrail: stock.holyGrail,
+            squeeze: stock.squeeze,
+            price: stock.price,
+            volume: stock.volume,
+            momentum: stock.change || 0
+          }
         })
       });
 
@@ -74,9 +83,11 @@ export default function MinimalSqueezeScanner() {
       console.log('✅ Strategies response:', data.success, data.actionableTrades?.length);
 
       if (data.success && data.actionableTrades) {
+        console.log('✅ Strategy Details:', data.actionableTrades.map(t => `${t.strategyKey}: ${t.probability}% prob, ${t.aiScore}/100 AI`));
         setStrategies(data.actionableTrades);
       } else {
         console.error('❌ Strategies failed:', data);
+        setError('Strategy generation failed: ' + (data.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('❌ Strategy error:', error);
@@ -260,41 +271,103 @@ export default function MinimalSqueezeScanner() {
                 {strategies.map((strategy, index) => {
                   const probability = parseInt(strategy.probability);
                   const probColor = probability >= 75 ? 'text-green-400' : probability >= 60 ? 'text-yellow-400' : 'text-orange-400';
+                  const aiScore = strategy.aiScore || 0;
+                  const aiScoreColor = aiScore >= 80 ? 'text-green-400' : aiScore >= 65 ? 'text-yellow-400' : 'text-orange-400';
                   
                   return (
                     <div key={index} className="bg-gray-700 rounded-lg p-5 border border-gray-600 hover:border-gray-500 transition-all">
+                      {/* Strategy Header with AI Reasoning */}
                       <div className="flex items-center justify-between mb-3">
-                        <div className="font-bold text-lg text-green-400 flex items-center gap-2">
-                          <DollarSign className="w-5 h-5" />
-                          {strategy.strategy}
+                        <div className="flex items-center gap-3">
+                          <div className="font-bold text-lg text-green-400 flex items-center gap-2">
+                            <DollarSign className="w-5 h-5" />
+                            {strategy.strategyKey || strategy.strategy}
+                          </div>
+                          <div className="text-sm px-2 py-1 bg-blue-900 text-blue-300 rounded">
+                            {strategy.marketBias || 'NEUTRAL'}
+                          </div>
+                          <div className="text-sm px-2 py-1 bg-purple-900 text-purple-300 rounded">
+                            DTE: {strategy.dte || '35'}
+                          </div>
                         </div>
-                        <div className={`font-bold ${probColor}`}>
-                          {strategy.probability}% Success
+                        <div className="text-right">
+                          <div className={`font-bold ${probColor}`}>
+                            {strategy.probability}% Success
+                          </div>
+                          <div className={`text-sm ${aiScoreColor}`}>
+                            AI Score: {aiScore}/100
+                          </div>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-3 gap-6 mb-3">
+                      {/* Enhanced Metrics Grid */}
+                      <div className="grid grid-cols-4 gap-4 mb-4">
                         <div className="text-center">
                           <div className="text-lg font-semibold text-green-300">${strategy.maxGain}</div>
                           <div className="text-xs text-gray-400">Max Gain</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-semibold text-red-300">${strategy.maxLoss}</div>
+                          <div className="text-lg font-semibold text-red-300">${Math.abs(strategy.maxLoss)}</div>
                           <div className="text-xs text-gray-400">Max Loss</div>
                         </div>
                         <div className="text-center">
                           <div className="text-lg font-semibold text-blue-300">
-                            {((strategy.maxGain / Math.abs(strategy.maxLoss)) * 100).toFixed(0)}%
+                            {strategy.riskReward ? `${strategy.riskReward}:1` : `${((strategy.maxGain / Math.abs(strategy.maxLoss)) || 1).toFixed(1)}:1`}
                           </div>
                           <div className="text-xs text-gray-400">Risk/Reward</div>
                         </div>
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-yellow-300">
+                            ${strategy.positionSize || Math.round(strategy.maxGain * 2)}
+                          </div>
+                          <div className="text-xs text-gray-400">Position Size</div>
+                        </div>
                       </div>
                       
-                      <div className="text-sm text-gray-300 bg-gray-800 rounded p-3">
+                      {/* Strategy Description */}
+                      <div className="text-sm text-gray-300 bg-gray-800 rounded p-3 mb-3">
                         {strategy.description}
                       </div>
                       
-                      <div className="mt-3 flex justify-end">
+                      {/* AI Reasoning */}
+                      {strategy.aiReasoning && (
+                        <div className="text-sm text-blue-200 bg-blue-900/30 rounded p-3 mb-3 border-l-4 border-blue-400">
+                          <strong>AI Analysis:</strong> {strategy.aiReasoning}
+                        </div>
+                      )}
+                      
+                      {/* Option Legs Display */}
+                      {strategy.legs && strategy.legs.length > 0 && (
+                        <div className="mb-3">
+                          <div className="text-sm font-semibold text-gray-300 mb-2">Trade Legs:</div>
+                          <div className="grid gap-2">
+                            {strategy.legs.slice(0, 4).map((leg, legIndex) => (
+                              <div key={legIndex} className="text-xs bg-gray-800 rounded p-2 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className={`px-2 py-1 rounded text-xs ${
+                                    leg.action?.toUpperCase() === 'BUY' ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+                                  }`}>
+                                    {leg.action?.toUpperCase() || 'BUY'}
+                                  </span>
+                                  <span className="text-white font-mono">
+                                    {leg.strike !== 'N/A' ? `$${leg.strike}` : 'Stock'} {leg.optionType || leg.type || 'CALL'}
+                                  </span>
+                                </div>
+                                <div className="text-gray-400">
+                                  {leg.expiry} | x{leg.quantity || 1}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Action Buttons */}
+                      <div className="flex gap-3 justify-end">
+                        <button className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-sm font-semibold flex items-center gap-2">
+                          <BarChart3 className="w-4 h-4" />
+                          View Analysis
+                        </button>
                         <button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-semibold flex items-center gap-2">
                           <TrendingUp className="w-4 h-4" />
                           Execute Trade

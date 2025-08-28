@@ -30,7 +30,8 @@ export default async function handler(req, res) {
       riskTolerance = 'moderate-aggressive', // Enhanced default
       maxInvestment = 10000,
       targetDTE = { min: 30, max: 45 }, // DTE targeting
-      precisionMode = true // Enable enhanced calculations
+      precisionMode = true, // Enable enhanced calculations
+      squeezeContext = null // NEW: Squeeze scanner context
     } = req.body;
 
     if (!symbols || !Array.isArray(symbols) || symbols.length === 0) {
@@ -39,9 +40,12 @@ export default async function handler(req, res) {
       });
     }
 
-    console.log(`🔍 ENHANCED ANALYSIS: ${symbols.length} symbols through 15+ strategies...`);
+    console.log(`🔍 ENHANCED ANALYSIS: ${symbols.length} symbols through 10 comprehensive strategies...`);
     console.log(`📊 Parameters: maxTrades=${maxTrades}, minProb=${minProbability}%, risk=${riskTolerance}`);
-    console.log(`🎯 DTE Target: ${targetDTE.min}-${targetDTE.max} days, Precision Mode: ${precisionMode}`);  
+    console.log(`🎯 DTE Target: ${targetDTE.min}-${targetDTE.max} days, Precision Mode: ${precisionMode}`);
+    if (squeezeContext) {
+      console.log(`🟢 SQUEEZE CONTEXT: Holy Grail ${squeezeContext.holyGrail}, Squeeze ${squeezeContext.squeeze}, Momentum ${squeezeContext.momentum}`);
+    }  
 
     const actionableTrades = [];
     const analysisResults = [];
@@ -54,13 +58,14 @@ export default async function handler(req, res) {
         // Get current market data for the symbol
         const marketData = await getMarketData(symbol);
         
-        // Analyze through all 15+ strategies with enhanced precision
+        // Analyze through all 10 comprehensive strategies with squeeze context
         const strategies = await analyzeAllStrategies(symbol, marketData, {
           riskTolerance,
           maxInvestment,
           minProbability,
           targetDTE,
-          precisionMode
+          precisionMode,
+          squeezeContext // Pass squeeze context for intelligent strategy selection
         });
         
         // Rank strategies by AI scoring
@@ -216,10 +221,16 @@ try {
   };
 }
 
-// Analyze symbol through comprehensive strategy system
+// Analyze symbol through comprehensive strategy system with squeeze integration
 async function analyzeAllStrategies(symbol, marketData, config) {
-  // Use comprehensive strategy system
-  const strategyKeys = Object.keys(ALL_STRATEGIES);
+  // Use comprehensive strategy system with squeeze-based filtering
+  let strategyKeys = Object.keys(ALL_STRATEGIES);
+  
+  // INTELLIGENT STRATEGY FILTERING based on squeeze context
+  if (config.squeezeContext) {
+    strategyKeys = filterStrategiesBySqueezeContext(strategyKeys, config.squeezeContext, marketData);
+    console.log(`🎯 SQUEEZE-FILTERED STRATEGIES: ${strategyKeys.length} selected based on Holy Grail ${config.squeezeContext.holyGrail}`);
+  }
   
   console.log(`🚀 COMPREHENSIVE ANALYSIS: ${strategyKeys.length} strategies for ${symbol}`);
   console.log(`📊 Strategies:`, strategyKeys.join(', '));
@@ -256,10 +267,10 @@ async function analyzeAllStrategies(symbol, marketData, config) {
   return results;
 }
 
-// COMPREHENSIVE strategy analysis using user's strategy system
+// COMPREHENSIVE strategy analysis using user's strategy system with squeeze context
 async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config) {
   const { price, impliedVolatility, change, volume, beta, greeks, earnings } = marketData;
-  const { riskTolerance, maxInvestment, targetDTE, precisionMode } = config;
+  const { riskTolerance, maxInvestment, targetDTE, precisionMode, squeezeContext } = config;
   
   // Use comprehensive strategy data
   const strategyData = strategy;
@@ -272,42 +283,73 @@ async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config
   const expirationDate = getExpirationDate(optimalDTE);
   const riskFreeRate = 0.0525; // Current Fed rate
   
-  // AI-powered probability calculation
+  // AI-powered probability calculation with squeeze integration
   let baseProbability = 50;
+  
+  // SQUEEZE BOOST: Enhance probability based on Holy Grail score
+  if (squeezeContext) {
+    const holyGrail = parseInt(squeezeContext.holyGrail || 0);
+    const momentum = parseFloat(squeezeContext.momentum || 0);
+    
+    // Holy Grail score boost (0-100 scale)
+    if (holyGrail >= 80) baseProbability += 15; // Strong squeeze signal
+    else if (holyGrail >= 60) baseProbability += 10; // Moderate squeeze
+    else if (holyGrail >= 40) baseProbability += 5; // Weak squeeze
+    
+    // Momentum alignment bonus
+    if (Math.abs(momentum) > 2) baseProbability += 5; // Strong momentum
+    else if (Math.abs(momentum) > 1) baseProbability += 3; // Moderate momentum
+    
+    console.log(`    🟢 SQUEEZE BOOST: Holy Grail ${holyGrail} -> +${holyGrail >= 80 ? 15 : holyGrail >= 60 ? 10 : holyGrail >= 40 ? 5 : 0} probability`);
+  }
   
   // Adjust based on strategy and market conditions
   switch (strategyKey) {
-    case 'straddle':
-    case 'strangle':
+    case 'longStraddle':
+    case 'longStrangle':
       // High volatility favors long volatility strategies
       baseProbability += (impliedVolatility - 0.25) * 100;
       baseProbability += Math.abs(change) * 5; // Recent movement
+      // Squeeze bonus for volatility plays
+      if (squeezeContext && parseInt(squeezeContext.holyGrail) >= 70) baseProbability += 8;
       break;
       
-    case 'shortStraddle':
-    case 'shortStrangle':
-      // Low volatility favors short volatility strategies
-      baseProbability += (0.25 - impliedVolatility) * 100;
-      baseProbability -= Math.abs(change) * 3;
+    case 'bullCallSpread':
+    case 'bullPutSpread':
+      // Bullish spreads favor upward momentum + squeeze
+      baseProbability += change > 0 ? change * 10 : -Math.abs(change) * 2;
+      if (squeezeContext) {
+        const momentum = parseFloat(squeezeContext.momentum || 0);
+        if (momentum > 1) baseProbability += 12; // Strong bullish momentum
+      }
+      break;
+      
+    case 'bearCallSpread':
+    case 'bearPutSpread':
+      // Bearish spreads favor downward momentum
+      baseProbability += change < 0 ? Math.abs(change) * 10 : -change * 2;
+      if (squeezeContext) {
+        const momentum = parseFloat(squeezeContext.momentum || 0);
+        if (momentum < -1) baseProbability += 12; // Strong bearish momentum
+      }
       break;
       
     case 'ironCondor':
     case 'ironButterfly':
-      // Range-bound strategies favor low volatility
+      // Range-bound strategies favor low volatility but benefit from squeeze setup
       baseProbability += (0.30 - impliedVolatility) * 80;
       baseProbability -= Math.abs(change) * 4;
-      break;
-      
-    case 'callSpread':
-    case 'putSpread':
-      // Directional spreads favor momentum
-      baseProbability += change > 0 ? change * 8 : Math.abs(change) * 4;
+      // Squeeze can indicate upcoming breakout, good for neutral strategies before move
+      if (squeezeContext && parseInt(squeezeContext.holyGrail) >= 60) baseProbability += 6;
       break;
       
     case 'coveredCall':
+    case 'cashSecuredPut':
       // Income strategies favor stable, dividend stocks
       baseProbability += volume > 10000000 ? 10 : 0; // High volume bonus
       baseProbability += beta < 1.2 ? 8 : 0; // Low beta bonus
+      // Squeeze indicates potential movement, slightly reduce for income strategies
+      if (squeezeContext && parseInt(squeezeContext.holyGrail) >= 70) baseProbability -= 3;
       break;
   }
   
@@ -369,12 +411,7 @@ async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config
     entryDate: new Date().toISOString().split('T')[0],
     timeDecay: calculateEnhancedTimeDecay(strategyKey, optimalDTE, greeks),
     greeks: strategyData.greeks || greeks || {},
-    legs: strategy.generateLegs ? strategy.generateLegs({
-      price,
-      contracts: Math.round(positionSize / (price * 100)),
-      expiry: expirationDate,
-      volatility: impliedVolatility
-    }) : [], // Use comprehensive strategy legs
+    legs: generateComprehensiveLegs(strategy, price, optimalDTE, expirationDate), // Enhanced legs generation
     strikes: preciseStrikes,
     marketCondition: assessEnhancedMarketCondition(change, impliedVolatility, volume, earnings),
     earningsRisk: isEarningsRisk(earnings, optimalDTE),
@@ -383,8 +420,11 @@ async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config
     breakevens: calculateBreakevens(strategyKey, preciseStrikes, price),
     profitZone: calculateProfitZone(strategyKey, preciseStrikes, price, impliedVolatility),
     liquidityScore: calculateLiquidityScore(volume, marketData.openInterest),
-    // NEW: AI reasoning from comprehensive strategy
-    aiReasoning: strategyData.aiReasoning
+    // NEW: AI reasoning from comprehensive strategy with squeeze context
+    aiReasoning: enhanceAIReasoning(strategyData.aiReasoning, squeezeContext, probability),
+    // NEW: Squeeze integration metrics
+    squeezeAlignment: assessSqueezeAlignment(strategyKey, squeezeContext),
+    holyGrailBonus: squeezeContext ? Math.max(0, parseInt(squeezeContext.holyGrail) - 50) : 0
   };
 }
 
@@ -914,6 +954,128 @@ function extractStrikesFromLegs(legs) {
   return strikes;
 }
 
+// NEW: Intelligent strategy filtering based on squeeze context
+function filterStrategiesBySqueezeContext(allStrategies, squeezeContext, marketData) {
+  const holyGrail = parseInt(squeezeContext.holyGrail || 0);
+  const momentum = parseFloat(squeezeContext.momentum || 0);
+  const { impliedVolatility, change } = marketData;
+  
+  // Priority strategies based on squeeze characteristics
+  let priorityStrategies = [];
+  let secondaryStrategies = [];
+  
+  for (const strategyKey of allStrategies) {
+    // High Holy Grail (70+) - Expect breakout, favor directional and volatility
+    if (holyGrail >= 70) {
+      if (['longStraddle', 'longStrangle', 'bullCallSpread', 'bearPutSpread'].includes(strategyKey)) {
+        priorityStrategies.push(strategyKey);
+      } else if (['bullPutSpread', 'bearCallSpread'].includes(strategyKey)) {
+        secondaryStrategies.push(strategyKey);
+      }
+    }
+    // Moderate Holy Grail (40-69) - Mixed signals, favor balanced approaches
+    else if (holyGrail >= 40) {
+      if (['ironCondor', 'ironButterfly', 'bullCallSpread', 'bullPutSpread'].includes(strategyKey)) {
+        priorityStrategies.push(strategyKey);
+      } else {
+        secondaryStrategies.push(strategyKey);
+      }
+    }
+    // Low Holy Grail (<40) - Favor income and conservative strategies
+    else {
+      if (['coveredCall', 'cashSecuredPut', 'ironCondor'].includes(strategyKey)) {
+        priorityStrategies.push(strategyKey);
+      } else {
+        secondaryStrategies.push(strategyKey);
+      }
+    }
+  }
+  
+  // Add momentum-based adjustments
+  if (Math.abs(momentum) > 2) {
+    // Strong momentum - prioritize directional strategies
+    const directional = momentum > 0 
+      ? ['bullCallSpread', 'bullPutSpread']
+      : ['bearCallSpread', 'bearPutSpread'];
+    priorityStrategies = [...directional, ...priorityStrategies.filter(s => !directional.includes(s))];
+  }
+  
+  // Return combined list, prioritizing based on squeeze signals
+  const result = [...priorityStrategies, ...secondaryStrategies.slice(0, 6)].slice(0, 8);
+  
+  console.log(`    🎯 SQUEEZE FILTER: HG=${holyGrail}, Momentum=${momentum} -> Selected: ${result.join(', ')}`);
+  return result;
+}
+
+// Enhance AI reasoning with squeeze context
+function enhanceAIReasoning(baseReasoning, squeezeContext, probability) {
+  if (!squeezeContext) return baseReasoning;
+  
+  const holyGrail = parseInt(squeezeContext.holyGrail || 0);
+  const momentum = parseFloat(squeezeContext.momentum || 0);
+  
+  let enhancement = '';
+  
+  if (holyGrail >= 80) {
+    enhancement = ` 🟢 STRONG SQUEEZE SIGNAL (HG: ${holyGrail}) - High probability breakout expected!`;
+  } else if (holyGrail >= 60) {
+    enhancement = ` 🟡 MODERATE SQUEEZE (HG: ${holyGrail}) - Potential move building.`;
+  } else if (holyGrail >= 40) {
+    enhancement = ` 🟠 WEAK SQUEEZE (HG: ${holyGrail}) - Mixed signals, proceed with caution.`;
+  }
+  
+  if (Math.abs(momentum) > 2) {
+    const direction = momentum > 0 ? 'bullish' : 'bearish';
+    enhancement += ` Momentum is strongly ${direction} (${momentum.toFixed(1)}%).`;
+  }
+  
+  return baseReasoning + enhancement;
+}
+
+// Assess how well strategy aligns with squeeze signals
+function assessSqueezeAlignment(strategyKey, squeezeContext) {
+  if (!squeezeContext) return 'NEUTRAL';
+  
+  const holyGrail = parseInt(squeezeContext.holyGrail || 0);
+  const momentum = parseFloat(squeezeContext.momentum || 0);
+  
+  // Volatility strategies align well with high squeeze
+  if (['longStraddle', 'longStrangle'].includes(strategyKey)) {
+    if (holyGrail >= 70) return 'EXCELLENT';
+    if (holyGrail >= 50) return 'GOOD';
+    return 'FAIR';
+  }
+  
+  // Directional strategies need momentum alignment
+  if (['bullCallSpread', 'bullPutSpread'].includes(strategyKey)) {
+    if (momentum > 1 && holyGrail >= 60) return 'EXCELLENT';
+    if (momentum > 0 && holyGrail >= 40) return 'GOOD';
+    return 'FAIR';
+  }
+  
+  if (['bearCallSpread', 'bearPutSpread'].includes(strategyKey)) {
+    if (momentum < -1 && holyGrail >= 60) return 'EXCELLENT';
+    if (momentum < 0 && holyGrail >= 40) return 'GOOD';
+    return 'FAIR';
+  }
+  
+  // Income strategies prefer lower squeeze
+  if (['coveredCall', 'cashSecuredPut'].includes(strategyKey)) {
+    if (holyGrail < 40) return 'GOOD';
+    if (holyGrail < 60) return 'FAIR';
+    return 'POOR';
+  }
+  
+  // Neutral strategies can work in various conditions
+  if (['ironCondor', 'ironButterfly'].includes(strategyKey)) {
+    if (holyGrail >= 40 && holyGrail <= 70) return 'GOOD';
+    return 'FAIR';
+  }
+  
+  return 'NEUTRAL';
+}
+
 console.log('✅ COMPREHENSIVE Options Strategy Analyzer API loaded successfully');
 console.log('🚀 Integrated with comprehensive strategy system - 10 proven strategies');
 console.log('🎯 Enhanced Features: Precise strikes, 30-45 DTE targeting, comprehensive legs, AI reasoning');
+console.log('🟢 NEW: Squeeze Scanner Integration - Intelligent strategy filtering & probability boost');
