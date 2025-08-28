@@ -237,7 +237,7 @@ async function analyzeAllStrategies(symbol, marketData, config) {
       }
       
       console.log(`  📊 Strategy loaded: ${strategy.name} (${strategy.marketBias})`);
-      const analysis = await analyzeComprehensiveStrategy(symbol, strategyKey, strategy, marketData, config);
+      const analysis = await analyzeStrategy(symbol, strategyKey, strategy, marketData, config);
       
       if (analysis) {
         results.push(analysis);
@@ -276,7 +276,7 @@ async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config
   let baseProbability = 50;
   
   // Adjust based on strategy and market conditions
-  switch (strategyName) {
+  switch (strategyKey) {
     case 'straddle':
     case 'strangle':
       // High volatility favors long volatility strategies
@@ -332,11 +332,11 @@ async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config
   
   // ENHANCED: Precise expected returns with Greeks
   const expectedReturn = calculateEnhancedReturn(strategyKey, price, impliedVolatility, optimalDTE, greeks);
-  const maxLoss = calculatePreciseMaxLoss(strategyName, price, positionSize, optimalDTE, impliedVolatility);
-  const maxGain = calculatePreciseMaxGain(strategyName, price, positionSize, optimalDTE, impliedVolatility);
+  const maxLoss = calculatePreciseMaxLoss(strategyKey, price, positionSize, optimalDTE, impliedVolatility);
+  const maxGain = calculatePreciseMaxGain(strategyKey, price, positionSize, optimalDTE, impliedVolatility);
   
   // Enhanced strike price calculations
-  const preciseStrikes = calculatePreciseStrikes(strategyName, price, impliedVolatility, optimalDTE, greeks);
+  const preciseStrikes = calculatePreciseStrikes(strategyKey, price, impliedVolatility, optimalDTE, greeks);
   
   // AI Score combines multiple factors
   let aiScore = probability * 0.4; // 40% weight on probability
@@ -347,7 +347,7 @@ async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config
   
   return {
     strategy: strategyKey,
-    strategyName: strategyData.name,
+    strategyKey: strategyData.name,
     description: strategyData.description,
     complexity: mapRiskToComplexity(strategyData.riskLevel),
     riskProfile: riskProfile.level, // NEW: Enhanced risk classification
@@ -369,7 +369,12 @@ async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config
     entryDate: new Date().toISOString().split('T')[0],
     timeDecay: calculateEnhancedTimeDecay(strategyKey, optimalDTE, greeks),
     greeks: strategyData.greeks || greeks || {},
-    legs: comprehensiveLegs, // Use comprehensive strategy legs
+    legs: strategy.generateLegs ? strategy.generateLegs({
+      price,
+      contracts: Math.round(positionSize / (price * 100)),
+      expiry: expirationDate,
+      volatility: impliedVolatility
+    }) : [], // Use comprehensive strategy legs
     strikes: preciseStrikes,
     marketCondition: assessEnhancedMarketCondition(change, impliedVolatility, volume, earnings),
     earningsRisk: isEarningsRisk(earnings, optimalDTE),
@@ -385,7 +390,7 @@ async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config
 
 // Helper functions
 // ENHANCED: Strategy templates with risk classifications
-function getStrategyTemplate(strategyName) {
+function getStrategyTemplate(strategyKey) {
   const templates = {
     // Volatility strategies
     straddle: { name: 'Long Straddle', description: 'Profit from large moves in either direction', complexity: 'Beginner', baseRisk: 'moderate' },
@@ -417,11 +422,11 @@ function getStrategyTemplate(strategyName) {
     jadeLizard: { name: 'Jade Lizard', description: 'High probability income strategy', complexity: 'Expert', baseRisk: 'moderate-aggressive' }
   };
   
-  return templates[strategyName] || { name: strategyName, description: 'Advanced options strategy', complexity: 'Intermediate', baseRisk: 'moderate' };
+  return templates[strategyKey] || { name: strategyKey, description: 'Advanced options strategy', complexity: 'Intermediate', baseRisk: 'moderate' };
 }
 
 // ENHANCED: Sophisticated risk profiling for moderate to moderate-aggressive strategies
-function getEnhancedRiskProfile(riskTolerance, strategyName, marketData) {
+function getEnhancedRiskProfile(riskTolerance, strategyKey, marketData) {
   const { price, impliedVolatility, volume, beta } = marketData;
   
   const riskProfiles = {
@@ -450,7 +455,7 @@ function getEnhancedRiskProfile(riskTolerance, strategyName, marketData) {
   if (beta > 1.3) marketAdjustment *= 0.95; // Reduce for high beta stocks
   
   const baseProfile = riskProfiles[riskTolerance] || riskProfiles['moderate'];
-  const strategyAdj = strategyRiskAdjustments[strategyName] || 1.0;
+  const strategyAdj = strategyRiskAdjustments[strategyKey] || 1.0;
   
   return {
     level: baseProfile.level,
@@ -461,7 +466,7 @@ function getEnhancedRiskProfile(riskTolerance, strategyName, marketData) {
 }
 
 // ENHANCED: Kelly Criterion with strategy-specific odds
-function calculateKellyFraction(probability, strategyName) {
+function calculateKellyFraction(probability, strategyKey) {
   const winProb = probability / 100;
   const lossProb = 1 - winProb;
   
@@ -472,16 +477,16 @@ function calculateKellyFraction(probability, strategyName) {
     'callSpread': 2.0, 'putSpread': 2.0, 'ratio': 1.8, 'backspread': 5.0
   };
   
-  const odds = strategyOdds[strategyName] || 2.0;
+  const odds = strategyOdds[strategyKey] || 2.0;
   const kelly = (odds * winProb - lossProb) / odds;
   
   // Enhanced position sizing with moderate-aggressive caps
-  const maxFraction = strategyName.includes('short') ? 0.08 : 0.15; // Lower for short strategies
+  const maxFraction = strategyKey.includes('short') ? 0.08 : 0.15; // Lower for short strategies
   return Math.max(0, Math.min(maxFraction, kelly));
 }
 
 // ENHANCED: Precise DTE calculations for 30-45 day targeting
-function calculateOptimalDTE(strategyName, targetDTE, earnings) {
+function calculateOptimalDTE(strategyKey, targetDTE, earnings) {
   const { min, max } = targetDTE;
   const earningsDate = new Date(earnings);
   const today = new Date();
@@ -499,7 +504,7 @@ function calculateOptimalDTE(strategyName, targetDTE, earnings) {
     'coveredCall': { preferred: 30, avoidEarnings: false }
   };
   
-  const pref = strategyPreferences[strategyName] || { preferred: 35, avoidEarnings: true };
+  const pref = strategyPreferences[strategyKey] || { preferred: 35, avoidEarnings: true };
   let optimalDTE = pref.preferred;
   
   // Avoid earnings if strategy prefers it and earnings are within window
@@ -524,7 +529,7 @@ function getExpirationDate(dte) {
 }
 
 // ENHANCED: Expected return with Greeks integration
-function calculateEnhancedReturn(strategyName, price, iv, dte, greeks) {
+function calculateEnhancedReturn(strategyKey, price, iv, dte, greeks) {
   const baseReturn = price * 0.025; // 2.5% enhanced base
   const volatilityComponent = iv * price * 0.12;
   const timeComponent = (45 - dte) / 45 * price * 0.015;
@@ -541,7 +546,7 @@ function calculateEnhancedReturn(strategyName, price, iv, dte, greeks) {
 }
 
 // ENHANCED: Precise max loss calculations
-function calculatePreciseMaxLoss(strategyName, price, positionSize, dte, iv) {
+function calculatePreciseMaxLoss(strategyKey, price, positionSize, dte, iv) {
   // Enhanced loss calculations with time and volatility factors
   const baseLossRatios = {
     'straddle': 0.75, 'strangle': 0.65, 'ironCondor': 0.35,
@@ -550,7 +555,7 @@ function calculatePreciseMaxLoss(strategyName, price, positionSize, dte, iv) {
     'calendar': 0.6, 'diagonal': 0.7, 'backspread': 0.4
   };
   
-  const baseRatio = baseLossRatios[strategyName] || 0.5;
+  const baseRatio = baseLossRatios[strategyKey] || 0.5;
   
   // Time and volatility adjustments
   const timeAdjustment = 1 + (dte - 37.5) / 100; // Adjust for DTE variance from mid-point
@@ -561,7 +566,7 @@ function calculatePreciseMaxLoss(strategyName, price, positionSize, dte, iv) {
 }
 
 // ENHANCED: Precise max gain calculations
-function calculatePreciseMaxGain(strategyName, price, positionSize, dte, iv) {
+function calculatePreciseMaxGain(strategyKey, price, positionSize, dte, iv) {
   const baseGainRatios = {
     'straddle': 3.5, 'strangle': 2.8, 'ironCondor': 0.9,
     'shortStraddle': 0.25, 'shortStrangle': 0.35, 'ratio': 0.7,
@@ -569,7 +574,7 @@ function calculatePreciseMaxGain(strategyName, price, positionSize, dte, iv) {
     'calendar': 1.2, 'diagonal': 1.4, 'backspread': 5.0
   };
   
-  const baseRatio = baseGainRatios[strategyName] || 1.0;
+  const baseRatio = baseGainRatios[strategyKey] || 1.0;
   
   // Enhanced gain potential with market factors
   const timeBonus = (45 - dte) / 45 * 0.2; // More time = less bonus for long positions
@@ -579,14 +584,14 @@ function calculatePreciseMaxGain(strategyName, price, positionSize, dte, iv) {
 }
 
 // ENHANCED: Precise strike calculations based on market data and Greeks
-function calculatePreciseStrikes(strategyName, price, iv, dte, greeks) {
+function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
   const atm = Math.round(price);
   const priceMove = price * iv * Math.sqrt(dte / 365); // Expected 1-sigma move
   
   // Strategy-specific strike calculations
   const strikes = {};
   
-  switch (strategyName) {
+  switch (strategyKey) {
     case 'straddle':
       strikes.call = atm;
       strikes.put = atm;
@@ -626,14 +631,14 @@ function calculatePreciseStrikes(strategyName, price, iv, dte, greeks) {
 }
 
 // ENHANCED: Time decay with Greeks integration
-function calculateEnhancedTimeDecay(strategyName, dte, greeks) {
+function calculateEnhancedTimeDecay(strategyKey, dte, greeks) {
   const baseDecayRates = {
     'straddle': -0.025, 'strangle': -0.022, 'calendar': 0.015,
     'shortStraddle': 0.035, 'shortStrangle': 0.028, 'coveredCall': 0.018,
     'ironCondor': 0.012, 'diagonal': 0.008
   };
   
-  let decay = baseDecayRates[strategyName] || -0.015;
+  let decay = baseDecayRates[strategyKey] || -0.015;
   
   // Theta acceleration as expiration approaches
   if (dte < 21) {
@@ -649,10 +654,10 @@ function calculateEnhancedTimeDecay(strategyName, dte, greeks) {
 }
 
 // ENHANCED: Precise option legs with calculated strikes and dates
-function generatePreciseOptionLegs(strategyName, price, strikes, dte, expirationDate) {
+function generatePreciseOptionLegs(strategyKey, price, strikes, dte, expirationDate) {
   const legs = [];
   
-  switch (strategyName) {
+  switch (strategyKey) {
     case 'straddle':
       legs.push(
         { type: 'call', action: 'buy', strike: strikes.call, expiry: expirationDate, dte, quantity: 1, premium: estimatePremium('call', strikes.call, price, dte) },
@@ -755,10 +760,10 @@ function getEnhancedRecommendation(probability, riskProfile, aiScore) {
 }
 
 // Calculate breakeven points
-function calculateBreakevens(strategyName, strikes, price) {
+function calculateBreakevens(strategyKey, strikes, price) {
   const breakevens = [];
   
-  switch (strategyName) {
+  switch (strategyKey) {
     case 'straddle':
       breakevens.push(strikes.call + 2, strikes.put - 2); // Simplified with premium estimate
       break;
@@ -776,10 +781,10 @@ function calculateBreakevens(strategyName, strikes, price) {
 }
 
 // Calculate profit zone range
-function calculateProfitZone(strategyName, strikes, price, iv) {
+function calculateProfitZone(strategyKey, strikes, price, iv) {
   const priceMove = price * iv * 0.5; // Simplified profit zone calculation
   
-  switch (strategyName) {
+  switch (strategyKey) {
     case 'ironCondor':
       return { lower: strikes.sellPut + 1, upper: strikes.sellCall - 1 };
     case 'shortStrangle':
