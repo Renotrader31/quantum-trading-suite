@@ -477,69 +477,80 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                 {actionableTrades.length > 0 ? (
                   <div className="space-y-4">
                     {actionableTrades.map((trade, index) => (
-                      <div key={index} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                        <div className="grid grid-cols-7 gap-4 items-center">
+                      <div key={index} className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+                        {/* Header Row with Symbol and Action Button */}
+                        <div className="flex justify-between items-start mb-4">
                           <div>
-                            <div className="font-bold text-lg text-blue-400">{trade.symbol}</div>
-                            <div className="text-sm text-gray-400">{trade.strategyName}</div>
+                            <div className="font-bold text-2xl text-blue-400">{trade.symbol}</div>
+                            <div className="text-lg text-gray-300">{trade.strategyName || trade.strategy}</div>
                           </div>
-                          
-                          <div className="text-center">
-                            <div className={`text-lg font-bold ${getProbabilityColor(trade.probability)}`}>
+                          <button
+                            onClick={() => handleSelectAndTrack(trade)}
+                            disabled={processingTrade === trade.symbol}
+                            className={`px-6 py-3 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 ${
+                              processingTrade === trade.symbol
+                                ? 'bg-yellow-600 text-white cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700 text-white'
+                            }`}
+                          >
+                            {processingTrade === trade.symbol ? (
+                              <>
+                                <RefreshCw className="w-4 h-4 animate-spin" />
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <Target className="w-4 h-4" />
+                                Select Trade
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        {/* Metrics Grid */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+                          <div className="text-center bg-gray-700 rounded-lg p-3">
+                            <div className={`text-xl font-bold ${getProbabilityColor(trade.probability)}`}>
                               {trade.probability}%
                             </div>
                             <div className="text-xs text-gray-400">Probability</div>
                           </div>
                           
-                          <div className="text-center">
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${getMLScoreColor(trade.mlScore || trade.aiScore)}`}>
+                          <div className="text-center bg-gray-700 rounded-lg p-3">
+                            <div className={`text-xl font-bold px-2 py-1 rounded text-white ${getMLScoreColor(trade.mlScore || trade.aiScore).split(' ')[0]}`}>
                               {trade.mlScore || trade.aiScore}
-                            </span>
+                            </div>
                             <div className="text-xs text-gray-400 mt-1">
                               {trade.mlScore ? 'ML Score' : 'AI Score'}
                             </div>
                           </div>
                           
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-green-400">
+                          <div className="text-center bg-gray-700 rounded-lg p-3">
+                            <div className="text-xl font-bold text-green-400">
                               {formatCurrency(trade.expectedReturn)}
                             </div>
                             <div className="text-xs text-gray-400">Expected Return</div>
                           </div>
                           
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-red-400">
+                          <div className="text-center bg-gray-700 rounded-lg p-3">
+                            <div className="text-xl font-bold text-red-400">
                               {formatCurrency(trade.maxLoss)}
                             </div>
                             <div className="text-xs text-gray-400">Max Loss</div>
                           </div>
                           
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-yellow-400">
+                          <div className="text-center bg-gray-700 rounded-lg p-3">
+                            <div className="text-xl font-bold text-yellow-400">
                               {trade.riskReward?.toFixed(1)}:1
                             </div>
                             <div className="text-xs text-gray-400">Risk:Reward</div>
                           </div>
-                          
-                          <div className="text-center">
-                            <button
-                              onClick={() => handleSelectAndTrack(trade)}
-                              disabled={processingTrade === trade.symbol}
-                              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                                processingTrade === trade.symbol
-                                  ? 'bg-yellow-600 text-white cursor-not-allowed'
-                                  : 'bg-green-600 hover:bg-green-700'
-                              }`}
-                            >
-                              {processingTrade === trade.symbol ? (
-                                <div className="flex items-center gap-1">
-                                  <RefreshCw className="w-3 h-3 animate-spin" />
-                                  Processing...
-                                </div>
-                              ) : (
-                                'Select & Track'
-                              )}
-                            </button>
+
+                          <div className="text-center bg-gray-700 rounded-lg p-3">
+                            <div className="text-xl font-bold text-purple-400">
+                              ${trade.positionSize || 1000}
+                            </div>
+                            <div className="text-xs text-gray-400">Position Size</div>
                           </div>
                         </div>
                         
