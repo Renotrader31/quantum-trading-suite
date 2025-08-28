@@ -430,8 +430,9 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
           <div className="p-6">
             {/* Debug Tab Indicator */}
             <div className="mb-4 text-xs text-gray-500 bg-gray-800 p-2 rounded">
-              Active: <span className="text-purple-400 font-bold">{selectedTab}</span> | 
-              Available: overview, trades, ensemble, risk, squeeze, ml, config
+              🔄 Active Tab: <span className="text-purple-400 font-bold">{selectedTab}</span> | 
+              📋 Available: overview, trades, ensemble, risk, squeeze, ml, config | 
+              ⏰ Updated: {new Date().toLocaleTimeString()}
             </div>
             {selectedTab === 'overview' && (
               <div className="space-y-6">
