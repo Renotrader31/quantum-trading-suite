@@ -14,10 +14,10 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
   const [pipelineResults, setPipelineResults] = useState(null);
   const [actionableTrades, setActionableTrades] = useState([]);
   const [pipelineConfig, setPipelineConfig] = useState({
-    squeezeThreshold: 75,
-    holyGrailThreshold: 65,
+    squeezeThreshold: 50, // Lowered from 75 to 50 for more candidates
+    holyGrailThreshold: 40, // Lowered from 65 to 40 for more candidates
     maxSymbols: 8,
-    maxTrades: 4,
+    maxTrades: 6, // Increased from 4 to 6 for more variety
     riskTolerance: 'moderate',
     maxInvestment: 10000,
     enableMLLearning: true,

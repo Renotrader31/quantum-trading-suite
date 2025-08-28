@@ -77,13 +77,32 @@ export default async function handler(req, res) {
       console.log(`✅ Squeeze Scanner: ${candidates.length} candidates from ${squeezeResults.results.length} scanned`);
 
       if (candidates.length === 0) {
-        return res.json({
-          success: true,
-          pipeline,
-          message: 'No candidates met squeeze criteria',
-          actionableTrades: [],
-          mlData: []
-        });
+        console.log(`⚠️ No candidates found with squeeze≥${squeezeThreshold} and holyGrail≥${holyGrailThreshold}`);
+        console.log(`📊 Available stocks:`, squeezeResults.results.slice(0, 3).map(s => ({
+          symbol: s.symbol, 
+          squeeze: s.squeeze, 
+          holyGrail: s.holyGrail
+        })));
+        
+        // Try with lower thresholds as fallback
+        const relaxedCandidates = squeezeResults.results
+          .filter(stock => stock.squeeze >= 30 && stock.holyGrail >= 25)
+          .sort((a, b) => b.holyGrail - a.holyGrail)
+          .slice(0, maxSymbols);
+          
+        if (relaxedCandidates.length > 0) {
+          console.log(`🔄 Using ${relaxedCandidates.length} candidates with relaxed thresholds`);
+          // Continue with relaxed candidates
+          candidates.push(...relaxedCandidates);
+        } else {
+          return res.json({
+            success: true,
+            pipeline,
+            message: 'No candidates met squeeze criteria even with relaxed thresholds',
+            actionableTrades: [],
+            mlData: []
+          });
+        }
       }
 
       // Step 2: Analyze through Options Strategy Generator
@@ -357,11 +376,11 @@ function assessRiskLevel(trade) {
 
 // Fallback mock data generators
 function generateMockSqueezeData(maxSymbols) {
-  const symbols = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA', 'AMD', 'META', 'AMZN'];
+  const symbols = ['AAPL', 'MSFT', 'GOOGL', 'TSLA', 'NVDA', 'AMD', 'META', 'AMZN', 'PLTR', 'COIN'];
   const results = symbols.slice(0, maxSymbols).map(symbol => ({
     symbol,
-    holyGrail: 60 + Math.random() * 35,
-    squeeze: 70 + Math.random() * 25,
+    holyGrail: 45 + Math.random() * 50, // Range: 45-95 (more likely to pass thresholds)
+    squeeze: 55 + Math.random() * 40, // Range: 55-95 (more likely to pass thresholds)
     gamma: 1 + Math.random() * 8,
     flow: 40 + Math.random() * 50,
     price: 100 + Math.random() * 400
@@ -371,33 +390,57 @@ function generateMockSqueezeData(maxSymbols) {
 }
 
 function generateMockOptionsData(symbols, params) {
-  const strategies = ['straddle', 'strangle', 'ironCondor', 'callSpread'];
+  const strategies = [
+    { key: 'straddle', name: 'Long Straddle' },
+    { key: 'strangle', name: 'Long Strangle' },
+    { key: 'ironCondor', name: 'Iron Condor' },
+    { key: 'callSpread', name: 'Bull Call Spread' },
+    { key: 'putSpread', name: 'Bear Put Spread' },
+    { key: 'butterfly', name: 'Iron Butterfly' }
+  ];
+  
   const actionableTrades = [];
   
   symbols.forEach(symbol => {
-    strategies.slice(0, 2).forEach(strategy => {
+    // Generate 2-3 strategies per symbol
+    const numStrategies = Math.min(strategies.length, 2 + Math.floor(Math.random() * 2));
+    const selectedStrategies = strategies.slice(0, numStrategies);
+    
+    selectedStrategies.forEach(strategy => {
+      const maxLoss = -(500 + Math.random() * 1500); // -$500 to -$2000
+      const maxGain = Math.abs(maxLoss) * (1.5 + Math.random() * 2); // 1.5x to 3.5x return
+      const expectedReturn = maxGain * 0.3 + Math.random() * maxGain * 0.4; // 30-70% of max gain
+      
       actionableTrades.push({
         symbol,
-        strategy,
-        strategyName: strategy.charAt(0).toUpperCase() + strategy.slice(1),
-        probability: 60 + Math.random() * 30,
-        aiScore: 50 + Math.random() * 40,
-        expectedReturn: 500 + Math.random() * 2000,
-        maxLoss: -(200 + Math.random() * 1000),
-        maxGain: 1000 + Math.random() * 3000,
-        positionSize: Math.round(params.maxInvestment * 0.1),
-        riskReward: 1.5 + Math.random() * 2
+        strategy: strategy.key,
+        strategyKey: strategy.key,
+        strategyName: strategy.name,
+        probability: 55 + Math.random() * 35, // 55-90% range
+        aiScore: 60 + Math.random() * 35, // 60-95% range
+        expectedReturn: Math.round(expectedReturn),
+        maxLoss: Math.round(maxLoss),
+        maxGain: Math.round(maxGain),
+        positionSize: Math.round(params.maxInvestment * 0.08 + Math.random() * params.maxInvestment * 0.12), // 8-20% of max investment
+        riskReward: parseFloat((Math.abs(expectedReturn / maxLoss)).toFixed(2)),
+        dte: 21 + Math.floor(Math.random() * 35), // 21-56 days
+        strikes: [Math.round(150 + Math.random() * 300)], // Strike prices
+        currentPrice: Math.round(140 + Math.random() * 320),
+        holyGrail: 45 + Math.random() * 40, // Match squeeze data range
+        sector: ['Technology', 'Healthcare', 'Finance', 'Consumer'][Math.floor(Math.random() * 4)]
       });
     });
   });
   
   return {
     success: true,
-    actionableTrades: actionableTrades.sort((a, b) => b.aiScore - a.aiScore).slice(0, params.maxTrades),
+    actionableTrades: actionableTrades
+      .sort((a, b) => b.aiScore - a.aiScore)
+      .slice(0, params.maxTrades || 6),
     summary: {
       symbolsAnalyzed: symbols.length,
-      averageProbability: '70.5',
-      averageAIScore: '75.2'
+      averageProbability: '72.3',
+      averageAIScore: '78.5'
     }
   };
 }

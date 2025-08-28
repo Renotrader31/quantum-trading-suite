@@ -637,6 +637,122 @@
         "status": "ACTIVE",
         "createdAt": "2025-08-28T20:23:32.041Z"
       }
+    ],
+    [
+      "INTC_undefined_mevvaqq5_381nx",
+      {
+        "id": "INTC_undefined_mevvaqq5_381nx",
+        "symbol": "INTC",
+        "strategy": "Long Strangle",
+        "entryDate": "2025-08-28T20:39:43.565Z",
+        "entryPrice": 24.93,
+        "strikes": {
+          "primary": 402
+        },
+        "expiration": "2025-10-03",
+        "dte": 30,
+        "positionSize": 1500,
+        "maxLoss": -719.97,
+        "maxGain": 38.76,
+        "mlContext": {
+          "squeezeContext": {
+            "holyGrail": 84,
+            "squeeze": 92,
+            "gamma": 0.037,
+            "flow": 85,
+            "gex": 914640,
+            "darkPool": {
+              "ratio": 0.16,
+              "volume": 6390969,
+              "trades": 402
+            },
+            "optionsMetrics": {
+              "totalVolume": 7647573,
+              "callVolume": 33756092,
+              "putVolume": 29123074,
+              "putCallRatio": 2.19,
+              "volumeOIRatio": 0.38,
+              "netPremium": 8365873,
+              "ivRank": 98,
+              "atmIV": 48.2,
+              "skew": 1.03,
+              "term": "CONTANGO"
+            },
+            "technicals": {
+              "rsi": 40
+            }
+          },
+          "marketConditions": {
+            "price": 24.93,
+            "volume": 59214159,
+            "change": 0.32,
+            "beta": 0.87
+          },
+          "neuralNetworkPrediction": 0,
+          "aiScore": 82,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T20:39:43.565Z"
+      }
+    ],
+    [
+      "NVDA_undefined_mevviw30_hgo1m",
+      {
+        "id": "NVDA_undefined_mevviw30_hgo1m",
+        "symbol": "NVDA",
+        "strategy": "Bear Call Spread",
+        "entryDate": "2025-08-28T20:46:03.756Z",
+        "entryPrice": 180.17,
+        "strikes": {
+          "primary": 182
+        },
+        "expiration": "2025-10-03",
+        "dte": 31,
+        "positionSize": 1500,
+        "maxLoss": -749.78,
+        "maxGain": 21.45,
+        "mlContext": {
+          "squeezeContext": {
+            "holyGrail": 88,
+            "squeeze": 94,
+            "gamma": 0.034,
+            "flow": 91,
+            "gex": 858570,
+            "darkPool": {
+              "ratio": 0.11,
+              "volume": 92800597,
+              "trades": 392
+            },
+            "optionsMetrics": {
+              "totalVolume": 30730200,
+              "callVolume": 193539549,
+              "putVolume": 77360285,
+              "putCallRatio": 2.29,
+              "volumeOIRatio": 2.95,
+              "netPremium": -8231676,
+              "ivRank": 100,
+              "atmIV": 58.4,
+              "skew": 0.99,
+              "term": "BACKWARDATION"
+            },
+            "technicals": {
+              "rsi": 40
+            }
+          },
+          "marketConditions": {
+            "price": 180.17,
+            "volume": 278310768,
+            "change": -0.79,
+            "beta": 1.65
+          },
+          "neuralNetworkPrediction": 0,
+          "aiScore": 72,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T20:46:03.756Z"
+      }
     ]
   ],
   "completedTrades": []
