@@ -32,15 +32,23 @@ export default function Home() {
   const fetchMarketData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/stocks');
+      // Use enhanced-scan API instead of stocks API to avoid polygon API key requirement
+      const response = await fetch('/api/enhanced-scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symbols: ['SPY', 'QQQ', 'IWM', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA'],
+          integrateLiveData: true
+        })
+      });
       const data = await response.json();
       
-      if (data.topMovers || data.indices) {
+      if (data.success && data.results) {
         const dataMap = {};
         
-        // Add top movers to the data map
-        if (data.topMovers && Array.isArray(data.topMovers)) {
-          data.topMovers.forEach(stock => {
+        // Add enhanced scan results to the data map
+        if (data.results && Array.isArray(data.results)) {
+          data.results.forEach(stock => {
             dataMap[stock.symbol] = {
               ...stock,
               name: stock.symbol, // AI component expects name field
@@ -48,20 +56,7 @@ export default function Home() {
           });
         }
         
-        // Add indices to the data map
-        if (data.indices) {
-          Object.entries(data.indices).forEach(([symbol, indexData]) => {
-            dataMap[symbol.toUpperCase()] = {
-              symbol: symbol.toUpperCase(),
-              name: symbol.toUpperCase(),
-              price: indexData.price,
-              change: indexData.change,
-              changePercent: indexData.changePercent,
-              volume: 0,
-              sector: 'Index'
-            };
-          });
-        }
+        // Enhanced scan already includes index data (SPY, QQQ, IWM) in results
         
         setMarketData(dataMap);
         setLastUpdate(new Date().toLocaleTimeString());
