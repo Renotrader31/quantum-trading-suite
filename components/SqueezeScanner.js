@@ -13,7 +13,7 @@ import {
 // Configuration - Update this when you deploy to Vercel
 const API_BASE_URL = ''; // Leave empty for same-origin requests
 
-export default function ProfessionalScannerWithVercel() {
+export default function SqueezeScanner({ marketData, loading: propsLoading, onRefresh, lastUpdate: propsLastUpdate }) {
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [scanning, setScanning] = useState(false);
@@ -34,21 +34,38 @@ export default function ProfessionalScannerWithVercel() {
   const eventSourceRef = useRef(null);
   const refreshIntervalRef = useRef(null);
 
-  // Advanced filters - Fixed to show more stocks
+  // Advanced filters - Adjusted for better results
   const [advancedFilters, setAdvancedFilters] = useState({
-    minHolyGrail: 10,  // Lowered from 70 to 10
-    minUnusual: 1,     // Lowered from 2 to 1  
-    minSweeps: 1,
-    minFlow: 20,       // Lowered from 60 to 20
-    minGamma: 2,       // Lowered from 5 to 2
-    maxDTC: 15,        // Raised from 10 to 15
-    minShortInterest: 10  // Lowered from 15 to 10
+    minHolyGrail: 10,  // Allow lower scores to show more results
+    minUnusual: 1,     // Lower threshold for unusual activity  
+    minSweeps: 0,      // Allow stocks without sweeps
+    minFlow: 20,       // Lower flow threshold
+    minGamma: 1,       // Lower gamma threshold
+    maxDTC: 20,        // Higher DTC allowance
+    minShortInterest: 5  // Lower short interest threshold
   });
 
   // Initialize client-side rendering
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Integrate with existing market data from Dashboard
+  useEffect(() => {
+    if (marketData && Object.keys(marketData).length > 0 && stocks.length === 0) {
+      console.log('🔄 Integrating with existing market data:', Object.keys(marketData).length, 'symbols');
+      
+      // Pre-populate scanner with market data symbols for quick analysis
+      const symbolsToScan = Object.keys(marketData).filter(symbol => 
+        !['SPY', 'QQQ', 'IWM', 'VIX'].includes(symbol) // Exclude indices
+      );
+      
+      if (symbolsToScan.length > 0) {
+        console.log('📊 Suggesting symbols for squeeze analysis:', symbolsToScan.slice(0, 5));
+        // You could auto-scan these symbols or just show a suggestion
+      }
+    }
+  }, [marketData, stocks]);
 
   // Connect to SSE stream for real-time updates
   const connectToStream = useCallback(() => {
@@ -137,7 +154,7 @@ export default function ProfessionalScannerWithVercel() {
   // Scan single stock
   const scanStock = async (symbol) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/individual-scan?symbol=${symbol}`);
+      const response = await fetch(`${API_BASE_URL}/api/scan/${symbol}`);
       const result = await response.json();
       
       if (result.success) {
@@ -160,7 +177,7 @@ export default function ProfessionalScannerWithVercel() {
     setErrors([]);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/bulk-scan`, {
+      const response = await fetch(`${API_BASE_URL}/api/scan/bulk`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
