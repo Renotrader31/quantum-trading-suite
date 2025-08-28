@@ -92,6 +92,89 @@ const EnhancedOptionsStrategies = ({ marketData, loading, onRefresh, lastUpdate 
         { type: 'call', action: 'sell', strike: 0, quantity: 1, expiry: 'near' },
         { type: 'call', action: 'buy', strike: 0, quantity: 1, expiry: 'far' }
       ]
+    },
+    shortStraddle: {
+      name: 'Short Straddle',
+      description: 'Sell call and put at same strike, profit from low volatility',
+      complexity: 'Advanced',
+      aiOptimized: true,
+      legs: [
+        { type: 'call', action: 'sell', strike: 0, quantity: 1 },
+        { type: 'put', action: 'sell', strike: 0, quantity: 1 }
+      ]
+    },
+    shortStrangle: {
+      name: 'Short Strangle', 
+      description: 'Sell call and put at different strikes, collect premium',
+      complexity: 'Advanced',
+      aiOptimized: true,
+      legs: [
+        { type: 'call', action: 'sell', strike: 5, quantity: 1 },
+        { type: 'put', action: 'sell', strike: -5, quantity: 1 }
+      ]
+    },
+    ironButterfly: {
+      name: 'Iron Butterfly',
+      description: 'Sell straddle, buy protective wings, limited risk/reward',
+      complexity: 'Advanced',
+      aiOptimized: true,
+      legs: [
+        { type: 'put', action: 'buy', strike: -10, quantity: 1 },
+        { type: 'put', action: 'sell', strike: 0, quantity: 1 },
+        { type: 'call', action: 'sell', strike: 0, quantity: 1 },
+        { type: 'call', action: 'buy', strike: 10, quantity: 1 }
+      ]
+    },
+    putSpread: {
+      name: 'Bull Put Spread',
+      description: 'Sell higher strike put, buy lower strike put, bullish strategy',
+      complexity: 'Intermediate',
+      aiOptimized: true,
+      legs: [
+        { type: 'put', action: 'sell', strike: -5, quantity: 1 },
+        { type: 'put', action: 'buy', strike: -15, quantity: 1 }
+      ]
+    },
+    callSpread: {
+      name: 'Bull Call Spread',
+      description: 'Buy lower strike call, sell higher strike call, limited upside',
+      complexity: 'Intermediate', 
+      aiOptimized: true,
+      legs: [
+        { type: 'call', action: 'buy', strike: 0, quantity: 1 },
+        { type: 'call', action: 'sell', strike: 10, quantity: 1 }
+      ]
+    },
+    protectivePut: {
+      name: 'Protective Put',
+      description: 'Own stock + buy put for downside protection',
+      complexity: 'Beginner',
+      aiOptimized: true,
+      legs: [
+        { type: 'stock', action: 'buy', strike: 0, quantity: 100 },
+        { type: 'put', action: 'buy', strike: -5, quantity: 1 }
+      ]
+    },
+    collar: {
+      name: 'Protective Collar',
+      description: 'Own stock, buy put, sell call for cost reduction',
+      complexity: 'Intermediate',
+      aiOptimized: true,
+      legs: [
+        { type: 'stock', action: 'buy', strike: 0, quantity: 100 },
+        { type: 'put', action: 'buy', strike: -5, quantity: 1 },
+        { type: 'call', action: 'sell', strike: 10, quantity: 1 }
+      ]
+    },
+    ratio: {
+      name: 'Call Ratio Spread',
+      description: 'Buy 1 call, sell 2 higher strike calls, profit from moderate move',
+      complexity: 'Advanced',
+      aiOptimized: true,
+      legs: [
+        { type: 'call', action: 'buy', strike: 0, quantity: 1 },
+        { type: 'call', action: 'sell', strike: 10, quantity: 2 }
+      ]
     }
   };
 
