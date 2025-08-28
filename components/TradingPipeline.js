@@ -165,35 +165,43 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
         // 🎯 PRIORITY #2: Apply Multi-Strategy Ensemble if enabled
         if (pipelineConfig.enableEnsemble && data.actionableTrades?.length > 0) {
           console.log('🎯 Applying Multi-Strategy Ensemble optimization...');
+          console.log(`📊 Received ${data.actionableTrades.length} trades from pipeline`);
           
-          // Get current portfolio context for risk management
-          let portfolioContext = null;
           try {
-            const portfolioResponse = await fetch('/api/trade-entry?action=getActiveTrades');
-            if (portfolioResponse.ok) {
-              const portfolioData = await portfolioResponse.json();
-              portfolioContext = {
-                activeTrades: portfolioData.activeTrades || [],
-                totalAllocated: portfolioData.totalAllocated || 0
-              };
+            // Get current portfolio context for risk management
+            let portfolioContext = null;
+            try {
+              const portfolioResponse = await fetch('/api/trade-entry?action=getActiveTrades');
+              if (portfolioResponse.ok) {
+                const portfolioData = await portfolioResponse.json();
+                portfolioContext = {
+                  activeTrades: portfolioData.activeTrades || [],
+                  totalAllocated: portfolioData.totalAllocated || 0
+                };
+              }
+            } catch (portErr) {
+              console.warn('Could not fetch portfolio context:', portErr);
             }
-          } catch (portErr) {
-            console.warn('Could not fetch portfolio context:', portErr);
+            
+            // Generate ensemble recommendations
+            const ensembleOutput = await ensembleEngine.generateEnsembleRecommendations(
+              marketData || {},
+              data.actionableTrades,
+              portfolioContext
+            );
+            
+            setEnsembleResults(ensembleOutput);
+            setActionableTrades(ensembleOutput.recommendations);
+            
+            console.log(`✅ Ensemble optimization complete: ${ensembleOutput.recommendations.length} optimized trades`);
+            console.log(`📊 Market Regime: ${ensembleOutput.marketRegime.primary} (${ensembleOutput.marketRegime.confidence}% confidence)`);
+          } catch (ensembleError) {
+            console.error('❌ Ensemble processing failed, using original trades:', ensembleError);
+            // Fallback to original trades if ensemble fails
+            setActionableTrades(data.actionableTrades || []);
           }
-          
-          // Generate ensemble recommendations
-          const ensembleOutput = await ensembleEngine.generateEnsembleRecommendations(
-            marketData || {},
-            data.actionableTrades,
-            portfolioContext
-          );
-          
-          setEnsembleResults(ensembleOutput);
-          setActionableTrades(ensembleOutput.recommendations);
-          
-          console.log(`✅ Ensemble optimization complete: ${ensembleOutput.recommendations.length} optimized trades`);
-          console.log(`📊 Market Regime: ${ensembleOutput.marketRegime.primary} (${ensembleOutput.marketRegime.confidence}% confidence)`);
         } else {
+          console.log(`📊 Setting ${data.actionableTrades?.length || 0} actionable trades (ensemble disabled)`);
           setActionableTrades(data.actionableTrades || []);
         }
         
