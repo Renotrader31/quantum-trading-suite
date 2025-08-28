@@ -14,14 +14,16 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
   const [pipelineResults, setPipelineResults] = useState(null);
   const [actionableTrades, setActionableTrades] = useState([]);
   const [pipelineConfig, setPipelineConfig] = useState({
-    squeezeThreshold: 50, // Lowered from 75 to 50 for more candidates
-    holyGrailThreshold: 40, // Lowered from 65 to 40 for more candidates
-    maxSymbols: 8,
-    maxTrades: 6, // Increased from 4 to 6 for more variety
+    squeezeThreshold: 50, // Adaptive via refinement engine
+    holyGrailThreshold: 40, // Adaptive via refinement engine  
+    maxSymbols: 50, // Expanded universe for richer ML training
+    maxTrades: 6, // More variety for ensemble optimization
     riskTolerance: 'moderate',
     maxInvestment: 10000,
     enableMLLearning: true,
-    enableEnsemble: true // NEW: Enable multi-strategy ensemble
+    enableEnsemble: true, // Multi-strategy ensemble system
+    enableRefinement: true, // NEW: Real-time strategy refinement
+    universeSize: 'balanced' // NEW: Universe size control
   });
   const [selectedTab, setSelectedTab] = useState('overview');
   const [processingTrade, setProcessingTrade] = useState(null);
@@ -900,6 +902,34 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                       <label className="text-sm font-medium text-gray-300">
                         Enable Multi-Strategy Ensemble
                       </label>
+                    </div>
+                    
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={pipelineConfig.enableRefinement}
+                        onChange={(e) => setPipelineConfig({...pipelineConfig, enableRefinement: e.target.checked})}
+                        className="mr-3"
+                      />
+                      <label className="text-sm font-medium text-gray-300">
+                        Enable Real-time Strategy Refinement 🧠
+                      </label>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Stock Universe Size (📊 Priority #4 Feature)
+                      </label>
+                      <select
+                        value={pipelineConfig.universeSize}
+                        onChange={(e) => setPipelineConfig({...pipelineConfig, universeSize: e.target.value})}
+                        className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-2"
+                      >
+                        <option value="conservative">Conservative (30 stable stocks)</option>
+                        <option value="balanced">Balanced (60 diversified stocks)</option>
+                        <option value="aggressive">Aggressive (80 high-vol stocks)</option>
+                        <option value="mlTraining">ML Training (100+ diverse stocks)</option>
+                      </select>
                     </div>
                   </div>
                 </div>

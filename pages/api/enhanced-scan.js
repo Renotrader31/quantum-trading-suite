@@ -22,13 +22,30 @@ export default async function handler(req, res) {
   try {
     const { symbols, batchSize = 10, integrateLiveData = true } = req.body;
     
-    // Default symbols list with popular stocks
-    const defaultSymbols = [
-      'SPY', 'QQQ', 'IWM', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 
-      'META', 'NVDA', 'NFLX', 'AMD', 'CRM', 'PYPL', 'ADBE', 'INTC',
-      'BABA', 'V', 'MA', 'JPM', 'JNJ', 'WMT', 'PG', 'UNH', 'HD',
-      'DIS', 'VZ', 'KO', 'PFE', 'MRK', 'T', 'XOM', 'CVX', 'WFC'
-    ];
+    // Import expanded stock universe for richer ML training
+    const { ExpandedStockUniverse } = await import('../../lib/expandedStockUniverse.js');
+    const stockUniverse = new ExpandedStockUniverse();
+    
+    // Smart universe selection based on request parameters
+    const universeSize = req.body.universeSize || 'balanced'; // conservative, balanced, aggressive, mlTraining
+    const maxSymbols = req.body.maxSymbols || 50;
+    
+    let defaultSymbols;
+    switch (universeSize) {
+      case 'conservative':
+        defaultSymbols = stockUniverse.getStableSubset(Math.min(maxSymbols, 30));
+        break;
+      case 'aggressive': 
+        defaultSymbols = stockUniverse.getHighVolatilitySubset(Math.min(maxSymbols, 80));
+        break;
+      case 'mlTraining':
+        defaultSymbols = stockUniverse.getDiversifiedSample(Math.min(maxSymbols, 100));
+        break;
+      default: // balanced
+        defaultSymbols = stockUniverse.getDiversifiedSample(Math.min(maxSymbols, 60));
+    }
+    
+    console.log(`📊 Using ${universeSize} universe: ${defaultSymbols.length} symbols`);
 
     const symbolsToScan = symbols || defaultSymbols;
     const results = [];

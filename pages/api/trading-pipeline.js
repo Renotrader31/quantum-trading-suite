@@ -1,7 +1,17 @@
 // Intelligent Trading Pipeline API
-// Connects Squeeze Scanner → Options Analyzer → ML Engine
+// Connects Squeeze Scanner → Options Analyzer → ML Engine → Strategy Refinement
 
 console.log('\n=== TRADING PIPELINE API STARTUP ===');
+
+import { StrategyRefinementEngine } from '../../lib/strategyRefinementEngine.js';
+
+// Initialize strategy refinement engine
+let refinementEngine = null;
+try {
+  refinementEngine = new StrategyRefinementEngine();
+} catch (error) {
+  console.warn('⚠️ Strategy refinement engine initialization failed:', error);
+}
 
 export default async function handler(req, res) {
   console.log('\n=== TRADING PIPELINE REQUEST ===');
@@ -22,16 +32,46 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { 
+    let {
       mode = 'full_pipeline',
-      squeezeThreshold = 75,
-      holyGrailThreshold = 60,
-      maxSymbols = 10,
-      maxTrades = 4,
+      squeezeThreshold = 50,
+      holyGrailThreshold = 40,
+      maxSymbols = 50, // Increased default for expanded universe
+      maxTrades = 6,
       riskTolerance = 'moderate',
       maxInvestment = 10000,
-      enableMLLearning = true
+      enableMLLearning = true,
+      enableRefinement = true // NEW: Enable strategy refinement
     } = req.body;
+
+    // 🎯 PRIORITY #4: Apply strategy refinement optimizations
+    if (enableRefinement && refinementEngine) {
+      console.log('🧠 Applying strategy refinement optimizations...');
+      
+      const currentConfig = {
+        squeezeThreshold,
+        holyGrailThreshold,
+        maxSymbols,
+        maxTrades,
+        riskTolerance,
+        maxInvestment
+      };
+
+      try {
+        const refinedConfig = await refinementEngine.applyRefinements(currentConfig);
+        
+        // Update parameters with refined values
+        squeezeThreshold = refinedConfig.squeezeThreshold || squeezeThreshold;
+        holyGrailThreshold = refinedConfig.holyGrailThreshold || holyGrailThreshold;
+        maxSymbols = refinedConfig.maxSymbols || maxSymbols;
+        maxTrades = refinedConfig.maxTrades || maxTrades;
+        
+        console.log(`📊 Refined parameters: squeeze=${squeezeThreshold}, holyGrail=${holyGrailThreshold}, symbols=${maxSymbols}`);
+        console.log(`🎯 Refinement confidence: ${refinedConfig.refinementMetadata?.confidence || 'unknown'}`);
+      } catch (refinementError) {
+        console.warn('⚠️ Strategy refinement failed, using default parameters:', refinementError);
+      }
+    }
 
     console.log(`🚀 Running ${mode} trading pipeline...`);
     console.log(`📊 Parameters: squeeze≥${squeezeThreshold}, holyGrail≥${holyGrailThreshold}, maxSymbols=${maxSymbols}`);
@@ -49,7 +89,11 @@ export default async function handler(req, res) {
     pipeline.steps.push({ step: 1, name: 'Squeeze Scanner', status: 'running', startTime: new Date().toISOString() });
     
     try {
-      const squeezeResults = await runSqueezeScanner(maxSymbols);
+      // Determine universe size based on refinement recommendations
+      const universeSize = enableRefinement && refinementEngine ? 
+        (await refinementEngine.recommendUniverseSize()) : 'balanced';
+      
+      const squeezeResults = await runSqueezeScanner(maxSymbols, universeSize);
       
       // Filter high-quality candidates
       const candidates = squeezeResults.results
@@ -199,16 +243,18 @@ export default async function handler(req, res) {
   }
 }
 
-// Run Enhanced Squeeze Scanner
-async function runSqueezeScanner(maxSymbols) {
+// Run Enhanced Squeeze Scanner with expanded universe
+async function runSqueezeScanner(maxSymbols, universeSize = 'balanced') {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/enhanced-scan`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        symbols: undefined, // Use default symbols
-        batchSize: 10,
-        integrateLiveData: true
+        symbols: undefined, // Use expanded universe
+        batchSize: Math.min(20, maxSymbols), // Larger batches for efficiency
+        integrateLiveData: true,
+        universeSize: universeSize, // conservative, balanced, aggressive, mlTraining
+        maxSymbols: maxSymbols
       })
     });
 
