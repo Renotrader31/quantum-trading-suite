@@ -49,17 +49,30 @@ export default async function handler(req, res) {
         });
 
       case 'calculatePositionSize':
-        const { winRate, avgWin, avgLoss, impliedVolatility } = req.body;
+        const { winRate, avgWin, avgLoss, impliedVolatility = 0.25 } = req.body;
         const kellySize = riskManager.calculateKellyCriterion(winRate, avgWin, avgLoss, portfolioValue);
         const volAdjustedSize = riskManager.calculateVolatilityBasedSize(kellySize, impliedVolatility);
         
+        // Calculate additional metrics
+        const kellyPercentage = (kellySize / portfolioValue) * 100;
+        const recommendedSize = volAdjustedSize || kellySize;
+        const maxLoss = recommendedSize * (avgLoss || 0.05); // Default 5% max loss
+        
+        // Determine risk level
+        let riskLevel = 'LOW';
+        if (kellyPercentage > 20) riskLevel = 'HIGH';
+        else if (kellyPercentage > 10) riskLevel = 'MEDIUM';
+        
         return res.json({
           success: true,
-          positionSizing: {
+          positionSize: {
             kellyOptimal: kellySize,
             volatilityAdjusted: volAdjustedSize,
-            recommendedSize: Math.min(kellySize, volAdjustedSize),
-            riskPercentage: (Math.min(kellySize, volAdjustedSize) / portfolioValue * 100).toFixed(2)
+            optimalSize: recommendedSize,
+            kellyPercentage,
+            maxLoss,
+            riskLevel,
+            riskPercentage: (recommendedSize / portfolioValue * 100).toFixed(2) + '%'
           }
         });
 
