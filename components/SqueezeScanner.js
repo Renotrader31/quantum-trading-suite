@@ -396,44 +396,177 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
     }
   };
 
-  // Handle trade selection and feed to ML
+  // Handle trade selection and feed to ML with MAXIMUM data capture
   const handleTradeSelection = async (trade) => {
-    console.log(`🎯 Trade selected: ${trade.strategyKey || trade.strategyName} for ${selectedStock.symbol}`);
+    console.log(`🎯 ENHANCED TRADE SELECTION: ${trade.strategyKey || trade.strategyName} for ${selectedStock.symbol}`);
+    
+    // Calculate additional execution details
+    const currentDate = new Date();
+    const entryDate = trade.entryDate || currentDate.toISOString().split('T')[0];
+    const dte = trade.dte || 35;
+    const expirationDate = trade.expirationDate || new Date(Date.now() + (dte * 24 * 60 * 60 * 1000)).toISOString().split('T')[0];
     
     try {
-      // Feed selected trade to ML learning system
+      // Construct comprehensive trade data for maximum ML learning effectiveness
+      const enhancedTradeData = {
+        ...trade,
+        symbol: selectedStock.symbol,
+        selectionTime: new Date().toISOString(),
+        userSelectionId: `${selectedStock.symbol}_${Date.now()}`,
+        
+        // 🎯 Market Data Context
+        marketData: {
+          price: selectedStock.price,
+          volume: selectedStock.volume,
+          change: selectedStock.change,
+          changePercent: selectedStock.changePercent,
+          marketCap: selectedStock.marketCap,
+          avgVolume: selectedStock.avgVolume,
+          beta: selectedStock.beta,
+          peRatio: selectedStock.peRatio,
+          eps: selectedStock.eps,
+          dividend: selectedStock.dividend,
+          sector: selectedStock.sector,
+          industry: selectedStock.industry
+        },
+        
+        // 🔥 Comprehensive Squeeze Context  
+        squeezeContext: {
+          holyGrail: selectedStock.holyGrail,
+          squeeze: selectedStock.squeeze,
+          gamma: selectedStock.gamma,
+          flow: selectedStock.flow,
+          dix: selectedStock.dix,
+          gex: selectedStock.gex,
+          darkPool: selectedStock.darkPool,
+          shortInterest: selectedStock.shortInterest,
+          institutionalOwnership: selectedStock.institutionalOwnership,
+          optionsMetrics: selectedStock.optionsMetrics,
+          recentFlows: selectedStock.recentFlows?.slice(0, 10), // Last 10 flows
+          technicals: {
+            rsi: selectedStock.rsi,
+            macd: selectedStock.macd,
+            ema20: selectedStock.ema20,
+            sma50: selectedStock.sma50,
+            bollinger: selectedStock.bollinger,
+            vwap: selectedStock.vwap
+          }
+        },
+        
+        // 📊 Options Strategy Details
+        strategyDetails: {
+          strategyName: trade.strategyKey || trade.strategyName,
+          complexity: trade.complexity,
+          riskProfile: trade.riskProfile,
+          probability: trade.probability,
+          aiScore: trade.aiScore,
+          holyGrailBonus: trade.holyGrailBonus || 0,
+          expectedReturn: trade.expectedReturn,
+          maxLoss: trade.maxLoss,
+          riskReward: trade.riskReward,
+          positionSize: trade.positionSize,
+          marketCondition: trade.marketCondition
+        },
+        
+        // ⚡ Key Levels & Targets
+        keyLevels: {
+          support: trade.support || selectedStock.support,
+          resistance: trade.resistance || selectedStock.resistance,
+          pivot: trade.pivot || selectedStock.pivot,
+          targets: trade.targets || [],
+          stopLoss: trade.stopLoss || selectedStock.stopLoss,
+          breakevens: trade.breakevens || []
+        },
+        
+        // 📅 Trade Execution Details
+        tradeExecution: {
+          entryDate: entryDate,
+          expirationDate: expirationDate,
+          dte: dte,
+          strikes: trade.strikes || [],
+          legs: trade.legs || [],
+          contractsPerLeg: trade.contractsPerLeg || 1,
+          totalContracts: (trade.legs?.length || 1) * (trade.contractsPerLeg || 1),
+          estimatedPremium: trade.estimatedPremium || 0,
+          commission: trade.commission || 5,
+          netDebit: trade.netDebit || 0,
+          netCredit: trade.netCredit || 0
+        },
+        
+        // ⚖️ Risk Management
+        riskMetrics: {
+          maxRisk: Math.abs(trade.maxLoss || 0),
+          maxReward: trade.expectedReturn || 0,
+          riskRewardRatio: trade.riskReward || 0,
+          winProbability: trade.probability || 0,
+          kellyPercentage: trade.kellyPercentage || 0,
+          portfolioRisk: trade.portfolioRisk || 2, // Default 2% portfolio risk
+          positionSizing: 'kelly_criterion',
+          exitStrategy: trade.exitStrategy || 'profit_target_50_stop_loss_25'
+        },
+        
+        // 🧠 ML Learning Features
+        learningFeatures: {
+          timeOfDay: currentDate.getHours(),
+          dayOfWeek: currentDate.getDay(),
+          marketSession: currentDate.getHours() >= 9 && currentDate.getHours() <= 16 ? 'market_hours' : 'after_hours',
+          volatilityRegime: selectedStock.optionsMetrics?.ivRank > 50 ? 'high_iv' : 'low_iv',
+          marketTrend: selectedStock.change > 0 ? 'bullish' : 'bearish',
+          squeezeStrength: selectedStock.holyGrail >= 75 ? 'strong' : selectedStock.holyGrail >= 50 ? 'moderate' : 'weak',
+          volumeProfile: selectedStock.volume > selectedStock.avgVolume * 1.5 ? 'high_volume' : 'normal_volume',
+          gammaExposure: selectedStock.gex > 0 ? 'positive_gamma' : 'negative_gamma'
+        }
+      };
+
+      console.log('📊 Feeding comprehensive trade data to ML learning system:', {
+        symbol: selectedStock.symbol,
+        strategy: trade.strategyKey || trade.strategyName,
+        dataPoints: Object.keys(enhancedTradeData).length,
+        holyGrail: selectedStock.holyGrail,
+        probability: trade.probability
+      });
+
+      // Feed selected trade to ML learning system with maximum data
       const mlResponse = await fetch(`${API_BASE_URL}/api/ml-learning`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'user_selection',
-          trade: {
-            ...trade,
-            symbol: selectedStock.symbol,
-            selectionTime: new Date().toISOString(),
-            squeezeContext: {
-              holyGrail: selectedStock.holyGrail,
-              squeeze: selectedStock.squeeze,
-              gamma: selectedStock.gamma,
-              flow: selectedStock.flow
-            }
+          trade: enhancedTradeData,
+          meta: {
+            version: '3.0_enhanced',
+            dataQuality: 'premium',
+            completeness: 'maximum',
+            timestamp: new Date().toISOString()
           }
         })
       });
 
       if (mlResponse.ok) {
-        console.log('✅ Trade fed to ML learning system');
+        const mlResult = await mlResponse.json();
+        console.log('✅ Trade successfully fed to ML learning system:', mlResult);
         
-        // Show success notification
+        // Enhanced success notification with ML feedback
         if (typeof addAlert === 'function') {
           addAlert({
             type: 'TRADE_SELECTED',
             symbol: selectedStock.symbol,
-            message: `${trade.strategyKey || trade.strategyName} selected for ${selectedStock.symbol} - Fed to ML system`,
+            message: `🧠 ${trade.strategyKey || trade.strategyName} → ML Learning | ${selectedStock.symbol} | Accuracy: ${mlResult.accuracy || 'N/A'}% | Models trained: ${mlResult.modelsUpdated || 0}`,
             severity: 'medium',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            mlFeedback: mlResult
           });
         }
+
+        // Log ML learning effectiveness
+        console.log('🎯 ML Learning Stats:', {
+          modelsUpdated: mlResult.modelsUpdated || 0,
+          accuracy: mlResult.accuracy || 'N/A',
+          patternsLearned: mlResult.patternsLearned || 0,
+          trainingDataSize: mlResult.trainingDataSize || 0
+        });
+      } else {
+        console.warn('⚠️ ML learning API returned error status:', mlResponse.status);
       }
       
       // Close modal
@@ -443,6 +576,17 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
       console.error('❌ Error feeding trade to ML system:', error);
       // Still close the modal even if ML feeding fails
       setShowTradeModal(false);
+      
+      // Add error alert
+      if (typeof addAlert === 'function') {
+        addAlert({
+          type: 'ERROR',
+          symbol: selectedStock.symbol,
+          message: `Failed to feed ${trade.strategyKey || trade.strategyName} to ML system`,
+          severity: 'high',
+          timestamp: new Date().toISOString()
+        });
+      }
     }
   };
 
@@ -1026,10 +1170,60 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                     <div key={index} className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-blue-600 transition-colors">
                       <div className="grid grid-cols-5 gap-4 items-center">
                         <div>
-                          <div className="font-bold text-lg text-orange-400">{trade.strategyName}</div>
+                          <div className="font-bold text-lg text-orange-400">{trade.strategyKey || trade.strategyName}</div>
                           <div className="text-sm text-gray-400">{trade.description}</div>
                           <div className="text-xs text-gray-500 mt-1">
-                            Complexity: <span className="text-blue-400">{trade.complexity}</span>
+                            Complexity: <span className="text-blue-400">{trade.complexity}</span> | 
+                            DTE: <span className="text-green-400">{trade.dte || 35}</span> | 
+                            Risk: <span className="text-yellow-400">{trade.riskProfile || 'Moderate'}</span>
+                          </div>
+                          
+                          {/* Enhanced Trade Execution Details */}
+                          {trade.legs && trade.legs.length > 0 && (
+                            <div className="mt-2 text-xs">
+                              <div className="font-semibold text-gray-300 mb-1">📋 Trade Legs:</div>
+                              <div className="space-y-1">
+                                {trade.legs.slice(0, 2).map((leg, legIndex) => (
+                                  <div key={legIndex} className="bg-gray-900 rounded p-1 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                      <span className={`px-1 py-0.5 rounded text-xs ${
+                                        leg.action?.toUpperCase() === 'BUY' ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'
+                                      }`}>
+                                        {leg.action?.toUpperCase() || 'BUY'}
+                                      </span>
+                                      <span className="text-white font-mono text-xs">
+                                        {leg.strike !== 'N/A' ? `$${leg.strike}` : 'Stock'} {leg.optionType || leg.type || 'CALL'}
+                                      </span>
+                                    </div>
+                                    <div className="text-gray-400 text-xs">
+                                      {trade.expirationDate || 'TBD'}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Entry & Exit Details */}
+                          <div className="mt-2 text-xs bg-gray-900 rounded p-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <span className="text-gray-400">Entry:</span>
+                                <span className="ml-1 text-green-300">{trade.entryDate || new Date().toISOString().split('T')[0]}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-400">Expiry:</span>
+                                <span className="ml-1 text-blue-300">{trade.expirationDate || 'TBD'}</span>
+                              </div>
+                              {trade.breakevens && trade.breakevens.length > 0 && (
+                                <div className="col-span-2">
+                                  <span className="text-gray-400">Breakevens:</span>
+                                  <span className="ml-1 text-yellow-300">
+                                    {trade.breakevens.map(be => `$${be.toFixed(2)}`).join(', ')}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                         
@@ -1060,30 +1254,120 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                         <div className="text-center">
                           <button
                             onClick={() => handleTradeSelection(trade)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
+                              trade.aiScore >= 85 ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg' :
+                              trade.aiScore >= 70 ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md' :
+                              'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white'
+                            }`}
+                            title={`Feed comprehensive trade data to ML Learning System (AI Score: ${trade.aiScore || 0}/100)`}
                           >
-                            Select Trade
+                            🧠 Select & Learn
+                            <div className="text-xs opacity-75 mt-0.5">
+                              Feed to ML
+                            </div>
                           </button>
+                          
+                          {/* Enhanced feedback indicators */}
+                          <div className="flex items-center justify-center gap-1 mt-2">
+                            {trade.holyGrailBonus > 0 && (
+                              <div className="text-xs bg-green-900/50 text-green-400 px-2 py-0.5 rounded">
+                                +{trade.holyGrailBonus} HG
+                              </div>
+                            )}
+                            {trade.aiScore >= 85 && (
+                              <div className="text-xs bg-purple-900/50 text-purple-400 px-2 py-0.5 rounded">
+                                HIGH AI
+                              </div>
+                            )}
+                            {trade.probability >= 80 && (
+                              <div className="text-xs bg-blue-900/50 text-blue-400 px-2 py-0.5 rounded">
+                                HIGH P
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                       
-                      {/* Additional Trade Details */}
-                      <div className="mt-3 pt-3 border-t border-gray-700 grid grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <span className="text-gray-400">Position Size:</span>
-                          <span className="ml-2 text-white">${(trade.positionSize).toLocaleString()}</span>
+                      {/* Enhanced Trade Details */}
+                      <div className="mt-3 pt-3 border-t border-gray-700 space-y-3">
+                        {/* Primary metrics */}
+                        <div className="grid grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-400">Position Size:</span>
+                            <span className="ml-2 text-white font-semibold">${(trade.positionSize).toLocaleString()}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">Risk/Reward:</span>
+                            <span className={`ml-2 font-semibold ${
+                              trade.riskReward >= 3 ? 'text-green-400' : 
+                              trade.riskReward >= 2 ? 'text-yellow-400' : 'text-orange-400'
+                            }`}>
+                              {trade.riskReward}:1
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">AI Score:</span>
+                            <span className={`ml-2 font-semibold ${
+                              trade.aiScore >= 85 ? 'text-purple-400' : 
+                              trade.aiScore >= 70 ? 'text-blue-400' : 'text-gray-400'
+                            }`}>
+                              {trade.aiScore}/100
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">Market Condition:</span>
+                            <span className="ml-2 text-blue-400">{trade.marketCondition}</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-gray-400">Risk/Reward:</span>
-                          <span className="ml-2 text-yellow-400">{trade.riskReward}:1</span>
+                        
+                        {/* Execution Details */}
+                        <div className="bg-gray-900 rounded p-3">
+                          <div className="text-xs font-semibold text-gray-300 mb-2">📋 Execution Plan</div>
+                          <div className="grid grid-cols-3 gap-4 text-xs">
+                            <div>
+                              <span className="text-gray-400">Entry Method:</span>
+                              <span className="ml-1 text-green-300">Market Order</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Fill Target:</span>
+                              <span className="ml-1 text-blue-300">Mid Price</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Commission:</span>
+                              <span className="ml-1 text-yellow-300">~$5-15</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Profit Target:</span>
+                              <span className="ml-1 text-green-300">50% Max Profit</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Stop Loss:</span>
+                              <span className="ml-1 text-red-300">25% Max Loss</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">Kelly %:</span>
+                              <span className="ml-1 text-purple-300">{((trade.probability/100) * 0.15 * 100).toFixed(1)}%</span>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-gray-400">AI Score:</span>
-                          <span className="ml-2 text-purple-400">{trade.aiScore}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-400">Market Condition:</span>
-                          <span className="ml-2 text-blue-400">{trade.marketCondition}</span>
+                        
+                        {/* ML Learning Indicators */}
+                        <div className="bg-gradient-to-r from-purple-900/20 to-blue-900/20 rounded p-2">
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2">
+                              <span className="text-purple-400">🧠 ML Learning Value:</span>
+                              <span className={`font-semibold ${
+                                (trade.probability + (selectedStock.holyGrail || 0)) > 140 ? 'text-green-400' :
+                                (trade.probability + (selectedStock.holyGrail || 0)) > 100 ? 'text-yellow-400' : 'text-gray-400'
+                              }`}>
+                                {(trade.probability + (selectedStock.holyGrail || 0)) > 140 ? 'HIGH' :
+                                 (trade.probability + (selectedStock.holyGrail || 0)) > 100 ? 'MEDIUM' : 'STANDARD'}
+                              </span>
+                            </div>
+                            <div className="text-gray-400">
+                              Data Points: <span className="text-blue-300">25+</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
