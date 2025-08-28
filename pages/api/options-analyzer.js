@@ -218,7 +218,8 @@ async function analyzeAllStrategies(symbol, marketData, config) {
       const analysis = await analyzeStrategy(symbol, strategyName, marketData, config);
       results.push(analysis);
     } catch (error) {
-      console.error(`Error analyzing ${strategyName} for ${symbol}:`, error.message);
+      console.error(`❌ ERROR analyzing ${strategyName} for ${symbol}:`, error.message);
+      console.error(`❌ Stack trace:`, error.stack);
     }
   }
 
@@ -234,6 +235,7 @@ async function analyzeStrategy(symbol, strategyName, marketData, config) {
   const strategyData = getStrategyTemplate(strategyName);
   
   // ENHANCED: Precise DTE calculations (30-45 days targeting)
+  console.log(`  🔎 DEBUG: Starting enhanced analysis for ${strategyName}...`);
   const optimalDTE = calculateOptimalDTE(strategyName, targetDTE, earnings);
   const expirationDate = getExpirationDate(optimalDTE);
   const riskFreeRate = 0.0525; // Current Fed rate
@@ -304,7 +306,9 @@ async function analyzeStrategy(symbol, strategyName, marketData, config) {
   const maxGain = calculatePreciseMaxGain(strategyName, price, positionSize, optimalDTE, impliedVolatility);
   
   // Enhanced strike price calculations
+  console.log(`  🎯 Calculating precise strikes for ${strategyName}...`);
   const preciseStrikes = calculatePreciseStrikes(strategyName, price, impliedVolatility, optimalDTE, greeks);
+  console.log(`  🎯 Strikes:`, preciseStrikes);
   
   // AI Score combines multiple factors
   let aiScore = probability * 0.4; // 40% weight on probability
@@ -312,6 +316,8 @@ async function analyzeStrategy(symbol, strategyName, marketData, config) {
   aiScore += (volume / 10000000) * 10; // 10% weight on liquidity
   aiScore += (100 - impliedVolatility * 100) * 0.2; // 20% weight on IV level
   aiScore += Math.random() * 10; // 10% random factor for variability
+  
+  console.log(`  ✅ Enhanced analysis complete for ${strategyName}`);
   
   return {
     strategy: strategyName,
