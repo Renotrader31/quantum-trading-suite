@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Priority #4 Test - Real-time Strategy Refinement</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #1a1a1a; color: white; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        button { background: #7c3aed; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; margin: 10px 0; }
+        button:hover { background: #6d28d9; }
+        .result { background: #374151; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .success { border-left: 4px solid #10b981; }
+        .error { border-left: 4px solid #ef4444; }
+        pre { background: #111827; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Priority #4: Real-time Strategy Refinement + Expanded Universe</h1>
+        <p>Testing the new features directly...</p>
+        
+        <h2>🔧 Configuration</h2>
+        <label>
+            Universe Size:
+            <select id="universeSize">
+                <option value="conservative">Conservative (30 stocks)</option>
+                <option value="balanced">Balanced (60 stocks)</option>
+                <option value="aggressive">Aggressive (80 stocks)</option>
+                <option value="mlTraining" selected>ML Training (100+ stocks)</option>
+            </select>
+        </label><br>
+        
+        <label>
+            Max Symbols: <input type="number" id="maxSymbols" value="50" min="10" max="100">
+        </label><br>
+        
+        <label>
+            <input type="checkbox" id="enableRefinement" checked> Enable Strategy Refinement
+        </label><br>
+        
+        <button onclick="testPipeline()">🚀 Test Priority #4 Pipeline</button>
+        <button onclick="testExpandedUniverse()">📊 Test Expanded Universe</button>
+        
+        <div id="results"></div>
+        
+        <script>
+            async function testPipeline() {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '<div class="result">🔄 Running Priority #4 pipeline test...</div>';
+                
+                try {
+                    const config = {
+                        squeezeThreshold: 50,
+                        holyGrailThreshold: 40,
+                        maxSymbols: parseInt(document.getElementById('maxSymbols').value),
+                        maxTrades: 6,
+                        riskTolerance: 'moderate',
+                        maxInvestment: 10000,
+                        enableMLLearning: true,
+                        enableEnsemble: true,
+                        enableRefinement: document.getElementById('enableRefinement').checked,
+                        universeSize: document.getElementById('universeSize').value
+                    };
+                    
+                    const response = await fetch('/api/trading-pipeline', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(config)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        resultsDiv.innerHTML = `
+                            <div class="result success">
+                                <h3>✅ Priority #4 Pipeline Success!</h3>
+                                <p><strong>Total Scanned:</strong> ${data.results.squeezeScanner.totalScanned} symbols</p>
+                                <p><strong>Candidates Found:</strong> ${data.results.squeezeScanner.candidates}</p>
+                                <p><strong>Actionable Trades:</strong> ${data.actionableTrades.length}</p>
+                                <p><strong>Execution Time:</strong> ${data.summary.totalExecutionTime}</p>
+                                
+                                <h4>🎯 New Symbols Found:</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin: 10px 0;">
+                                    ${data.results.squeezeScanner.topCandidates.slice(0, 20).map(c => 
+                                        `<span style="background: #4f46e5; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${c.symbol}</span>`
+                                    ).join('')}
+                                </div>
+                                
+                                <h4>📊 Sample Trade:</h4>
+                                <pre>${JSON.stringify(data.actionableTrades[0], null, 2).substring(0, 1000)}...</pre>
+                            </div>
+                        `;
+                    } else {
+                        throw new Error(data.error || 'Pipeline failed');
+                    }
+                } catch (error) {
+                    resultsDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Error</h3>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            async function testExpandedUniverse() {
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = '<div class="result">🔄 Testing expanded stock universe...</div>';
+                
+                try {
+                    const response = await fetch('/api/enhanced-scan', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            universeSize: document.getElementById('universeSize').value,
+                            maxSymbols: parseInt(document.getElementById('maxSymbols').value),
+                            integrateLiveData: true
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        resultsDiv.innerHTML = `
+                            <div class="result success">
+                                <h3>📊 Expanded Universe Test Success!</h3>
+                                <p><strong>Total Results:</strong> ${data.results.length}</p>
+                                <p><strong>Universe Type:</strong> ${document.getElementById('universeSize').value}</p>
+                                
+                                <h4>🎯 Symbol Diversity:</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 6px; margin: 10px 0;">
+                                    ${data.results.slice(0, 50).map(r => 
+                                        `<span style="background: #059669; padding: 3px 6px; border-radius: 3px; font-size: 11px;">${r.symbol}</span>`
+                                    ).join('')}
+                                </div>
+                                
+                                <h4>📈 Sample Data:</h4>
+                                <pre>${JSON.stringify(data.results.slice(0, 3), null, 2)}</pre>
+                            </div>
+                        `;
+                    } else {
+                        throw new Error(data.error || 'Enhanced scan failed');
+                    }
+                } catch (error) {
+                    resultsDiv.innerHTML = `
+                        <div class="result error">
+                            <h3>❌ Error</h3>
+                            <p>${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>

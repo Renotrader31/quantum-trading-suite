@@ -1,0 +1,28 @@
+{
+  "strategyPerformance": {},
+  "parameterOptimization": {},
+  "marketRegimeEffectiveness": {},
+  "mlModelAccuracy": {},
+  "thresholdOptimization": {
+    "squeeze": {
+      "current": 50,
+      "optimal": 50,
+      "performance": []
+    },
+    "holyGrail": {
+      "current": 40,
+      "optimal": 40,
+      "performance": []
+    },
+    "aiScore": {
+      "current": 60,
+      "optimal": 60,
+      "performance": []
+    },
+    "probability": {
+      "current": 60,
+      "optimal": 60,
+      "performance": []
+    }
+  }
+}

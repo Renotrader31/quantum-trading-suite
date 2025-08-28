@@ -22,28 +22,43 @@ export default async function handler(req, res) {
   try {
     const { symbols, batchSize = 10, integrateLiveData = true } = req.body;
     
-    // Import expanded stock universe for richer ML training
-    const { ExpandedStockUniverse } = await import('../../lib/expandedStockUniverse.js');
-    const stockUniverse = new ExpandedStockUniverse();
+    // Expanded stock universe for richer ML training (inline to avoid import issues)
+    const getExpandedUniverse = (universeSize, maxSymbols) => {
+      const etfs = ['SPY', 'QQQ', 'IWM', 'EFA', 'EEM', 'VTI', 'VEA', 'VWO', 'AGG', 'LQD'];
+      const technology = ['AAPL', 'MSFT', 'GOOGL', 'GOOG', 'AMZN', 'META', 'TSLA', 'NVDA', 'NFLX', 'CRM', 'ORCL', 'ADBE', 'INTC', 'AMD', 'CSCO', 'AVGO', 'TXN', 'QCOM', 'INTU', 'NOW'];
+      const healthcare = ['JNJ', 'PFE', 'UNH', 'MRK', 'ABBV', 'TMO', 'DHR', 'ABT', 'LLY', 'BMY', 'AMGN', 'GILD', 'REGN', 'VRTX', 'BIIB', 'MRNA', 'BNTX', 'NVAX', 'ZTS', 'ISRG'];
+      const financial = ['JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'USB', 'PNC', 'TFC', 'COF', 'AXP', 'V', 'MA', 'PYPL', 'SQ', 'AFRM', 'SOFI', 'BRK.B', 'BLK', 'SPGI'];
+      const industrial = ['BA', 'CAT', 'DE', 'GE', 'HON', 'UPS', 'FDX', 'LMT', 'RTX', 'NOC', 'MMM', 'EMR', 'ETN', 'PH', 'ROK', 'ITW', 'CSX', 'UNP', 'NSC', 'ODFL'];
+      const consumer = ['WMT', 'HD', 'TGT', 'COST', 'LOW', 'MCD', 'SBUX', 'NKE', 'DIS', 'CMG', 'YUM', 'F', 'GM', 'RIVN', 'LCID', 'NIO', 'XPEV', 'LI', 'TM', 'HMC'];
+      const energy = ['XOM', 'CVX', 'COP', 'EOG', 'SLB', 'MPC', 'VLO', 'PSX', 'OXY', 'KMI', 'WMB', 'EPD', 'NEE', 'SO', 'DUK', 'D', 'AEP', 'EXC', 'SRE', 'PEG'];
+      const materials = ['LIN', 'APD', 'ECL', 'SHW', 'FCX', 'NEM', 'GOLD', 'BHP', 'RIO', 'VALE', 'DOW', 'DD', 'LYB', 'CF', 'MOS', 'FMC', 'ALB', 'IFF', 'CE', 'VMC'];
+      const emerging = ['SPCE', 'OPEN', 'WISH', 'CLOV', 'BB', 'AMC', 'GME', 'MVIS', 'TLRY', 'ACB', 'CGC', 'SNDL', 'PLBY', 'RIDE', 'NKLA', 'GOEV', 'HYLN', 'WKHS', 'FSR', 'PSNY'];
+      const international = ['BABA', 'JD', 'PDD', 'BIDU', 'NTES', 'TME', 'BILI', 'IQ', 'VIPS', 'ASML', 'TSM', 'UMC', 'SAP', 'SHOP', 'SE', 'GRAB', 'DIDI', 'WB'];
+      
+      const allSymbols = [...etfs, ...technology, ...healthcare, ...financial, ...industrial, ...consumer, ...energy, ...materials, ...emerging, ...international];
+      
+      switch (universeSize) {
+        case 'conservative':
+          return [...etfs, ...technology.slice(0, 10), ...financial.slice(0, 5), ...healthcare.slice(0, 5)].slice(0, Math.min(maxSymbols, 30));
+        case 'aggressive':
+          return [...technology.slice(5), ...emerging, ...international].slice(0, Math.min(maxSymbols, 80));
+        case 'mlTraining':
+          // Diversified sample across all categories
+          const sample = [];
+          [etfs, technology, healthcare, financial, industrial, consumer, energy, materials, emerging, international].forEach(category => {
+            sample.push(...category.slice(0, Math.ceil(maxSymbols / 10)));
+          });
+          return [...new Set(sample)].slice(0, Math.min(maxSymbols, 100));
+        default: // balanced
+          const balanced = [...etfs.slice(0, 8), ...technology.slice(0, 15), ...healthcare.slice(0, 10), ...financial.slice(0, 10), ...industrial.slice(0, 8), ...consumer.slice(0, 9)];
+          return [...new Set(balanced)].slice(0, Math.min(maxSymbols, 60));
+      }
+    };
     
     // Smart universe selection based on request parameters
-    const universeSize = req.body.universeSize || 'balanced'; // conservative, balanced, aggressive, mlTraining
+    const universeSize = req.body.universeSize || 'balanced';
     const maxSymbols = req.body.maxSymbols || 50;
-    
-    let defaultSymbols;
-    switch (universeSize) {
-      case 'conservative':
-        defaultSymbols = stockUniverse.getStableSubset(Math.min(maxSymbols, 30));
-        break;
-      case 'aggressive': 
-        defaultSymbols = stockUniverse.getHighVolatilitySubset(Math.min(maxSymbols, 80));
-        break;
-      case 'mlTraining':
-        defaultSymbols = stockUniverse.getDiversifiedSample(Math.min(maxSymbols, 100));
-        break;
-      default: // balanced
-        defaultSymbols = stockUniverse.getDiversifiedSample(Math.min(maxSymbols, 60));
-    }
+    const defaultSymbols = getExpandedUniverse(universeSize, maxSymbols);
     
     console.log(`📊 Using ${universeSize} universe: ${defaultSymbols.length} symbols`);
 
