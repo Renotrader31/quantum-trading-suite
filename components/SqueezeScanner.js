@@ -396,6 +396,56 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
     }
   };
 
+  // Handle trade selection and feed to ML
+  const handleTradeSelection = async (trade) => {
+    console.log(`🎯 Trade selected: ${trade.strategyKey || trade.strategyName} for ${selectedStock.symbol}`);
+    
+    try {
+      // Feed selected trade to ML learning system
+      const mlResponse = await fetch(`${API_BASE_URL}/api/ml-learning`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'user_selection',
+          trade: {
+            ...trade,
+            symbol: selectedStock.symbol,
+            selectionTime: new Date().toISOString(),
+            squeezeContext: {
+              holyGrail: selectedStock.holyGrail,
+              squeeze: selectedStock.squeeze,
+              gamma: selectedStock.gamma,
+              flow: selectedStock.flow
+            }
+          }
+        })
+      });
+
+      if (mlResponse.ok) {
+        console.log('✅ Trade fed to ML learning system');
+        
+        // Show success notification
+        if (typeof addAlert === 'function') {
+          addAlert({
+            type: 'TRADE_SELECTED',
+            symbol: selectedStock.symbol,
+            message: `${trade.strategyKey || trade.strategyName} selected for ${selectedStock.symbol} - Fed to ML system`,
+            severity: 'medium',
+            timestamp: new Date().toISOString()
+          });
+        }
+      }
+      
+      // Close modal
+      setShowTradeModal(false);
+      
+    } catch (error) {
+      console.error('❌ Error feeding trade to ML system:', error);
+      // Still close the modal even if ML feeding fails
+      setShowTradeModal(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* Header */}
@@ -1084,48 +1134,4 @@ const handleIndividualAnalysis = async (symbol) => {
   }
 };
 
-// Handle trade selection and feed to ML
-const handleTradeSelection = async (trade) => {
-  console.log(`🎯 Trade selected: ${trade.strategyName} for ${selectedStock.symbol}`);
-  
-  try {
-    // Feed selected trade to ML learning system
-    const mlResponse = await fetch(`${API_BASE_URL}/api/ml-learning`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'user_selection',
-        trade: {
-          ...trade,
-          symbol: selectedStock.symbol,
-          selectionTime: new Date().toISOString(),
-          squeezeContext: {
-            holyGrail: selectedStock.holyGrail,
-            squeeze: selectedStock.squeeze,
-            gamma: selectedStock.gamma,
-            flow: selectedStock.flow
-          }
-        }
-      })
-    });
 
-    if (mlResponse.ok) {
-      console.log('✅ Trade fed to ML learning system');
-      
-      // Show success notification
-      addAlert({
-        type: 'TRADE_SELECTED',
-        symbol: selectedStock.symbol,
-        message: `${trade.strategyName} selected for ${selectedStock.symbol} - Fed to ML system`,
-        severity: 'medium',
-        timestamp: new Date().toISOString()
-      });
-    }
-    
-    // Close modal
-    setShowTradeModal(false);
-    
-  } catch (error) {
-    console.error('❌ Error feeding trade to ML system:', error);
-  }
-};
