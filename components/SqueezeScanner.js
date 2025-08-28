@@ -36,13 +36,13 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
 
   // Advanced filters - Adjusted for better results
   const [advancedFilters, setAdvancedFilters] = useState({
-    minHolyGrail: 10,  // Allow lower scores to show more results
-    minUnusual: 1,     // Lower threshold for unusual activity  
+    minHolyGrail: 5,   // Very low threshold to show more results
+    minUnusual: 0.5,   // Very low threshold for unusual activity  
     minSweeps: 0,      // Allow stocks without sweeps
-    minFlow: 20,       // Lower flow threshold
-    minGamma: 1,       // Lower gamma threshold
-    maxDTC: 20,        // Higher DTC allowance
-    minShortInterest: 5  // Lower short interest threshold
+    minFlow: 10,       // Very low flow threshold
+    minGamma: 0.001,   // Very low gamma threshold
+    maxDTC: 50,        // Much higher DTC allowance
+    minShortInterest: 0  // No short interest requirement
   });
 
   // Initialize client-side rendering
