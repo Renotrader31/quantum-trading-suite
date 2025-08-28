@@ -1,7 +1,146 @@
-// Dynamic route for individual stock scanning
-// Handles /api/scan/AAPL, /api/scan/MSFT, etc.
+// Enhanced scan API that integrates live market data with squeeze analysis
+console.log('\n=== ENHANCED SCAN API STARTUP ===');
 
-// Enhanced squeeze metrics generator (copied from enhanced-scan.js)
+export default async function handler(req, res) {
+  console.log('\n=== ENHANCED SCAN REQUEST ===');
+  console.log('Method:', req.method);
+  console.log('Timestamp:', new Date().toISOString());
+
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const { symbols, batchSize = 10, integrateLiveData = true } = req.body;
+    
+    // Default symbols list with popular stocks
+    const defaultSymbols = [
+      'SPY', 'QQQ', 'IWM', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 
+      'META', 'NVDA', 'NFLX', 'AMD', 'CRM', 'PYPL', 'ADBE', 'INTC',
+      'BABA', 'V', 'MA', 'JPM', 'JNJ', 'WMT', 'PG', 'UNH', 'HD',
+      'DIS', 'VZ', 'KO', 'PFE', 'MRK', 'T', 'XOM', 'CVX', 'WFC'
+    ];
+
+    const symbolsToScan = symbols || defaultSymbols;
+    const results = [];
+    const errors = [];
+
+    console.log(`Enhanced scanning ${symbolsToScan.length} symbols with live data integration`);
+
+    // First, get live market data if requested
+    let liveMarketData = {};
+    if (integrateLiveData) {
+      try {
+        console.log('🔄 Fetching live market data...');
+        // Get current market data from stocks API
+        const marketResponse = await fetch(`${req.headers.host ? 'http://' + req.headers.host : ''}/api/stocks?endpoint=market-overview`);
+        if (marketResponse.ok) {
+          const marketData = await marketResponse.json();
+          
+          // Process indices
+          if (marketData.indices) {
+            Object.entries(marketData.indices).forEach(([symbol, data]) => {
+              liveMarketData[symbol.toUpperCase()] = data;
+            });
+          }
+          
+          // Process top movers
+          if (marketData.topMovers && Array.isArray(marketData.topMovers)) {
+            marketData.topMovers.forEach(stock => {
+              liveMarketData[stock.symbol] = stock;
+            });
+          }
+          
+          console.log(`✅ Retrieved live data for ${Object.keys(liveMarketData).length} symbols`);
+        }
+      } catch (error) {
+        console.log('⚠️ Live market data fetch failed, proceeding with fallback:', error.message);
+      }
+    }
+
+    // Process in batches
+    for (let i = 0; i < symbolsToScan.length; i += batchSize) {
+      const batch = symbolsToScan.slice(i, i + batchSize);
+      console.log(`Processing enhanced batch ${Math.floor(i/batchSize) + 1}: ${batch.join(', ')}`);
+      
+      const batchPromises = batch.map(symbol => enhancedScanSingleStock(symbol, liveMarketData[symbol]));
+      const batchResults = await Promise.allSettled(batchPromises);
+      
+      batchResults.forEach((result, index) => {
+        const symbol = batch[index];
+        if (result.status === 'fulfilled' && result.value) {
+          results.push(result.value);
+          console.log(`✅ ${symbol}: Enhanced scan success`);
+        } else {
+          const errorMsg = result.reason?.message || 'Enhanced scan failed';
+          errors.push({ symbol, error: errorMsg });
+          console.log(`❌ ${symbol}: ${errorMsg}`);
+        }
+      });
+
+      // Small delay between batches
+      if (i + batchSize < symbolsToScan.length) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    // Sort by Holy Grail score
+    results.sort((a, b) => b.holyGrail - a.holyGrail);
+
+    console.log(`✅ Enhanced scan complete: ${results.length} success, ${errors.length} failed`);
+
+    res.json({
+      success: true,
+      results,
+      errors,
+      scanned: results.length,
+      failed: errors.length,
+      liveDataIntegrated: integrateLiveData,
+      liveDataCount: Object.keys(liveMarketData).length
+    });
+
+  } catch (error) {
+    console.error('❌ Enhanced scan error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message,
+      results: [],
+      errors: [{ error: error.message }]
+    });
+  }
+}
+
+// Enhanced single stock scanning with live data integration
+async function enhancedScanSingleStock(symbol, liveData = null) {
+  try {
+    console.log(`🔍 Enhanced scanning ${symbol} with${liveData ? '' : 'out'} live data`);
+
+    // Generate realistic squeeze metrics
+    const squeezeMetrics = generateEnhancedSqueezeMetrics(symbol, liveData);
+    
+    return {
+      symbol,
+      timestamp: new Date().toISOString(),
+      dataSource: liveData ? 'live_enhanced' : 'simulated_enhanced',
+      ...squeezeMetrics
+    };
+
+  } catch (error) {
+    console.error(`Enhanced scan failed for ${symbol}:`, error);
+    throw error;
+  }
+}
+
+// Generate enhanced squeeze metrics with live data integration
 function generateEnhancedSqueezeMetrics(symbol, liveData) {
   // Use live data if available, otherwise realistic defaults
   const price = liveData?.price || getRealisticPrice(symbol);
@@ -15,6 +154,7 @@ function generateEnhancedSqueezeMetrics(symbol, liveData) {
   for (let i = 0; i < 25; i++) { // More strike prices for better analysis
     const strikeOffset = (i - 12) * 5; // Strikes from -60 to +60
     const strike = price + strikeOffset;
+    const moneyness = price / strike;
     
     // More realistic Greeks based on moneyness
     const callGamma = Math.max(0, 0.1 * Math.exp(-Math.pow(strikeOffset / 10, 2))) * (1 + Math.random() * 0.5);
@@ -180,58 +320,4 @@ function getSectorCategory(symbol) {
   return sectorMap[symbol] || 'Technology';
 }
 
-export default async function handler(req, res) {
-  console.log('\n=== DYNAMIC SCAN ROUTE ===');
-  console.log('Method:', req.method);
-  console.log('Symbol from URL:', req.query.symbol);
-  console.log('Query params:', req.query);
-
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  try {
-    const { symbol } = req.query;
-    
-    if (!symbol) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Symbol parameter is required' 
-      });
-    }
-
-    console.log(`🔍 Enhanced individual scan for ${symbol}`);
-
-    // Use the enhanced scan logic directly
-    const result = {
-      symbol: symbol.toUpperCase(),
-      timestamp: new Date().toISOString(),
-      dataSource: 'simulated_enhanced',
-      ...generateEnhancedSqueezeMetrics(symbol.toUpperCase(), null)
-    };
-
-    return res.json({
-      success: true,
-      data: result,
-      liveDataUsed: false,
-      timestamp: new Date().toISOString()
-    });
-    
-  } catch (error) {
-    console.error('Enhanced individual scan error:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: 'Failed to process enhanced scan request',
-      details: error.message 
-    });
-  }
-}
+console.log('✅ Enhanced scan API loaded successfully');

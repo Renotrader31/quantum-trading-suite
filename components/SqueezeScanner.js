@@ -169,7 +169,7 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
     }
   };
 
-  // Bulk scan function
+  // Bulk scan function - Updated to use enhanced API with live data
   const startBulkScan = async () => {
     setScanning(true);
     setLoading(true);
@@ -177,20 +177,34 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
     setErrors([]);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/scan/bulk`, {
+      console.log('🚀 Starting enhanced squeeze scan with live data integration...');
+      const response = await fetch(`${API_BASE_URL}/api/enhanced-scan`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          symbols: undefined, // Will use default from API (100 stocks)
-          batchSize: 10 
+          symbols: undefined, // Will use default from API (enhanced symbols)
+          batchSize: 10,
+          integrateLiveData: true // Enable live data integration
         })
       });
       
       const data = await response.json();
       
       if (data.success) {
+        console.log(`✅ Enhanced scan complete: ${data.scanned} stocks scanned, ${data.liveDataCount} with live data`);
         setStocks(data.results);
         setLastUpdate(new Date().toISOString());
+        
+        // Show success alert with enhanced data info
+        if (data.liveDataIntegrated && data.liveDataCount > 0) {
+          addAlert({
+            type: 'SCAN_SUCCESS',
+            symbol: 'SYSTEM',
+            message: `Enhanced scan complete: ${data.scanned} stocks, ${data.liveDataCount} with LIVE data integration`,
+            severity: 'medium',
+            timestamp: new Date().toISOString()
+          });
+        }
         
         // Check for high holy grail scores
         data.results.forEach(stock => {

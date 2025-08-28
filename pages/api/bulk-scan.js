@@ -151,8 +151,13 @@ async function scanSingleStock(symbol) {
 
   } catch (error) {
     console.error(`API failed for ${symbol}, generating fallback data:`, error.message);
-    // Generate fallback data when API fails
-    return generateFallbackData(symbol);
+    // Generate fallback data when API fails - ensure this returns properly
+    try {
+      return generateFallbackData(symbol);
+    } catch (fallbackError) {
+      console.error(`Fallback generation failed for ${symbol}:`, fallbackError.message);
+      return null;
+    }
   }
 }
 
@@ -184,8 +189,12 @@ function generateFallbackData(symbol) {
 
 // Squeeze calculation function
 function calculateSqueezeMetrics(greeks, symbol) {
-  // Mock price data - you can integrate with your price API later
-  const mockPrice = 150 + Math.random() * 100;
+  // Use realistic price data based on symbol
+  const priceMap = {
+    'SPY': 646, 'QQQ': 572, 'IWM': 235, 'AAPL': 229, 'MSFT': 505, 
+    'GOOGL': 195, 'AMZN': 205, 'TSLA': 351, 'META': 745, 'NVDA': 182
+  };
+  const mockPrice = priceMap[symbol] || (150 + Math.random() * 100);
   const mockChange = (Math.random() - 0.5) * 10;
 
   // Calculate gamma concentration
