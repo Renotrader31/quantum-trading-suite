@@ -782,6 +782,35 @@
         "status": "ACTIVE",
         "createdAt": "2025-08-28T21:01:12.185Z"
       }
+    ],
+    [
+      "NVDA_undefined_mevxjadz_o2ar0",
+      {
+        "id": "NVDA_undefined_mevxjadz_o2ar0",
+        "symbol": "NVDA",
+        "strategy": "bearCallSpread",
+        "entryDate": "2025-08-28T21:42:21.527Z",
+        "entryPrice": 180.17,
+        "strikes": {
+          "primary": 182
+        },
+        "expiration": "2025-10-10",
+        "dte": 37,
+        "positionSize": 1000,
+        "maxLoss": -488.74,
+        "maxGain": 11.54,
+        "mlContext": {
+          "squeezeContext": {
+            "probability": 95
+          },
+          "marketConditions": {},
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-28T21:42:21.527Z"
+      }
     ]
   ],
   "completedTrades": []
