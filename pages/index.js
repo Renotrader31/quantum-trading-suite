@@ -4,6 +4,7 @@ import SqueezeScanner from '../components/SqueezeScanner';
 import AIRecommendations from '../components/AIRecommendations';
 import GammaAnalytics from '../components/GammaAnalytics';
 import OptionsStrategies from '../components/OptionsStrategies';
+import QuantumTradeAI from '../components/QuantumTradeAI';
 
 export default function Home() {
   const [activeMode, setActiveMode] = useState('dashboard');
@@ -76,6 +77,7 @@ export default function Home() {
     { id: 'dashboard', name: 'Dashboard', icon: '📊' },
     { id: 'scanner', name: 'Squeeze Scanner', icon: '🔍' },
     { id: 'ai', name: 'AI Recommendations', icon: '🤖' },
+    { id: 'quantum', name: 'Quantum AI v3.0', icon: '🔮' },
     { id: 'gamma', name: 'Gamma Analytics', icon: '⚡' },
     { id: 'options', name: 'Options Strategies', icon: '📈' }
   ];
@@ -95,6 +97,8 @@ export default function Home() {
         return <SqueezeScanner {...commonProps} />;
       case 'ai':
         return <AIRecommendations {...commonProps} />;
+      case 'quantum':
+        return <QuantumTradeAI {...commonProps} />;
       case 'gamma':
         return <GammaAnalytics {...commonProps} />;
       case 'options':

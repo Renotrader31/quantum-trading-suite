@@ -1,12 +1,15 @@
 // components/GammaAnalytics.js - Real-time Gamma Analytics with Unusual Whales Integration
 import { useState, useEffect } from 'react';
 
-export default function GammaAnalytics() {
+export default function GammaAnalytics({ marketData, loading: propsLoading, onRefresh, lastUpdate }) {
 
   const [greeksData, setGreeksData] = useState([]);
+  const [gexData, setGexData] = useState([]);
   const [ticker, setTicker] = useState('SPY');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [realTimeEnabled, setRealTimeEnabled] = useState(false);
+  const [gammaHeatmap, setGammaHeatmap] = useState([]);
 
   const fetchGammaData = async (symbol) => {
     setLoading(true);
@@ -49,6 +52,15 @@ export default function GammaAnalytics() {
   useEffect(() => {
     fetchGammaData(ticker);
   }, []);
+
+  // Real-time updates integration
+  useEffect(() => {
+    if (marketData && marketData[ticker]) {
+      // Use existing market data when available
+      const stockData = marketData[ticker];
+      console.log(`📊 Using existing market data for ${ticker}:`, stockData.price);
+    }
+  }, [marketData, ticker]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
