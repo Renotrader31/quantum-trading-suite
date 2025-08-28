@@ -379,13 +379,33 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
         {/* Results Tabs */}
         <div className="bg-gray-900 rounded-lg border border-gray-800">
           {/* Tab Navigation */}
-          <div className="border-b border-gray-800 px-4 py-3">
-            <div className="flex flex-wrap gap-2 md:gap-4">
+          <div className="border-b border-gray-800 px-4 py-4 bg-gray-800">
+            {/* First Row - Main Tabs */}
+            <div className="grid grid-cols-4 gap-2 mb-3">
               {[
                 { id: 'overview', name: 'Overview', icon: Eye },
-                { id: 'trades', name: 'Actionable Trades', icon: Target },
-                { id: 'ensemble', name: 'Ensemble System', icon: Layers },
-                { id: 'risk', name: 'Risk Management', icon: Shield },
+                { id: 'trades', name: 'Trades', icon: Target },
+                { id: 'ensemble', name: 'Ensemble', icon: Layers },
+                { id: 'risk', name: 'Risk Mgmt', icon: Shield }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedTab(tab.id)}
+                  className={`flex items-center justify-center gap-1 px-2 py-3 rounded-lg text-xs font-bold transition-colors ${
+                    selectedTab === tab.id 
+                      ? 'bg-purple-600 text-white shadow-lg' 
+                      : 'text-gray-300 hover:text-white hover:bg-gray-600 bg-gray-700'
+                  }`}
+                >
+                  <tab.icon className="w-4 h-4" />
+                  <span>{tab.name}</span>
+                </button>
+              ))}
+            </div>
+            
+            {/* Second Row - Analysis Tabs */}
+            <div className="grid grid-cols-3 gap-2">
+              {[
                 { id: 'squeeze', name: 'Squeeze Results', icon: Activity },
                 { id: 'ml', name: 'ML Insights', icon: Brain },
                 { id: 'config', name: 'Configuration', icon: Settings }
@@ -393,14 +413,14 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                 <button
                   key={tab.id}
                   onClick={() => setSelectedTab(tab.id)}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs md:text-sm font-medium transition-colors ${
+                  className={`flex items-center justify-center gap-1 px-2 py-3 rounded-lg text-xs font-bold transition-colors ${
                     selectedTab === tab.id 
-                      ? 'bg-purple-600 text-white border-2 border-purple-400' 
-                      : 'text-gray-400 hover:text-white hover:bg-gray-700 border-2 border-transparent'
+                      ? 'bg-purple-600 text-white shadow-lg' 
+                      : 'text-gray-300 hover:text-white hover:bg-gray-600 bg-gray-700'
                   }`}
                 >
-                  <tab.icon className="w-4 h-4 flex-shrink-0" />
-                  <span className="whitespace-nowrap">{tab.name}</span>
+                  <tab.icon className="w-4 h-4" />
+                  <span>{tab.name}</span>
                 </button>
               ))}
             </div>
@@ -408,6 +428,11 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
 
           {/* Tab Content */}
           <div className="p-6">
+            {/* Debug Tab Indicator */}
+            <div className="mb-4 text-xs text-gray-500 bg-gray-800 p-2 rounded">
+              Active: <span className="text-purple-400 font-bold">{selectedTab}</span> | 
+              Available: overview, trades, ensemble, risk, squeeze, ml, config
+            </div>
             {selectedTab === 'overview' && (
               <div className="space-y-6">
                 <h3 className="text-xl font-semibold mb-4">Pipeline Overview</h3>
@@ -682,6 +707,16 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                   <Layers className="w-6 h-6 text-purple-500" />
                   Multi-Strategy Ensemble System
                 </h3>
+
+                {/* Always show ensemble info */}
+                <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 mb-4">
+                  <h4 className="text-lg font-semibold text-blue-300 mb-2">🎯 Ensemble Status</h4>
+                  <div className="text-sm text-gray-300">
+                    <p><strong>Ensemble Engine:</strong> {pipelineConfig.enableEnsemble ? '✅ Enabled' : '❌ Disabled'}</p>
+                    <p><strong>Results Available:</strong> {ensembleResults ? '✅ Yes' : '❌ No (run pipeline with ensemble enabled)'}</p>
+                    <p><strong>Strategy Count:</strong> 6 core strategies available</p>
+                  </div>
+                </div>
                 
                 {ensembleResults ? (
                   <div className="space-y-6">
@@ -808,10 +843,26 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <Layers className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                    <div className="text-gray-400">No ensemble data available</div>
-                    <div className="text-sm text-gray-500">Enable ensemble mode in configuration and run the pipeline</div>
+                  <div className="space-y-4">
+                    <div className="bg-gray-800 rounded-lg p-6 text-center">
+                      <Layers className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+                      <h4 className="text-xl font-semibold text-white mb-2">Run Pipeline to Generate Ensemble Data</h4>
+                      <p className="text-gray-400 mb-4">Enable ensemble mode in configuration and run the pipeline to see:</p>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="bg-gray-700 p-3 rounded">
+                          <div className="text-blue-400 font-bold">Market Regime</div>
+                          <div className="text-gray-300">Detection & Analysis</div>
+                        </div>
+                        <div className="bg-gray-700 p-3 rounded">
+                          <div className="text-green-400 font-bold">Strategy Weights</div>
+                          <div className="text-gray-300">Dynamic Optimization</div>
+                        </div>
+                        <div className="bg-gray-700 p-3 rounded">
+                          <div className="text-purple-400 font-bold">Portfolio Metrics</div>
+                          <div className="text-gray-300">Risk & Diversification</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -819,6 +870,28 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
 
             {selectedTab === 'risk' && (
               <div className="space-y-4">
+                <div className="bg-blue-900/20 border border-blue-600/30 rounded-lg p-4 mb-4">
+                  <h4 className="text-lg font-semibold text-blue-300 mb-2">🛡️ Risk Management Status</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <div className="text-center">
+                      <div className="text-green-400 font-bold">✅ Active</div>
+                      <div className="text-gray-300">Risk System</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-blue-400 font-bold">${pipelineConfig.maxInvestment.toLocaleString()}</div>
+                      <div className="text-gray-300">Portfolio Value</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-purple-400 font-bold">{portfolioPositions.length}</div>
+                      <div className="text-gray-300">Active Positions</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-yellow-400 font-bold">Kelly</div>
+                      <div className="text-gray-300">Position Sizing</div>
+                    </div>
+                  </div>
+                </div>
+                
                 <RiskManagementDashboard
                   positions={portfolioPositions}
                   portfolioValue={pipelineConfig.maxInvestment}
