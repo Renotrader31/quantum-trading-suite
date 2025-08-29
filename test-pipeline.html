@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Trading Pipeline Navigation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="max-w-4xl mx-auto p-8">
+        <h1 class="text-2xl font-bold mb-6">Testing Navigation to Trading Pipeline</h1>
+        
+        <div class="space-y-4">
+            <div>
+                <h2 class="text-lg font-semibold mb-2">Current Page Status:</h2>
+                <p id="status">Loading...</p>
+            </div>
+            
+            <div>
+                <h2 class="text-lg font-semibold mb-2">Navigation Actions:</h2>
+                <button 
+                    id="navigateBtn" 
+                    class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-white"
+                    onclick="navigateToTradingPipeline()"
+                >
+                    Navigate to Trading Pipeline
+                </button>
+            </div>
+            
+            <div>
+                <h2 class="text-lg font-semibold mb-2">Test Results:</h2>
+                <div id="results" class="bg-gray-800 p-4 rounded min-h-[100px]">
+                    Click the button above to test navigation.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+        
+        function updateResults(message) {
+            const results = document.getElementById('results');
+            results.innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + message + '</div>';
+        }
+        
+        function navigateToTradingPipeline() {
+            updateResults('Attempting to navigate to Trading Pipeline...');
+            
+            try {
+                // Open the main app in a new window
+                const appWindow = window.open('/', '_blank');
+                
+                if (appWindow) {
+                    updateResults('Main app opened in new window');
+                    
+                    // Wait for the page to load, then try to navigate
+                    setTimeout(() => {
+                        try {
+                            // Try to find and click the Trading Pipeline button
+                            const pipelineButton = appWindow.document.querySelector('button:contains("Trading Pipeline")');
+                            if (pipelineButton) {
+                                pipelineButton.click();
+                                updateResults('✅ Found and clicked Trading Pipeline button');
+                            } else {
+                                // Try alternative selector
+                                const buttons = appWindow.document.querySelectorAll('button');
+                                let found = false;
+                                buttons.forEach(btn => {
+                                    if (btn.textContent.includes('Trading Pipeline') || btn.textContent.includes('⚙️')) {
+                                        btn.click();
+                                        updateResults('✅ Found and clicked Trading Pipeline button (alternative method)');
+                                        found = true;
+                                    }
+                                });
+                                
+                                if (!found) {
+                                    updateResults('❌ Could not find Trading Pipeline button');
+                                    updateResults('Available buttons: ' + Array.from(buttons).map(b => b.textContent.trim()).filter(t => t).join(', '));
+                                }
+                            }
+                        } catch (e) {
+                            updateResults('❌ Error accessing new window: ' + e.message);
+                        }
+                    }, 3000);
+                } else {
+                    updateResults('❌ Failed to open new window (popup blocked?)');
+                }
+            } catch (error) {
+                updateResults('❌ Error: ' + error.message);
+            }
+        }
+        
+        // Set initial status
+        updateStatus('Ready to test navigation');
+        updateResults('Test page loaded successfully');
+    </script>
+</body>
+</html>

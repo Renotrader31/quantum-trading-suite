@@ -23,20 +23,11 @@ import {
   MenuItem,
   Switch,
   FormControlLabel,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Divider
+
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+
 import ErrorBoundary from './ErrorBoundary';
+import OptionsStrategyTab from './OptionsStrategyTab';
 
 // Utility function to safely access severity property
 const getSafeSeverity = (item) => {
@@ -79,7 +70,7 @@ function TabPanel({ children, value, index, ...other }) {
   );
 }
 
-export default function TradingPipeline() {
+export default function TradingPipeline({ marketData = {}, loading: externalLoading = false, onRefresh, lastUpdate }) {
   // State management
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -92,68 +83,7 @@ export default function TradingPipeline() {
   const [riskMetrics, setRiskMetrics] = useState(null);
   const [selectedTrades, setSelectedTrades] = useState([]);
   
-  // Options strategy state
-  const [selectedStock, setSelectedStock] = useState(null);
-  const [strategyRecommendations, setStrategyRecommendations] = useState([]);
-  const [strategyLoading, setStrategyLoading] = useState(false);
-  const [strategyEngine, setStrategyEngine] = useState(null);
-  
-  // Initialize strategy engine safely on client side with dynamic import
-  useEffect(() => {
-    let isMounted = true;
-    
-    const initializeEngine = async () => {
-      try {
-        console.log('🔧 Starting OptionsStrategyEngine initialization...');
-        
-        // Small delay to ensure component is fully mounted
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        if (!isMounted) {
-          console.log('⚠️ Component unmounted during initialization');
-          return;
-        }
-        
-        console.log('📦 Dynamic importing SimpleOptionsEngine class...');
-        const { default: SimpleOptionsEngine } = await import('../lib/SimpleOptionsEngine');
-        
-        console.log('🏗️ Creating engine instance...');
-        const engine = new SimpleOptionsEngine();
-        
-        console.log('🧪 Testing engine methods...');
-        // Test that the engine has required methods
-        if (typeof engine.analyzeStrategies !== 'function') {
-          throw new Error('SimpleOptionsEngine missing analyzeStrategies method');
-        }
-        
-        setStrategyEngine(engine);
-        console.log('✅ SimpleOptionsEngine initialized successfully');
-        console.log('🎯 Engine methods available:', Object.getOwnPropertyNames(Object.getPrototypeOf(engine)));
-      } catch (error) {
-        console.error('❌ Failed to initialize SimpleOptionsEngine:', error);
-        console.error('📊 Error stack:', error.stack);
-        if (isMounted) {
-          showError(`Failed to initialize options strategy engine: ${error.message}`);
-        }
-      }
-    };
-    
-    initializeEngine();
-    
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-  
-  // Debug state changes
-  useEffect(() => {
-    console.log('🔍 Strategy state changed:', {
-      selectedStock: selectedStock?.symbol,
-      recommendationsCount: strategyRecommendations.length,
-      strategyLoading,
-      engineReady: !!strategyEngine
-    });
-  }, [selectedStock, strategyRecommendations, strategyLoading, strategyEngine]);
+
   
   // Configuration state
   const [config, setConfig] = useState({
@@ -358,117 +288,7 @@ export default function TradingPipeline() {
     });
   };
 
-  // Handle stock selection for options strategy analysis
-  const handleStockSelect = useCallback(async (stock) => {
-    console.log('🎯 Stock selected for options analysis:', stock.symbol);
-    
-    if (!strategyEngine) {
-      showError('Options strategy engine is not ready. Please wait a moment and try again.');
-      return;
-    }
-    
-    // Cancel any previous analysis
-    setStrategyLoading(true);
-    setSelectedStock(stock);
-    
-    // Use AbortController to handle cleanup
-    const controller = new AbortController();
-    
-    try {
-      // Prepare stock data for analysis
-      const stockData = {
-        symbol: stock.symbol,
-        price: stock.price || stock.currentPrice || 100, // Use actual price or fallback
-        change: stock.change || 0,
-        changePercent: stock.changePercent || 0,
-        volume: stock.volume || 0,
-        marketCap: stock.marketCap || 0
-      };
-      
-      // Get market conditions from the stock data and scan results
-      const marketConditions = {
-        sentiment: stock.sentiment || 'neutral',
-        volatility: stock.volatility || 'medium',
-        trend: stock.trend || 'sideways',
-        ivRank: stock.ivRank || 50
-      };
-      
-      console.log('📊 Analyzing strategies with data:', { stockData, marketConditions });
-      
-      // Get strategy recommendations
-      console.log('🔧 Calling strategyEngine.analyzeStrategies...');
-      const analysis = await strategyEngine.analyzeStrategies(stockData, marketConditions);
-      console.log('📋 Raw analysis result:', analysis);
-      console.log('📊 Recommendations array:', analysis.recommendations);
-      console.log('📏 Recommendations length:', analysis.recommendations?.length);
-      
-      setStrategyRecommendations(analysis.recommendations || []);
-      
-      // Auto-switch to Options Strategies tab to show results
-      setActiveTab(1);
-      
-      console.log('✅ Strategy analysis complete:', analysis);
-      showSuccess(`Generated ${analysis.recommendations?.length || 0} strategy recommendations for ${stock.symbol}`);
-      
-    } catch (error) {
-      if (!controller.signal.aborted) {
-        console.error('❌ Options strategy analysis failed:', error);
-        showError(`Failed to analyze options strategies: ${error.message}`);
-        setStrategyRecommendations([]);
-      }
-    } finally {
-      if (!controller.signal.aborted) {
-        setStrategyLoading(false);
-      }
-    }
-    
-    // Cleanup function
-    return () => {
-      controller.abort();
-    };
-  }, [strategyEngine, showError, showSuccess, setActiveTab]);
 
-  // Handle strategy selection and ML feedback
-  const handleStrategySelect = async (strategy) => {
-    console.log('📈 Strategy selected:', strategy.strategy);
-    
-    try {
-      // Record strategy selection in ML system
-      const response = await fetch('/api/ml-feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'recordStrategySelection',
-          userId: 'current_user',
-          symbol: selectedStock?.symbol,
-          strategy: strategy.strategyKey,
-          confidence: strategy.score,
-          reasoning: strategy.reasoning,
-          timestamp: new Date().toISOString()
-        })
-      });
-      
-      if (response.ok) {
-        showSuccess(`Strategy selection recorded for ML learning: ${strategy.strategy}`);
-      }
-    } catch (error) {
-      console.error('Failed to record strategy selection:', error);
-    }
-    
-    // Add to selected trades for further analysis
-    const tradeData = {
-      id: `${selectedStock?.symbol}_${strategy.strategyKey}_${Date.now()}`,
-      symbol: selectedStock?.symbol,
-      strategy: strategy.strategy,
-      type: 'options_strategy',
-      setup: strategy.setup,
-      risk: strategy.maxRisk,
-      reward: strategy.maxReward,
-      score: strategy.score
-    };
-    
-    setSelectedTrades(prev => [...prev, tradeData]);
-  };
 
   // Safe render functions for different data types
   const renderScanResults = () => (
@@ -512,28 +332,14 @@ export default function TradingPipeline() {
                     </Box>
                   }
                 />
-                <Box display="flex" gap={1}>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => handleTradeSelect(result)}
-                    color={selectedTrades.some(t => (t.id || t.symbol) === (result.id || result.symbol)) ? "primary" : "inherit"}
-                  >
-                    {selectedTrades.some(t => (t.id || t.symbol) === (result.id || result.symbol)) ? 'Selected' : 'Select'}
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="secondary"
-                    startIcon={<TrendingUpIcon />}
-                    onClick={() => handleStockSelect(result)}
-                    disabled={!strategyEngine || (strategyLoading && selectedStock?.symbol === result.symbol)}
-                  >
-                    {strategyLoading && selectedStock?.symbol === result.symbol ? 
-                      <CircularProgress size={16} /> : 'Analyze Options'
-                    }
-                  </Button>
-                </Box>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => handleTradeSelect(result)}
+                  color={selectedTrades.some(t => (t.id || t.symbol) === (result.id || result.symbol)) ? "primary" : "inherit"}
+                >
+                  {selectedTrades.some(t => (t.id || t.symbol) === (result.id || result.symbol)) ? 'Selected' : 'Select'}
+                </Button>
               </ListItem>
             ))}
           </List>
@@ -604,237 +410,6 @@ export default function TradingPipeline() {
     </Card>
   );
 
-  const renderOptionsStrategies = () => (
-    <Grid container spacing={3}>
-      <Grid item xs={12}>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Options Strategy Analysis
-            </Typography>
-            
-            {selectedStock ? (
-              <Box>
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  Analyzing options strategies for {selectedStock.symbol}. 
-                  Found {strategyRecommendations.length} recommendations.
-                  {strategyLoading && ' Analysis in progress...'}
-                </Alert>
-                <Box display="flex" alignItems="center" gap={2} mb={2}>
-                  <Typography variant="h5" color="primary">
-                    {selectedStock.symbol}
-                  </Typography>
-                  <Chip 
-                    label={`$${selectedStock.price || selectedStock.currentPrice || 'N/A'}`}
-                    color="primary"
-                    variant="outlined"
-                  />
-                  {selectedStock.changePercent && (
-                    <Chip 
-                      label={`${selectedStock.changePercent > 0 ? '+' : ''}${selectedStock.changePercent.toFixed(2)}%`}
-                      color={selectedStock.changePercent > 0 ? 'success' : 'error'}
-                      size="small"
-                    />
-                  )}
-                </Box>
-                
-                {strategyLoading ? (
-                  <Box display="flex" justifyContent="center" py={4}>
-                    <CircularProgress />
-                    <Typography ml={2}>Analyzing optimal strategies...</Typography>
-                  </Box>
-                ) : strategyRecommendations.length > 0 ? (
-                  <Box>
-                    <Typography variant="subtitle1" gutterBottom>
-                      Top {strategyRecommendations.length} Recommended Strategies
-                    </Typography>
-                    {strategyRecommendations.map((strategy, index) => (
-                      <Accordion key={index} sx={{ mb: 1 }}>
-                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                          <Box display="flex" alignItems="center" gap={2} width="100%">
-                            <Chip 
-                              label={`#${index + 1}`} 
-                              color="primary" 
-                              size="small" 
-                            />
-                            <Typography variant="h6">
-                              {strategy.strategy}
-                            </Typography>
-                            <Chip 
-                              label={strategy.type}
-                              color={
-                                strategy.type.includes('bullish') ? 'success' : 
-                                strategy.type.includes('bearish') ? 'error' : 'warning'
-                              }
-                              size="small"
-                            />
-                            <Chip 
-                              label={`Score: ${(strategy.score * 100).toFixed(0)}%`}
-                              variant="outlined"
-                              size="small"
-                            />
-                          </Box>
-                        </AccordionSummary>
-                        <AccordionDetails>
-                          <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
-                              <Card variant="outlined">
-                                <CardContent>
-                                  <Typography variant="h6" gutterBottom color="primary">
-                                    Strategy Overview
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Complexity:</strong> {strategy.complexity}
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Reasoning:</strong> {strategy.reasoning}
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Max Risk:</strong> ${strategy.maxRisk}
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Max Reward:</strong> ${strategy.maxReward}
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Breakeven:</strong> ${strategy.breakeven}
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    <strong>Probability of Profit:</strong> {strategy.probabilityOfProfit}%
-                                  </Typography>
-                                </CardContent>
-                              </Card>
-                            </Grid>
-                            
-                            <Grid item xs={12} md={6}>
-                              <Card variant="outlined">
-                                <CardContent>
-                                  <Typography variant="h6" gutterBottom color="primary">
-                                    Position Details
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Position Size:</strong> {strategy.positionSize} contracts
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Entry Price:</strong> ${strategy.entryPrice}
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Target Price:</strong> ${strategy.targetPrice}
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Stop Loss:</strong> ${strategy.stopLoss}
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Days to Expiration:</strong> {strategy.daysToExpiration}
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    <strong>Expiration:</strong> {new Date(strategy.expirationDate).toLocaleDateString()}
-                                  </Typography>
-                                </CardContent>
-                              </Card>
-                            </Grid>
-                            
-                            <Grid item xs={12} md={6}>
-                              <Card variant="outlined">
-                                <CardContent>
-                                  <Typography variant="h6" gutterBottom color="primary">
-                                    Greeks Analysis
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Delta:</strong> {strategy.netDelta}
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Theta:</strong> {strategy.netTheta}
-                                  </Typography>
-                                  <Typography variant="body2" paragraph>
-                                    <strong>Vega:</strong> {strategy.netVega}
-                                  </Typography>
-                                  <Typography variant="body2">
-                                    <strong>Gamma:</strong> {strategy.netGamma}
-                                  </Typography>
-                                </CardContent>
-                              </Card>
-                            </Grid>
-                            
-                            <Grid item xs={12} md={6}>
-                              <Card variant="outlined">
-                                <CardContent>
-                                  <Typography variant="h6" gutterBottom color="primary">
-                                    Action Plan
-                                  </Typography>
-                                  {strategy.actions && strategy.actions.map((action, idx) => (
-                                    <Typography key={idx} variant="body2" paragraph>
-                                      {idx + 1}. {action}
-                                    </Typography>
-                                  ))}\n                                </CardContent>
-                              </Card>
-                            </Grid>
-                            
-                            <Grid item xs={12}>
-                              <Box display="flex" gap={2}>
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  onClick={() => handleStrategySelect(strategy)}
-                                >
-                                  Select This Strategy
-                                </Button>
-                                <Button
-                                  variant="outlined"
-                                  onClick={() => {
-                                    // Export strategy details
-                                    const strategyData = JSON.stringify(strategy, null, 2);
-                                    const blob = new Blob([strategyData], { type: 'application/json' });
-                                    const url = URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = `${selectedStock.symbol}_${strategy.strategyKey}_strategy.json`;
-                                    a.click();
-                                    URL.revokeObjectURL(url);
-                                  }}
-                                >
-                                  Export Strategy
-                                </Button>
-                              </Box>
-                            </Grid>
-                          </Grid>
-                        </AccordionDetails>
-                      </Accordion>
-                    ))}
-                  </Box>
-                ) : (
-                  <Typography color="textSecondary">
-                    Strategy analysis completed but no recommendations found.
-                  </Typography>
-                )}
-              </Box>
-            ) : (
-              <Box textAlign="center" py={4}>
-                <Alert severity="info" sx={{ mb: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Options Strategy Analysis
-                  </Typography>
-                  <Typography paragraph>
-                    Click "Analyze Options" on any stock from the Market Opportunities tab to get personalized strategy recommendations.
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Features: 15+ strategies, Greeks analysis, risk management, ML learning
-                  </Typography>
-                </Alert>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setActiveTab(0)}
-                  size="large"
-                >
-                  Browse Market Opportunities
-                </Button>
-              </Box>
-            )}
-          </CardContent>
-        </Card>
-      </Grid>
-    </Grid>
-  );
 
   const renderRiskManagement = () => (
     <Grid container spacing={3}>
@@ -1050,22 +625,7 @@ export default function TradingPipeline() {
           </TabPanel>
           
           <TabPanel value={activeTab} index={1}>
-            <ErrorBoundary>
-              <div>
-                <Typography variant="h6" gutterBottom>
-                  Options Strategies Debug
-                </Typography>
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  Engine Status: {strategyEngine ? '✅ Ready' : '❌ Not Ready'}
-                </Alert>
-                {strategyEngine && (
-                  <Alert severity="success">
-                    Options Strategy Engine successfully initialized!
-                  </Alert>
-                )}
-                {renderOptionsStrategies()}
-              </div>
-            </ErrorBoundary>
+            <OptionsStrategyTab marketData={marketData} loading={externalLoading} onRefresh={onRefresh} />
           </TabPanel>
           
           <TabPanel value={activeTab} index={2}>
