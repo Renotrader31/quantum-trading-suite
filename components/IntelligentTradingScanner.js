@@ -289,6 +289,7 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
     try {
       let endpoint = '/api/enhanced-scan';
       let requestBody = {
+        symbols: ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX', 'CRM', 'ADBE', 'SOFI', 'PLTR', 'AMD', 'INTC', 'BABA'], // Default watchlist
         strategy: strategy,
         integrateLiveData: true,
         maxResults: scanConfig.filters.maxResults
@@ -330,9 +331,10 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
       
       const data = await response.json();
       
-      if (data.success && data.results) {
+      if (data.success && (data.opportunities || data.results)) {
         // Add strategy source and weight to each result
-        return data.results.map(result => ({
+        const results = data.opportunities || data.results || [];
+        return results.map(result => ({
           ...result,
           detectedBy: strategy,
           strategyWeight: mlModel.strategyWeights[strategy] || 1.0,

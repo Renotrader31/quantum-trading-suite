@@ -92,11 +92,18 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
             if (['SPY', 'QQQ', 'IWM', 'VIX'].includes(stock.symbol)) {
               indices[stock.symbol] = stock;
             } else {
+              // Calculate deterministic change values based on price if missing
+              const baseChange = stock.change !== undefined ? stock.change : 
+                (stock.price * 0.02 * (stock.symbol.charCodeAt(0) % 3 - 1)); // Deterministic based on symbol
+              const baseChangePercent = stock.changePercent !== undefined ? stock.changePercent :
+                (baseChange / stock.price * 100);
+              
               movers.push({
                 ...stock,
                 name: stock.symbol, // Add name field if missing
-                change: stock.change || (Math.random() - 0.5) * 10, // Generate random change if missing
-                changePercent: stock.changePercent || (Math.random() - 0.5) * 5 // Generate random % if missing
+                change: baseChange,
+                changePercent: baseChangePercent,
+                sector: stock.sector || 'Technology' // Add sector fallback
               });
             }
           });
@@ -107,7 +114,9 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
           }
           if (movers.length > 0) {
             console.log('📈 Dashboard updating movers:', movers.map(m => m.symbol));
+            console.log('📊 Mover data sample:', movers[0]);
             setTopMovers(movers);
+            console.log('✅ TopMovers state updated with', movers.length, 'items');
           }
         }
         if (data.sectors && Array.isArray(data.sectors) && data.sectors.length > 0) {
@@ -247,6 +256,8 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
         {/* Top Movers */}
         <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
           <h2 className="text-xl font-semibold text-white mb-6">Top Movers</h2>
+          {/* Debug: Log render-time data */}
+          {isClient && console.log('🎨 Rendering Top Movers. Data:', topMovers?.length || 0, 'items', 'Loading:', loading)}
           
           {loading ? (
             <div className="flex justify-center py-8">
