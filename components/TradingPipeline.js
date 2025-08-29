@@ -981,21 +981,22 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
         {portfolioPositions.slice(0, 3).map((pos, idx) => (
           <div key={idx}>• {pos.symbol} - {pos.strategyName}</div>
         ))}
-        {portfolioPositions.length > 3 && <div>+ {portfolioPositions.length - 3} more...</div>}
+        {portfolioPositions.length > 3 && <div>+ {portfolioPositions.length - 3} more...</div>}//
       </div>
        </div>
-  } : (
+     ) : (
   <div>
     <p className="mb-3">No active positions loaded. Click "Load Active Positions" to sync with your Portfolio Tracker.</p>
     <button
       onClick={async () => {
-        try {
-          console.log('🔄 Loading active positions...');
-          const response = await fetch('/api/trade-entry', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'getActiveTrades' })
-          });
+        // ... button code here
+      }}
+      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium"
+    >
+      Load Active Positions
+    </button>
+  </div>
+)}
           
           if (response.ok) {
             const data = await response.json();
