@@ -915,7 +915,14 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                       onClick={async () => {
                         try {
                           console.log('🔄 Loading active positions from Portfolio Tracker...');
-                          const response = await fetch('/api/trade-entry?action=getActiveTrades');
+                          const response = await fetch('/api/trade-entry', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ action: 'getActiveTrades' })
+                          });
+                          
                           if (response.ok) {
                             const data = await response.json();
                             const positions = data.activeTrades || [];
@@ -929,7 +936,8 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                               alert('📝 No active positions found in your Portfolio Tracker.\n\nAdd some trades to your portfolio first, then sync again.');
                             }
                           } else {
-                            throw new Error(`API responded with status ${response.status}`);
+                            const errorText = await response.text();
+                            throw new Error(`API responded with status ${response.status}: ${errorText}`);
                           }
                         } catch (error) {
                           console.error('❌ Failed to load portfolio positions:', error);
