@@ -569,9 +569,9 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                           </div>
                           
                           <div className="text-center bg-gray-700 rounded-lg p-3">
-                            <div className="text-xl font-bold text-yellow-400">
-                              {trade.riskReward?.toFixed(1)}:1
-                            </div>
+                           <div className="text-xl font-bold text-yellow-400">
+  {typeof trade.riskReward === 'number' ? trade.riskReward.toFixed(1) : '0.0'}:1
+</div>
                             <div className="text-xs text-gray-400">Risk:Reward</div>
                           </div>
 
