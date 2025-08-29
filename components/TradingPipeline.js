@@ -570,7 +570,7 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                           
                           <div className="text-center bg-gray-700 rounded-lg p-3">
                             <div className="text-xl font-bold text-yellow-400">
-                              {trade.riskReward?.toFixed(1)}:1
+                              {typeof trade.riskReward === 'number' ? trade.riskReward.toFixed(1) : trade.riskReward || '0.0'}:1
                             </div>
                             <div className="text-xs text-gray-400">Risk:Reward</div>
                           </div>
@@ -632,7 +632,12 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                                 )}
                                 <div className="flex justify-between">
                                   <span className="text-gray-400">Current Price:</span>
-                                  <span className="text-white font-medium">${(trade.currentPrice || trade.price || 100).toFixed(2)}</span>
+                                  <span className="text-white font-medium">
+                                    ${typeof (trade.currentPrice || trade.price) === 'number' 
+                                      ? (trade.currentPrice || trade.price).toFixed(2) 
+                                      : '100.00'
+                                    }
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -650,13 +655,13 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                                 <div className="flex justify-between">
                                   <span className="text-gray-400">Delta:</span>
                                   <span className="text-white font-medium">
-                                    {trade.greeks?.delta?.toFixed(3) || '0.500'}
+                                    {(typeof trade.greeks?.delta === 'number' ? trade.greeks.delta.toFixed(3) : '0.500')}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-gray-400">Theta:</span>
                                   <span className="text-white font-medium">
-                                    {trade.greeks?.theta?.toFixed(3) || '-0.050'}
+                                    {(typeof trade.greeks?.theta === 'number' ? trade.greeks.theta.toFixed(3) : '-0.050')}
                                   </span>
                                 </div>
                               </div>
@@ -679,7 +684,7 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                                       </span>
                                     </div>
                                     <div className="text-xs text-gray-400 mt-1">
-                                      Premium: ${leg.premium?.toFixed(2) || '2.50'} | {leg.dte || trade.dte || 35} DTE
+                                      Premium: ${typeof leg.premium === 'number' ? leg.premium.toFixed(2) : '2.50'} | {leg.dte || trade.dte || 35} DTE
                                     </div>
                                   </div>
                                 ))}
@@ -697,8 +702,8 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                                     <div className="text-xs text-gray-400 mb-1">Breakeven Points</div>
                                     <div className="text-sm text-white font-medium">
                                       {typeof trade.breakevens === 'object' 
-                                        ? Object.values(trade.breakevens).map(be => `$${be.toFixed(2)}`).join(', ')
-                                        : `$${trade.breakevens}`
+                                        ? Object.values(trade.breakevens).map(be => `$${typeof be === 'number' ? be.toFixed(2) : be}`).join(', ')
+                                        : `$${typeof trade.breakevens === 'number' ? trade.breakevens.toFixed(2) : trade.breakevens}`
                                       }
                                     </div>
                                   </div>
@@ -708,7 +713,7 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                                   <div className="bg-gray-600 rounded-lg p-3">
                                     <div className="text-xs text-gray-400 mb-1">Profit Zone</div>
                                     <div className="text-sm text-white font-medium">
-                                      ${trade.profitZone.lower?.toFixed(2)} - ${trade.profitZone.upper?.toFixed(2)}
+                                      ${typeof trade.profitZone.lower === 'number' ? trade.profitZone.lower.toFixed(2) : trade.profitZone.lower} - ${typeof trade.profitZone.upper === 'number' ? trade.profitZone.upper.toFixed(2) : trade.profitZone.upper}
                                     </div>
                                   </div>
                                 )}
