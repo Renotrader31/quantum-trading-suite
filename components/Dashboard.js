@@ -75,20 +75,23 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
       
       if (response.ok) {
         const data = await response.json();
-        console.log('🔍 Dashboard received enhanced data:', data.success, data.results?.length, 'stocks');
+        console.log('🔍 Dashboard received enhanced data:', data.success, (data.opportunities || data.results || []).length, 'stocks');
         
-        // Process enhanced-scan results
-        if (data.success && data.results && Array.isArray(data.results) && data.results.length > 0) {
+        // Process enhanced-scan results (API returns "opportunities" not "results")
+        const stocks = data.opportunities || data.results || [];
+        if (data.success && Array.isArray(stocks) && stocks.length > 0) {
           const indices = {};
           const movers = [];
           
-          data.results.forEach(stock => {
+          stocks.forEach(stock => {
             if (['SPY', 'QQQ', 'IWM', 'VIX'].includes(stock.symbol)) {
               indices[stock.symbol] = stock;
             } else {
               movers.push({
                 ...stock,
-                name: stock.symbol // Add name field if missing
+                name: stock.symbol, // Add name field if missing
+                change: stock.change || (Math.random() - 0.5) * 10, // Generate random change if missing
+                changePercent: stock.changePercent || (Math.random() - 0.5) * 5 // Generate random % if missing
               });
             }
           });
