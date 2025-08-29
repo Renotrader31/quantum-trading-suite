@@ -1176,9 +1176,9 @@ function calculateBreakevens(strategyKey, strikes, price) {
     case 'ironButterfly':
     case 'butterfly':
       // Iron butterfly breakeven = ATM +/- net debit (wing distance - net credit)
-      const netCredit = estimatePremium('call', strikes.sellCall, price, 30) + estimatePremium('put', strikes.sellPut, price, 30) - estimatePremium('call', strikes.buyCall, price, 30) - estimatePremium('put', strikes.buyPut, price, 30);
+      const butterflyNetCredit = estimatePremium('call', strikes.sellCall, price, 30) + estimatePremium('put', strikes.sellPut, price, 30) - estimatePremium('call', strikes.buyCall, price, 30) - estimatePremium('put', strikes.buyPut, price, 30);
       const wingDistance = strikes.buyCall - strikes.sellCall; // Distance from ATM to wing
-      breakevens.push(strikes.sellCall - Math.max(wingDistance - netCredit, 1), strikes.sellCall + Math.max(wingDistance - netCredit, 1));
+      breakevens.push(strikes.sellCall - Math.max(wingDistance - butterflyNetCredit, 1), strikes.sellCall + Math.max(wingDistance - butterflyNetCredit, 1));
       break;
     case 'callSpread':
     case 'bullCallSpread':
