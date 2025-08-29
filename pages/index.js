@@ -6,6 +6,7 @@ import GammaAnalytics from '../components/GammaAnalytics';
 import OptionsStrategies from '../components/OptionsStrategies';
 import QuantumTradeAI from '../components/QuantumTradeAI';
 import TradingPipeline from '../components/TradingPipeline';
+import IntelligentTradingScanner from '../components/IntelligentTradingScanner';
 
 export default function Home() {
   const [activeMode, setActiveMode] = useState('dashboard');
@@ -84,8 +85,9 @@ export default function Home() {
 
   const modes = [
     { id: 'dashboard', name: 'Dashboard', icon: '📊' },
+    { id: 'intelligent', name: 'Intelligent Scanner', icon: '🧠' },
     { id: 'scanner', name: 'Squeeze Scanner', icon: '🔍' },
-    { id: 'pipeline', name: 'Trading Pipeline', icon: '🧠' },
+    { id: 'pipeline', name: 'Trading Pipeline', icon: '⚙️' },
     { id: 'ai', name: 'AI Recommendations', icon: '🤖' },
     { id: 'quantum', name: 'Quantum AI v3.0', icon: '🔮' },
     { id: 'gamma', name: 'Gamma Analytics', icon: '⚡' },
@@ -103,6 +105,8 @@ export default function Home() {
     switch (activeMode) {
       case 'dashboard':
         return <Dashboard {...commonProps} />;
+      case 'intelligent':
+        return <IntelligentTradingScanner {...commonProps} />;
       case 'scanner':
         return <SqueezeScanner {...commonProps} />;
       case 'pipeline':

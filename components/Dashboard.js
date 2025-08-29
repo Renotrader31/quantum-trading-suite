@@ -43,6 +43,9 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
       if (movers.length > 0) {
         setTopMovers(movers);
       }
+    } else {
+      // If no props data, automatically fetch market data to populate dashboard
+      fetchMarketDataSafely();
     }
   }, [propsMarketData]);
 
@@ -152,6 +155,13 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
             >
               🎯 Trade Tracker
             </button>
+            <button
+              onClick={fetchMarketDataSafely}
+              disabled={actualLoading}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg font-medium transition-colors"
+            >
+              {actualLoading ? '🔄' : '📊'} Refresh
+            </button>
             <div className="flex items-center space-x-2">
               <div className={`w-3 h-3 rounded-full ${actualLoading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}></div>
               <span className="text-sm text-gray-400">
@@ -234,9 +244,9 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
             </div>
-          ) : (
+          ) : topMovers && Array.isArray(topMovers) && topMovers.length > 0 ? (
             <div className="space-y-3">
-              {topMovers && Array.isArray(topMovers) && topMovers.slice(0, 6).map((stock, index) => {
+              {topMovers.slice(0, 6).map((stock, index) => {
                 const symbol = stock?.symbol || 'N/A';
                 const price = stock?.price || 0;
                 const change = stock?.change || 0;
@@ -262,6 +272,18 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
                   </div>
                 );
               })}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-gray-400 mb-4">
+                📈 No market data loaded yet
+              </div>
+              <button
+                onClick={fetchMarketDataSafely}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                📊 Load Top Movers
+              </button>
             </div>
           )}
         </div>
