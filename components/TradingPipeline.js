@@ -86,6 +86,11 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
   const [riskMetrics, setRiskMetrics] = useState(null);
   const [selectedTrades, setSelectedTrades] = useState([]);
   
+  // Debug selectedTrades changes
+  useEffect(() => {
+    console.log('selectedTrades state updated:', selectedTrades);
+  }, [selectedTrades]);
+
 
   
   // Configuration state
@@ -142,6 +147,9 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
       }
       
       const data = await response.json();
+      console.log('Raw API response data:', data);
+      console.log('data.opportunities exists?', !!data.opportunities);
+      console.log('data.opportunities length:', data.opportunities?.length);
       
       // Intelligent strategy analysis based on market data
       const analyzeStrategy = (opportunity) => {
@@ -200,17 +208,35 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
       
       // Enhanced results with intelligent analysis
       const enhancedResults = (data.opportunities || []).map(opportunity => {
-        const analysis = analyzeStrategy(opportunity);
-        console.log(`Strategy Analysis for ${opportunity.symbol}:`, analysis);
-        return {
+        try {
+          const analysis = analyzeStrategy(opportunity);
+          console.log(`Strategy Analysis for ${opportunity.symbol}:`, analysis);
+          console.log(`Original opportunity:`, opportunity);
+        
+        const enhanced = {
           ...opportunity,
           ...analysis,
           id: opportunity.symbol || Math.random().toString(36),
           symbol: opportunity.symbol || 'Unknown'
         };
+        
+        console.log(`Enhanced result for ${opportunity.symbol}:`, enhanced);
+        return enhanced;
+        } catch (error) {
+          console.error(`Error analyzing strategy for ${opportunity.symbol}:`, error);
+          return {
+            ...opportunity,
+            strategy: 'Analysis Error',
+            expectedReturn: 'N/A',
+            risk: 'Unknown',
+            severity: 'info',
+            id: opportunity.symbol || Math.random().toString(36),
+            symbol: opportunity.symbol || 'Unknown'
+          };
+        }
       });
       
-      console.log('Enhanced scan results:', enhancedResults);
+      console.log('Final enhanced scan results:', enhancedResults);
       setScanResults(enhancedResults);
       showSuccess(`🎯 Found ${enhancedResults.length} intelligent trading opportunities!`);
       return data;
@@ -343,12 +369,20 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
 
   // Handle trade selection with safety
   const handleTradeSelect = (trade) => {
+    console.log('handleTradeSelect called with:', trade);
     const safeTradeId = trade?.id || trade?.symbol || Math.random().toString(36);
+    console.log('safeTradeId:', safeTradeId);
+    
     setSelectedTrades(prev => {
+      console.log('Previous selectedTrades:', prev);
       if (prev.some(t => (t.id || t.symbol) === safeTradeId)) {
-        return prev.filter(t => (t.id || t.symbol) !== safeTradeId);
+        const filtered = prev.filter(t => (t.id || t.symbol) !== safeTradeId);
+        console.log('Removing trade, new array:', filtered);
+        return filtered;
       }
-      return [...prev, { ...trade, id: safeTradeId }];
+      const newArray = [...prev, { ...trade, id: safeTradeId }];
+      console.log('Adding trade, new array:', newArray);
+      return newArray;
     });
   };
 
@@ -523,7 +557,9 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
                 </Box>
               ) : (
                 <Grid container spacing={2}>
-                  {scanResults.map((result, index) => (
+                  {scanResults.map((result, index) => {
+                    console.log(`Rendering card for ${result.symbol}:`, result);
+                    return (
                     <Grid item xs={12} md={6} lg={4} key={index}>
                       <Card 
                         variant="outlined"
@@ -585,7 +621,8 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
                         </CardContent>
                       </Card>
                     </Grid>
-                  ))}
+                    );
+                  })}
                 </Grid>
               )}
             </CardContent>

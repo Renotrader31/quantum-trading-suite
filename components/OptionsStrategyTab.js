@@ -212,6 +212,10 @@ export default function OptionsStrategyTab({ marketData = {}, selectedTrades = [
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Debug logging
+  console.log('OptionsStrategyTab received selectedTrades:', selectedTrades);
+  console.log('OptionsStrategyTab received marketData:', Object.keys(marketData));
+
   // Enhanced strategy analysis function for 15+ strategies
   const analyzeStrategies = (stockData) => {
     const price = stockData.price || 100;
