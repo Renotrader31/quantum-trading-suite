@@ -36,7 +36,6 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import OptionsStrategyEngine from '../lib/OptionsStrategyEngine';
 import ErrorBoundary from './ErrorBoundary';
 
 // Utility function to safely access severity property
@@ -99,24 +98,42 @@ export default function TradingPipeline() {
   const [strategyLoading, setStrategyLoading] = useState(false);
   const [strategyEngine, setStrategyEngine] = useState(null);
   
-  // Initialize strategy engine safely on client side
+  // Initialize strategy engine safely on client side with dynamic import
   useEffect(() => {
     let isMounted = true;
     
     const initializeEngine = async () => {
       try {
+        console.log('🔧 Starting OptionsStrategyEngine initialization...');
+        
         // Small delay to ensure component is fully mounted
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        if (!isMounted) return;
+        if (!isMounted) {
+          console.log('⚠️ Component unmounted during initialization');
+          return;
+        }
         
-        const engine = new OptionsStrategyEngine();
+        console.log('📦 Dynamic importing SimpleOptionsEngine class...');
+        const { default: SimpleOptionsEngine } = await import('../lib/SimpleOptionsEngine');
+        
+        console.log('🏗️ Creating engine instance...');
+        const engine = new SimpleOptionsEngine();
+        
+        console.log('🧪 Testing engine methods...');
+        // Test that the engine has required methods
+        if (typeof engine.analyzeStrategies !== 'function') {
+          throw new Error('SimpleOptionsEngine missing analyzeStrategies method');
+        }
+        
         setStrategyEngine(engine);
-        console.log('✅ OptionsStrategyEngine initialized successfully');
+        console.log('✅ SimpleOptionsEngine initialized successfully');
+        console.log('🎯 Engine methods available:', Object.getOwnPropertyNames(Object.getPrototypeOf(engine)));
       } catch (error) {
-        console.error('❌ Failed to initialize OptionsStrategyEngine:', error);
+        console.error('❌ Failed to initialize SimpleOptionsEngine:', error);
+        console.error('📊 Error stack:', error.stack);
         if (isMounted) {
-          showError('Failed to initialize options strategy engine');
+          showError(`Failed to initialize options strategy engine: ${error.message}`);
         }
       }
     };
@@ -1034,7 +1051,20 @@ export default function TradingPipeline() {
           
           <TabPanel value={activeTab} index={1}>
             <ErrorBoundary>
-              {renderOptionsStrategies()}
+              <div>
+                <Typography variant="h6" gutterBottom>
+                  Options Strategies Debug
+                </Typography>
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Engine Status: {strategyEngine ? '✅ Ready' : '❌ Not Ready'}
+                </Alert>
+                {strategyEngine && (
+                  <Alert severity="success">
+                    Options Strategy Engine successfully initialized!
+                  </Alert>
+                )}
+                {renderOptionsStrategies()}
+              </div>
             </ErrorBoundary>
           </TabPanel>
           
