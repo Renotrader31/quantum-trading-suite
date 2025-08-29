@@ -20,11 +20,13 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    console.log('🎯 Dashboard useEffect triggered');
     setIsClient(true);
     setLastUpdate(new Date());
     
     // Use props data if available, otherwise keep fallback data
     if (propsMarketData && Object.keys(propsMarketData).length > 0) {
+      console.log('📊 Using props market data:', Object.keys(propsMarketData).length, 'items');
       // Convert props market data to proper format
       const indices = {};
       const movers = [];
@@ -45,6 +47,7 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
       }
     } else {
       // If no props data, automatically fetch market data to populate dashboard
+      console.log('📈 No props data, fetching market data automatically...');
       fetchMarketDataSafely();
     }
   }, [propsMarketData]);
@@ -61,6 +64,7 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
 
   const fetchMarketDataSafely = async () => {
     try {
+      console.log('🚀 Dashboard: Starting fetch market data...');
       setLoading(true);
       
       // Use enhanced-scan API instead of broken stocks API
@@ -76,6 +80,7 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
       if (response.ok) {
         const data = await response.json();
         console.log('🔍 Dashboard received enhanced data:', data.success, (data.opportunities || data.results || []).length, 'stocks');
+        console.log('📊 Full API response:', JSON.stringify(data, null, 2));
         
         // Process enhanced-scan results (API returns "opportunities" not "results")
         const stocks = data.opportunities || data.results || [];
