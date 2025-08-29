@@ -346,10 +346,13 @@ function getRealisticPrice(symbol) {
     'SPY': 646.12, 'QQQ': 572.78, 'IWM': 235.50, 'AAPL': 229.70, 'MSFT': 505.13,
     'GOOGL': 195.30, 'AMZN': 205.45, 'TSLA': 351.18, 'META': 745.00, 'NVDA': 181.90,
     'NFLX': 285.20, 'AMD': 167.17, 'CRM': 321.45, 'PYPL': 89.23, 'ADBE': 485.67,
-    'INTC': 45.78, 'BABA': 98.56, 'V': 289.34, 'MA': 534.12, 'JPM': 234.56
+    'INTC': 45.78, 'BABA': 98.56, 'V': 289.34, 'MA': 534.12, 'JPM': 234.56,
+    // FIXED: Added missing ticker prices to prevent wild trades
+    'BE': 54.80, 'SOFI': 26.04, 'EFA': 92.02, 'PLTR': 45.67, 'ROKU': 89.34,
+    'COIN': 267.45, 'SQ': 123.78, 'HOOD': 34.56, 'RBLX': 67.89, 'SNAP': 23.45
   };
   
-  return priceMap[symbol] || (100 + Math.random() * 400); // Default range $100-500
+  return priceMap[symbol] || (25 + Math.random() * 75); // More conservative default range $25-100
 }
 
 function getMarketCapCategory(symbol) {
