@@ -348,7 +348,7 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
                     <MenuItem value="all">All Market Caps</MenuItem>
                     <MenuItem value="large">Large Cap ($10B+)</MenuItem>
                     <MenuItem value="mid">Mid Cap ($2-10B)</MenuItem>
-                    <MenuItem value="small">Small Cap (<$2B)</MenuItem>
+                    <MenuItem value="small">Small Cap (&lt;$2B)</MenuItem>
                   </Select>
                 </FormControl>
               </Box>
