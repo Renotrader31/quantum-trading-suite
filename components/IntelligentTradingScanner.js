@@ -59,9 +59,9 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
       unusual_activity: true
     },
     filters: {
-      minScore: 60,
+      minScore: 30, // Lowered for demo data
       maxResults: 50,
-      minVolume: 100000,
+      minVolume: 1000, // Lowered for demo data  
       minPrice: 5.0,
       maxPrice: 1000.0,
       sectors: []
@@ -466,14 +466,21 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
   
   // Apply user-defined filters
   const applyFilters = (results) => {
-    return results.filter(stock => {
+    console.log('🔍 Applying filters to', results.length, 'results');
+    console.log('📊 Filter settings:', scanConfig.filters);
+    console.log('📈 Sample stock data:', results[0]);
+    
+    const filtered = results.filter(stock => {
       // Score filter
-      if ((stock.aiScore || stock.compositeScore || 0) < scanConfig.filters.minScore) {
+      const score = stock.aiScore || stock.compositeScore || stock.holyGrail || 0;
+      if (score < scanConfig.filters.minScore) {
+        console.log('❌ Filtered out', stock.symbol, 'score too low:', score, 'min:', scanConfig.filters.minScore);
         return false;
       }
       
       // Volume filter
       if ((stock.volume || 0) < scanConfig.filters.minVolume) {
+        console.log('❌ Filtered out', stock.symbol, 'volume too low:', stock.volume, 'min:', scanConfig.filters.minVolume);
         return false;
       }
       
@@ -496,6 +503,9 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
       
       return true;
     });
+    
+    console.log('✅ Filtering complete:', filtered.length, 'out of', results.length, 'stocks passed filters');
+    return filtered;
   };
   
   // Sort results

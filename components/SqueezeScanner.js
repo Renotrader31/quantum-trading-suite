@@ -198,9 +198,10 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
       
       if (data.success) {
         console.log(`✅ Enhanced scan complete: ${data.scanned} stocks scanned, ${data.liveDataCount} with live data`);
-        console.log('🔍 DEBUG: First stock data:', JSON.stringify(data.results[0], null, 2));
+        const results = data.opportunities || data.results || [];
+        console.log('🔍 DEBUG: First stock data:', JSON.stringify(results[0], null, 2));
         console.log('🔍 DEBUG: Data source:', data.dataSource);
-        setStocks(data.results);
+        setStocks(results);
         setLastUpdate(new Date().toISOString());
         
         // Show success alert with enhanced data info
@@ -215,7 +216,7 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
         }
         
         // Check for high holy grail scores
-        data.results.forEach(stock => {
+        results.forEach(stock => {
           if (stock.holyGrail >= 85) {
             addAlert({
               type: 'HOLY_GRAIL',
@@ -701,8 +702,9 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
       
       const scanData = await scanResponse.json();
       
-      if (scanData.success && scanData.results && scanData.results.length > 0) {
-        const stockData = scanData.results[0];
+      if (scanData.success && (scanData.opportunities || scanData.results) && (scanData.opportunities || scanData.results).length > 0) {
+        const results = scanData.opportunities || scanData.results;
+        const stockData = results[0];
         
         // Use the scanned stock data for trade analysis
         handleStockClick(stockData, { stopPropagation: () => {} });
