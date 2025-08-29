@@ -927,22 +927,100 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                   </div>
                   
                   <div className="text-sm text-gray-400">
-                    {portfolioPositions.length > 0 ? (
-                      <div>
-                        <p className="mb-2">✅ {portfolioPositions.length} active positions loaded for risk analysis</p>
-                        <div className="text-xs text-gray-500 space-y-1">
-                          {portfolioPositions.slice(0, 3).map((pos, idx) => (
-                            <div key={idx}>• {pos.symbol} - {pos.strategyName}</div>
-                          ))}
-                          {portfolioPositions.length > 3 && <div>+ {portfolioPositions.length - 3} more...</div>}
-                        </div>
-                      </div>
-                    ) : (
-                      <p>No active positions loaded. Click "Load Active Positions" to sync with your Portfolio Tracker.</p>
-                    )}
-                  </div>
-                </div>
+                    <div className="flex items-center justify-between mb-4">
+  <h4 className="text-lg font-semibold text-white flex items-center gap-2">
+    📊 Portfolio Integration
+  </h4>
+  <button
+    onClick={async () => {
+      try {
+        console.log('🔄 Loading active positions...');
+        const response = await fetch('/api/trade-entry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'getActiveTrades' })
+        });
+        
+        console.log('📡 Response status:', response.status);
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('📊 Received data:', data);
+          
+          if (data.success && data.activeTrades) {
+            setPortfolioPositions(data.activeTrades);
+            console.log(`✅ Loaded ${data.activeTrades.length} active positions`);
+            alert(`✅ Loaded ${data.activeTrades.length} active positions from Portfolio Tracker`);
+          } else {
+            console.warn('⚠️ No active trades found in response');
+            alert('ℹ️ No active positions found in Portfolio Tracker');
+            setPortfolioPositions([]);
+          }
+        } else {
+          const errorData = await response.text();
+          console.error('❌ API Error:', response.status, errorData);
+          alert(`❌ Error loading positions: ${response.status} - ${errorData}`);
+        }
+      } catch (error) {
+        console.error('❌ Failed to load portfolio positions:', error);
+        alert(`❌ Network Error: ${error.message}`);
+      }
+    }}
+    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm"
+  >
+    Load Active Positions
+  </button>
+</div>
 
+<div className="text-sm text-gray-400">
+  {portfolioPositions.length > 0 ? (
+    <div>
+      <p className="mb-2">✅ {portfolioPositions.length} active positions loaded for risk analysis</p>
+      <div className="text-xs text-gray-500 space-y-1">
+        {portfolioPositions.slice(0, 3).map((pos, idx) => (
+          <div key={idx}>• {pos.symbol} - {pos.strategyName}</div>
+        ))}
+        {portfolioPositions.length > 3 && <div>+ {portfolioPositions.length - 3} more...</div>}
+      </div>
+       </div>
+  } : (
+  <div>
+    <p className="mb-3">No active positions loaded. Click "Load Active Positions" to sync with your Portfolio Tracker.</p>
+    <button
+      onClick={async () => {
+        try {
+          console.log('🔄 Loading active positions...');
+          const response = await fetch('/api/trade-entry', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'getActiveTrades' })
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.activeTrades) {
+              setPortfolioPositions(data.activeTrades);
+              alert(`✅ Loaded ${data.activeTrades.length} active positions from Portfolio Tracker`);
+            } else {
+              alert('ℹ️ No active positions found in Portfolio Tracker');
+              setPortfolioPositions([]);
+            }
+          } else {
+            alert(`❌ Error loading positions: ${response.status}`);
+          }
+        } catch (error) {
+          alert(`❌ Network Error: ${error.message}`);
+        }
+      }}
+      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium"
+    >
+      Load Active Positions
+    </button>
+  </div>
+)}
+
+</div>
+    </div>
                 {riskCalculatedPosition && (
                   <div className="bg-green-900/20 border border-green-600/30 rounded-lg p-4">
                     <h4 className="text-lg font-semibold text-green-300 mb-2 flex items-center gap-2">
