@@ -363,23 +363,35 @@ async function analyzeStrategy(symbol, strategyKey, strategy, marketData, config
       break;
       
     case 'bullCallSpread':
+    case 'callSpread': // Also handle the generic callSpread case
     case 'bullPutSpread':
-      // Bullish spreads favor upward momentum + squeeze
-      baseProbability += change > 0 ? change * 10 : -Math.abs(change) * 2;
+      // FIXED: Conservative probability adjustments for directional spreads
+      // Cap positive change bonus at +8% max, negative change penalty at -5% max
+      baseProbability += change > 0 ? Math.min(change * 3, 8) : Math.max(-Math.abs(change) * 2, -5);
       if (squeezeContext) {
         const momentum = parseFloat(squeezeContext.momentum || 0);
-        if (momentum > 1) baseProbability += 12; // Strong bullish momentum
+        if (momentum > 1) baseProbability += 6; // Reduced from 12 to 6
+        else if (momentum > 0) baseProbability += 3; // Small positive momentum
+      }
+      
+      // SANITY CHECK: Bull call spreads should be conservative
+      if (strategyKey === 'bullCallSpread' || strategyKey === 'callSpread') {
+        baseProbability = Math.min(baseProbability, 70); // Cap at 70% max
       }
       break;
       
     case 'bearCallSpread':
     case 'bearPutSpread':
-      // Bearish spreads favor downward momentum
-      baseProbability += change < 0 ? Math.abs(change) * 10 : -change * 2;
+      // FIXED: Conservative probability adjustments for bearish spreads
+      baseProbability += change < 0 ? Math.min(Math.abs(change) * 3, 8) : Math.max(-change * 2, -5);
       if (squeezeContext) {
         const momentum = parseFloat(squeezeContext.momentum || 0);
-        if (momentum < -1) baseProbability += 12; // Strong bearish momentum
+        if (momentum < -1) baseProbability += 6; // Reduced from 12 to 6
+        else if (momentum < 0) baseProbability += 3; // Small negative momentum
       }
+      
+      // SANITY CHECK: Bear spreads should be conservative
+      baseProbability = Math.min(baseProbability, 70); // Cap at 70% max
       break;
       
     case 'ironCondor':
@@ -754,12 +766,20 @@ function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
       break;
       
     case 'callSpread':
-      strikes.buyCall = Math.round(atm + priceMove * 0.2); // Slightly OTM
-      strikes.sellCall = strikes.buyCall + Math.round(price * 0.04);
+      // FIXED: Conservative bull call spread - buy ATM/slightly ITM, sell OTM
+      strikes.buyCall = Math.max(atm - Math.round(price * 0.02), Math.round(atm * 0.98)); // Slightly ITM or ATM
+      strikes.sellCall = strikes.buyCall + Math.max(5, Math.round(price * 0.025)); // 2.5% spread width minimum $5
       
-      // SANITY CHECK: Keep call spreads reasonable
-      strikes.buyCall = Math.min(strikes.buyCall, atm + price * 0.1);
-      strikes.sellCall = Math.min(strikes.sellCall, atm + price * 0.2);
+      // STRICT SANITY CHECK: Keep call spreads very reasonable
+      strikes.buyCall = Math.max(Math.round(price * 0.95), Math.min(strikes.buyCall, Math.round(price * 1.05))); // Within ±5%
+      strikes.sellCall = Math.max(strikes.buyCall + 2, Math.min(strikes.sellCall, Math.round(price * 1.08))); // Max 8% OTM
+      
+      // Ensure minimum spread width of $2 and maximum of 10% of stock price
+      const spreadWidth = strikes.sellCall - strikes.buyCall;
+      if (spreadWidth < 2) strikes.sellCall = strikes.buyCall + 2;
+      if (spreadWidth > price * 0.1) strikes.sellCall = strikes.buyCall + Math.round(price * 0.1);
+      
+      console.log(`📊 BULL CALL SPREAD FIX - Stock: $${price}, Buy: $${strikes.buyCall}, Sell: $${strikes.sellCall}, Width: $${strikes.sellCall - strikes.buyCall}`);
       break;
       
     case 'putSpread':
@@ -1093,6 +1113,18 @@ function calculateBreakevens(strategyKey, strikes, price) {
     case 'ironCondor':
       breakevens.push(strikes.sellCall - 1, strikes.sellPut + 1);
       break;
+    case 'callSpread':
+    case 'bullCallSpread':
+      // FIXED: Bull call spread breakeven = long strike + net debit paid
+      const netDebit = estimatePremium('call', strikes.buyCall, price, 30) - estimatePremium('call', strikes.sellCall, price, 30);
+      breakevens.push(strikes.buyCall + Math.max(netDebit, 0.5)); // Minimum $0.50 debit
+      break;
+    case 'putSpread':
+    case 'bullPutSpread':
+      // Bull put spread breakeven = short strike - net credit received
+      const netCredit = estimatePremium('put', strikes.sellPut, price, 30) - estimatePremium('put', strikes.buyPut, price, 30);
+      breakevens.push(strikes.sellPut - Math.max(netCredit, 0.5)); // Minimum $0.50 credit
+      break;
     default:
       breakevens.push(price);
   }
@@ -1402,17 +1434,20 @@ function getActionAlignment(strategyBias, neuralPrediction) {
 function calculateEnhancedProbability(baseProbability, neuralNetworkBoost, squeezeBoost, strategyWinRate) {
   let finalProbability = baseProbability;
   
-  // Add neural network boost
-  finalProbability += neuralNetworkBoost;
+  // Add neural network boost (cap individual boosts)
+  finalProbability += Math.min(neuralNetworkBoost, 10);
   
-  // Add squeeze context boost
-  finalProbability += squeezeBoost;
+  // Add squeeze context boost (cap individual boosts)
+  finalProbability += Math.min(squeezeBoost, 15);
   
-  // Blend with strategy historical win rate
-  finalProbability = (finalProbability * 0.7) + (strategyWinRate * 0.3);
+  // Blend with strategy historical win rate (more conservative)
+  finalProbability = (finalProbability * 0.6) + (strategyWinRate * 0.4);
   
-  // Ensure probability is within reasonable bounds
-  return Math.max(10, Math.min(95, Math.round(finalProbability)));
+  // FIXED: More conservative probability caps - no trade should exceed 80%
+  const maxProbability = 80; // Reduced from 95% to 80%
+  const minProbability = 25; // Increased from 10% to 25%
+  
+  return Math.max(minProbability, Math.min(maxProbability, Math.round(finalProbability)));
 }
 
 // Pattern recognition integration
