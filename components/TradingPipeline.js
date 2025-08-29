@@ -197,8 +197,21 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
               portfolioContext
             );
             
-            setEnsembleResults(ensembleOutput);
-            setActionableTrades(ensembleOutput.recommendations);
+           if (ensembleOutput && typeof ensembleOutput === 'object') {
+  // Fix any undefined severity properties in the ensemble output
+  if (ensembleOutput.recommendations && Array.isArray(ensembleOutput.recommendations)) {
+    ensembleOutput.recommendations = ensembleOutput.recommendations.map(rec => ({
+      ...rec,
+      severity: rec.severity || 'info'  // Fix undefined severity
+    }));
+  }
+  
+  setEnsembleResults(ensembleOutput);
+  setActionableTrades(ensembleOutput.recommendations || []);
+} else {
+  console.warn('⚠️ Ensemble output is invalid, using original trades');
+  setActionableTrades(data.actionableTrades || []);
+}
             
             console.log(`✅ Ensemble optimization complete: ${ensembleOutput.recommendations.length} optimized trades`);
             console.log(`📊 Market Regime: ${ensembleOutput.marketRegime.primary} (${ensembleOutput.marketRegime.confidence}% confidence)`);
