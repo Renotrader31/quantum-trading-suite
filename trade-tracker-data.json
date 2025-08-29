@@ -898,6 +898,64 @@
         "status": "ACTIVE",
         "createdAt": "2025-08-28T22:22:28.267Z"
       }
+    ],
+    [
+      "HOOD_undefined_mew3ig2x_mz7kz",
+      {
+        "id": "HOOD_undefined_mew3ig2x_mz7kz",
+        "symbol": "HOOD",
+        "strategy": "Bull Call Spread",
+        "entryDate": "2025-08-29T00:29:39.945Z",
+        "entryPrice": 103.69,
+        "strikes": {
+          "primary": 125
+        },
+        "expiration": "2025-10-03",
+        "dte": 35,
+        "positionSize": 1500,
+        "maxLoss": -756.26,
+        "maxGain": 12.41,
+        "mlContext": {
+          "squeezeContext": {
+            "holyGrail": 58,
+            "squeeze": 79,
+            "gamma": 0.036,
+            "flow": 75,
+            "gex": 906870,
+            "darkPool": {
+              "ratio": 0.13,
+              "volume": 5103888,
+              "trades": 922
+            },
+            "optionsMetrics": {
+              "totalVolume": 2732048,
+              "callVolume": 9655722,
+              "putVolume": 12596226,
+              "putCallRatio": 2.19,
+              "volumeOIRatio": 0.7,
+              "netPremium": 3680695,
+              "ivRank": 54,
+              "atmIV": 26.2,
+              "skew": 0.91,
+              "term": "CONTANGO"
+            },
+            "technicals": {
+              "rsi": 57
+            }
+          },
+          "marketConditions": {
+            "price": 103.69,
+            "volume": 25950979,
+            "change": 0.75,
+            "beta": 1.06
+          },
+          "neuralNetworkPrediction": 0,
+          "aiScore": 100,
+          "probability": 95
+        },
+        "status": "ACTIVE",
+        "createdAt": "2025-08-29T00:29:39.945Z"
+      }
     ]
   ],
   "completedTrades": []
