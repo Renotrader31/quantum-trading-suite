@@ -96,7 +96,19 @@ export default function TradingPipeline() {
   const [selectedStock, setSelectedStock] = useState(null);
   const [strategyRecommendations, setStrategyRecommendations] = useState([]);
   const [strategyLoading, setStrategyLoading] = useState(false);
-  const [strategyEngine] = useState(() => new OptionsStrategyEngine());
+  const [strategyEngine, setStrategyEngine] = useState(null);
+  
+  // Initialize strategy engine safely on client side
+  useEffect(() => {
+    try {
+      const engine = new OptionsStrategyEngine();
+      setStrategyEngine(engine);
+      console.log('✅ OptionsStrategyEngine initialized successfully');
+    } catch (error) {
+      console.error('❌ Failed to initialize OptionsStrategyEngine:', error);
+      showError('Failed to initialize options strategy engine');
+    }
+  }, []);
   
   // Debug state changes
   useEffect(() => {
@@ -104,9 +116,9 @@ export default function TradingPipeline() {
       selectedStock: selectedStock?.symbol,
       recommendationsCount: strategyRecommendations.length,
       strategyLoading,
-      recommendations: strategyRecommendations
+      engineReady: !!strategyEngine
     });
-  }, [selectedStock, strategyRecommendations, strategyLoading]);
+  }, [selectedStock, strategyRecommendations, strategyLoading, strategyEngine]);
   
   // Configuration state
   const [config, setConfig] = useState({
@@ -314,6 +326,12 @@ export default function TradingPipeline() {
   // Handle stock selection for options strategy analysis
   const handleStockSelect = async (stock) => {
     console.log('🎯 Stock selected for options analysis:', stock.symbol);
+    
+    if (!strategyEngine) {
+      showError('Options strategy engine is not ready. Please wait a moment and try again.');
+      return;
+    }
+    
     setSelectedStock(stock);
     setStrategyLoading(true);
     
@@ -461,7 +479,7 @@ export default function TradingPipeline() {
                     color="secondary"
                     startIcon={<TrendingUpIcon />}
                     onClick={() => handleStockSelect(result)}
-                    disabled={strategyLoading && selectedStock?.symbol === result.symbol}
+                    disabled={!strategyEngine || (strategyLoading && selectedStock?.symbol === result.symbol)}
                   >
                     {strategyLoading && selectedStock?.symbol === result.symbol ? 
                       <CircularProgress size={16} /> : 'Analyze Options'
