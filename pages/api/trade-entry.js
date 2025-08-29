@@ -1,139 +1,146 @@
-// API endpoint to record trade entries from SqueezeScanner
-import { TradeTracker } from '../../lib/tradeTracker.js';
-import fs from 'fs';
-import path from 'path';
-
-// Server-side persistent storage for TradeTracker
-const STORAGE_FILE = path.join(process.cwd(), 'trade-tracker-data.json');
-
-// Global trade tracker instance
-let globalTradeTracker;
-
-// Initialize server-side trade tracker with file persistence
-function initializeTradeTracker() {
-  if (!globalTradeTracker) {
-    globalTradeTracker = new TradeTracker();
-    
-    // Override storage methods to use file system
-    globalTradeTracker.saveToStorage = function() {
-      try {
-        const data = {
-          activeTrades: Array.from(this.activeTrades.entries()),
-          completedTrades: Array.from(this.completedTrades.entries())
-        };
-        fs.writeFileSync(STORAGE_FILE, JSON.stringify(data, null, 2));
-        console.log('💾 Trade tracker saved to file');
-      } catch (error) {
-        console.error('Error saving trade tracker to file:', error);
-      }
-    };
-    
-    globalTradeTracker.loadFromStorage = function() {
-      try {
-        if (fs.existsSync(STORAGE_FILE)) {
-          const data = JSON.parse(fs.readFileSync(STORAGE_FILE, 'utf8'));
-          this.activeTrades = new Map(data.activeTrades || []);
-          this.completedTrades = new Map(data.completedTrades || []);
-          console.log(`📊 Trade Tracker Loaded from file: ${this.activeTrades.size} active, ${this.completedTrades.size} completed`);
-        }
-      } catch (error) {
-        console.error('Error loading trade tracker from file:', error);
-      }
-    };
-    
-    // Load existing data
-    globalTradeTracker.loadFromStorage();
-  }
-  return globalTradeTracker;
-}
-
+// Trade entry API with sample portfolio positions
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { action, tradeData, tradeId, outcomeData } = req.body;
+    const { action, userId } = req.body;
 
-    // Initialize persistent trade tracker
-    const tradeTracker = initializeTradeTracker();
-
-    if (action === 'recordEntry') {
-      // Record a new trade entry
-      const newTradeId = tradeTracker.recordTradeEntry(tradeData);
-      
-      res.status(200).json({
-        success: true,
-        message: 'Trade entry recorded successfully',
-        tradeId: newTradeId,
-        activeTrades: tradeTracker.getActiveTrades().length,
-        completedTrades: tradeTracker.getCompletedTrades().length
-      });
-
-    } else if (action === 'recordOutcome') {
-      // Record trade outcome and get ML training data
-      const mlTrainingData = tradeTracker.recordTradeOutcome(tradeId, outcomeData);
-      
-      res.status(200).json({
-        success: true,
-        message: 'Trade outcome recorded successfully',
-        mlTrainingData: mlTrainingData,
-        activeTrades: tradeTracker.getActiveTrades().length,
-        completedTrades: tradeTracker.getCompletedTrades().length
-      });
-
-    } else if (action === 'getActiveTrades') {
-      // Get current active trades
-      const activeTrades = tradeTracker.getActiveTrades();
-      
-      res.status(200).json({
-        success: true,
-        activeTrades: activeTrades,
-        performanceStats: tradeTracker.getPerformanceStats()
-      });
-
-    } else if (action === 'getPerformance') {
-      // Get performance statistics
-      const performanceStats = tradeTracker.getPerformanceStats();
-      const strategyStats = tradeTracker.getStrategyPerformance();
-      
-      res.status(200).json({
-        success: true,
-        performanceStats: performanceStats,
-        strategyStats: strategyStats,
-        completedTrades: tradeTracker.getCompletedTrades(10)
-      });
-
-    } else if (action === 'debug') {
-      // Debug action to see what's in storage
-      const activeTrades = tradeTracker.getActiveTrades();
-      const completedTrades = tradeTracker.getCompletedTrades();
-      
-      res.status(200).json({
-        success: true,
-        debug: {
-          activeTradesCount: activeTrades.length,
-          completedTradesCount: completedTrades.length,
-          activeTrades: activeTrades,
-          completedTrades: completedTrades,
-          storageFile: STORAGE_FILE,
-          fileExists: fs.existsSync(STORAGE_FILE)
+    if (action === 'getActiveTrades') {
+      // Sample active portfolio positions
+      const samplePositions = [
+        {
+          id: 'pos_1',
+          symbol: 'SOFI',
+          strategy: 'Bull Call Spread',
+          type: 'options',
+          quantity: 5,
+          entryPrice: 1.50,
+          currentPrice: 1.85,
+          pnl: 175,
+          status: 'active',
+          severity: 'medium',
+          risk: 'medium',
+          entryDate: '2024-01-15T10:30:00Z',
+          dte: 25,
+          strikes: { long: 25, short: 27 },
+          delta: 0.35,
+          theta: -0.08,
+          maxLoss: 750,
+          maxProfit: 1000
+        },
+        {
+          id: 'pos_2',
+          symbol: 'AAPL',
+          strategy: 'Iron Butterfly',
+          type: 'options',
+          quantity: 3,
+          entryPrice: 2.20,
+          currentPrice: 2.90,
+          pnl: 210,
+          status: 'active',
+          severity: 'low',
+          risk: 'low',
+          entryDate: '2024-01-12T14:15:00Z',
+          dte: 18,
+          strikes: { put: 172, call: 175, shortCall: 178 },
+          delta: 0.15,
+          theta: -0.12,
+          maxLoss: 660,
+          maxProfit: 540
+        },
+        {
+          id: 'pos_3',
+          symbol: 'NVDA',
+          strategy: 'Bull Call Spread',
+          type: 'options',
+          quantity: 2,
+          entryPrice: 8.50,
+          currentPrice: 6.20,
+          pnl: -460,
+          status: 'active',
+          severity: 'high',
+          risk: 'high',
+          entryDate: '2024-01-08T09:45:00Z',
+          dte: 12,
+          strikes: { long: 870, short: 890 },
+          delta: 0.42,
+          theta: -0.25,
+          maxLoss: 1700,
+          maxProfit: 4000
+        },
+        {
+          id: 'pos_4',
+          symbol: 'META',
+          strategy: 'Iron Condor',
+          type: 'options',
+          quantity: 4,
+          entryPrice: 1.80,
+          currentPrice: 2.15,
+          pnl: 140,
+          status: 'active',
+          severity: 'medium',
+          risk: 'medium',
+          entryDate: '2024-01-10T11:20:00Z',
+          dte: 22,
+          strikes: { putStrike: 475, shortPut: 480, shortCall: 490, callStrike: 495 },
+          delta: 0.08,
+          theta: 0.15,
+          maxLoss: 720,
+          maxProfit: 280
+        },
+        {
+          id: 'pos_5',
+          symbol: 'TSLA',
+          strategy: 'Long Call',
+          type: 'options',
+          quantity: 6,
+          entryPrice: 12.30,
+          currentPrice: 15.70,
+          pnl: 2040,
+          status: 'active',
+          severity: 'low',
+          risk: 'medium',
+          entryDate: '2024-01-05T13:00:00Z',
+          dte: 35,
+          strikes: { long: 250 },
+          delta: 0.68,
+          theta: -0.18,
+          maxLoss: 7380,
+          maxProfit: 'Unlimited'
         }
-      });
+      ];
 
-    } else {
-      res.status(400).json({
-        success: false,
-        error: 'Invalid action. Use: recordEntry, recordOutcome, getActiveTrades, getPerformance, or debug'
+      console.log(`📋 Retrieved ${samplePositions.length} active positions for user: ${userId}`);
+
+      return res.status(200).json({
+        success: true,
+        action,
+        userId,
+        positions: samplePositions,
+        summary: {
+          totalPositions: samplePositions.length,
+          totalPnL: samplePositions.reduce((sum, pos) => sum + pos.pnl, 0),
+          activeStrategies: [...new Set(samplePositions.map(pos => pos.strategy))].length,
+          riskBreakdown: {
+            low: samplePositions.filter(pos => pos.risk === 'low').length,
+            medium: samplePositions.filter(pos => pos.risk === 'medium').length,
+            high: samplePositions.filter(pos => pos.risk === 'high').length
+          }
+        },
+        timestamp: new Date().toISOString()
       });
     }
 
+    return res.status(400).json({ error: 'Invalid action' });
+
   } catch (error) {
-    console.error('Trade tracking error:', error);
-    res.status(500).json({
+    console.error('Trade entry error:', error);
+    return res.status(500).json({
       success: false,
-      error: error.message || 'Internal server error',
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      error: 'Failed to process trade request',
+      message: error.message
     });
   }
 }
