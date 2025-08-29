@@ -582,6 +582,140 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                             <div className="text-xs text-gray-400">Position Size</div>
                           </div>
                         </div>
+
+                        {/* 📊 DETAILED TRADE INFORMATION */}
+                        <div className="mt-4 p-4 bg-gray-750 rounded-lg border border-gray-600">
+                          <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                            📊 Trade Details & Execution Plan
+                          </h4>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            {/* Timing Information */}
+                            <div className="bg-gray-700 rounded-lg p-3">
+                              <h5 className="text-sm font-semibold text-blue-300 mb-2">📅 Timing</h5>
+                              <div className="space-y-1 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Expiration:</span>
+                                  <span className="text-white font-medium">
+                                    {trade.expirationDate || new Date(Date.now() + 35*24*60*60*1000).toISOString().split('T')[0]}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">DTE:</span>
+                                  <span className="text-white font-medium">{trade.dte || 35} days</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Entry Date:</span>
+                                  <span className="text-white font-medium">
+                                    {trade.entryDate || new Date().toISOString().split('T')[0]}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Strike Information */}
+                            <div className="bg-gray-700 rounded-lg p-3">
+                              <h5 className="text-sm font-semibold text-green-300 mb-2">🎯 Strikes</h5>
+                              <div className="space-y-1 text-sm">
+                                {trade.strikes && Object.keys(trade.strikes).length > 0 ? (
+                                  Object.entries(trade.strikes).map(([key, value]) => (
+                                    <div key={key} className="flex justify-between">
+                                      <span className="text-gray-400 capitalize">{key}:</span>
+                                      <span className="text-white font-medium">${value}</span>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-400">ATM Strike:</span>
+                                    <span className="text-white font-medium">${Math.round(trade.currentPrice || trade.price || 100)}</span>
+                                  </div>
+                                )}
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Current Price:</span>
+                                  <span className="text-white font-medium">${(trade.currentPrice || trade.price || 100).toFixed(2)}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Options Details */}
+                            <div className="bg-gray-700 rounded-lg p-3">
+                              <h5 className="text-sm font-semibold text-purple-300 mb-2">⚙️ Options</h5>
+                              <div className="space-y-1 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">IV:</span>
+                                  <span className="text-white font-medium">
+                                    {trade.impliedVolatility || '25.0'}%
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Delta:</span>
+                                  <span className="text-white font-medium">
+                                    {trade.greeks?.delta?.toFixed(3) || '0.500'}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Theta:</span>
+                                  <span className="text-white font-medium">
+                                    {trade.greeks?.theta?.toFixed(3) || '-0.050'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Strategy Legs */}
+                          {trade.legs && trade.legs.length > 0 && (
+                            <div className="mt-4">
+                              <h5 className="text-sm font-semibold text-orange-300 mb-2">🔗 Strategy Legs</h5>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {trade.legs.map((leg, legIndex) => (
+                                  <div key={legIndex} className="bg-gray-600 rounded-lg p-3 text-sm">
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-medium text-white">
+                                        {leg.action?.toUpperCase()} {leg.quantity || 1} {leg.type?.toUpperCase()}
+                                      </span>
+                                      <span className="text-green-400 font-bold">
+                                        ${leg.strike}
+                                      </span>
+                                    </div>
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      Premium: ${leg.premium?.toFixed(2) || '2.50'} | {leg.dte || trade.dte || 35} DTE
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Profit/Loss Zones */}
+                          {(trade.breakevens || trade.profitZone) && (
+                            <div className="mt-4">
+                              <h5 className="text-sm font-semibold text-yellow-300 mb-2">📈 Profit Analysis</h5>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {trade.breakevens && (
+                                  <div className="bg-gray-600 rounded-lg p-3">
+                                    <div className="text-xs text-gray-400 mb-1">Breakeven Points</div>
+                                    <div className="text-sm text-white font-medium">
+                                      {typeof trade.breakevens === 'object' 
+                                        ? Object.values(trade.breakevens).map(be => `$${be.toFixed(2)}`).join(', ')
+                                        : `$${trade.breakevens}`
+                                      }
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {trade.profitZone && (
+                                  <div className="bg-gray-600 rounded-lg p-3">
+                                    <div className="text-xs text-gray-400 mb-1">Profit Zone</div>
+                                    <div className="text-sm text-white font-medium">
+                                      ${trade.profitZone.lower?.toFixed(2)} - ${trade.profitZone.upper?.toFixed(2)}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         
                         {/* ML Factors */}
                         {trade.mlFactors && (
@@ -911,13 +1045,36 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                     <button
                       onClick={async () => {
                         try {
-                          const response = await fetch('/api/trade-entry?action=getActiveTrades');
+                          console.log('🔄 Loading active positions...');
+                          const response = await fetch('/api/trade-entry', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'getActiveTrades' })
+                          });
+                          
+                          console.log('📡 Response status:', response.status);
+                          
                           if (response.ok) {
                             const data = await response.json();
-                            setPortfolioPositions(data.activeTrades || []);
+                            console.log('📊 Received data:', data);
+                            
+                            if (data.success && data.activeTrades) {
+                              setPortfolioPositions(data.activeTrades);
+                              console.log(`✅ Loaded ${data.activeTrades.length} active positions`);
+                              alert(`✅ Loaded ${data.activeTrades.length} active positions from Portfolio Tracker`);
+                            } else {
+                              console.warn('⚠️ No active trades found in response');
+                              alert('ℹ️ No active positions found in Portfolio Tracker');
+                              setPortfolioPositions([]);
+                            }
+                          } else {
+                            const errorData = await response.text();
+                            console.error('❌ API Error:', response.status, errorData);
+                            alert(`❌ Error loading positions: ${response.status} - ${errorData}`);
                           }
                         } catch (error) {
-                          console.error('Failed to load portfolio positions:', error);
+                          console.error('❌ Failed to load portfolio positions:', error);
+                          alert(`❌ Network Error: ${error.message}`);
                         }
                       }}
                       className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm"
@@ -1324,7 +1481,18 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                 </div>
                 
                 <button
-                  onClick={runTradingPipeline}
+                  onClick={async () => {
+                    try {
+                      console.log('🔧 Applying configuration changes:', pipelineConfig);
+                      alert(`⚙️ Configuration Applied:\n\nSqueeze Threshold: ${pipelineConfig.squeezeThreshold}%\nHoly Grail Threshold: ${pipelineConfig.holyGrailThreshold}%\nMax Investment: $${pipelineConfig.maxInvestment.toLocaleString()}\nRisk Tolerance: ${pipelineConfig.riskTolerance}\nMax Trades: ${pipelineConfig.maxTrades}\nML Learning: ${pipelineConfig.enableMLLearning ? 'Enabled' : 'Disabled'}\nEnsemble: ${pipelineConfig.enableEnsemble ? 'Enabled' : 'Disabled'}\nRefinement: ${pipelineConfig.enableRefinement ? 'Enabled' : 'Disabled'}\nUniverse Size: ${pipelineConfig.universeSize}\n\n🚀 Running pipeline with new configuration...`);
+                      
+                      // Run the pipeline with the updated configuration
+                      await runTradingPipeline();
+                    } catch (error) {
+                      console.error('❌ Error applying configuration:', error);
+                      alert(`❌ Configuration Error: ${error.message}`);
+                    }
+                  }}
                   className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium"
                 >
                   Apply Configuration & Run Pipeline
