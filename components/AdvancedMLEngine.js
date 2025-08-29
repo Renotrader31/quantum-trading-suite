@@ -45,10 +45,19 @@ export default function AdvancedMLEngine({ marketData = {}, selectedTrades = [] 
   // Advanced ML Learning Engine
   class QuantumMLEngine {
     constructor() {
-      this.strategyDatabase = this.loadStrategyDatabase();
-      this.marketRegimes = this.initializeMarketRegimes();
-      this.neuralNetwork = this.initializeNeuralNetwork();
-      this.performanceTracker = this.initializePerformanceTracker();
+      try {
+        this.strategyDatabase = this.loadStrategyDatabase();
+        this.marketRegimes = this.initializeMarketRegimes();
+        this.neuralNetwork = this.initializeNeuralNetwork();
+        this.performanceTracker = this.initializePerformanceTracker();
+      } catch (error) {
+        console.error('Error in QuantumMLEngine constructor:', error);
+        // Initialize with safe defaults
+        this.strategyDatabase = {};
+        this.marketRegimes = {};
+        this.neuralNetwork = { epochs: 0, accuracy: 0.65 };
+        this.performanceTracker = { totalTrades: 0, winningTrades: 0, totalReturn: 0 };
+      }
     }
 
     // Initialize strategy performance database
@@ -337,9 +346,30 @@ export default function AdvancedMLEngine({ marketData = {}, selectedTrades = [] 
 
   // Initialize ML Engine
   const [mlEngine] = useState(() => {
-    const engine = new QuantumMLEngine();
-    engine.loadFromStorage();
-    return engine;
+    try {
+      const engine = new QuantumMLEngine();
+      engine.loadFromStorage();
+      return engine;
+    } catch (error) {
+      console.error('Error initializing QuantumMLEngine:', error);
+      // Return a fallback minimal engine
+      return {
+        generateMLInsights: () => ({ 
+          networkAccuracy: 0.65, 
+          totalTrades: 0, 
+          winRate: 0, 
+          adaptiveStrategies: [],
+          regimeAnalysis: { currentRegime: 'unknown', confidence: 0 },
+          recommendations: []
+        }),
+        learnFromOutcome: () => {},
+        saveToStorage: () => {},
+        loadFromStorage: () => {},
+        performanceTracker: { totalTrades: 0, winningTrades: 0, totalReturn: 0 },
+        neuralNetwork: { epochs: 0, accuracy: 0.65 },
+        initializePerformanceTracker: () => ({ totalTrades: 0, winningTrades: 0, totalReturn: 0 })
+      };
+    }
   });
 
   // Simulate ML learning process

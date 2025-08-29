@@ -640,10 +640,12 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
           </TabPanel>
           
           <TabPanel value={activeTab} index={3}>
-            <AdvancedMLEngine 
-              marketData={marketData} 
-              selectedTrades={selectedTrades}
-            />
+            <ErrorBoundary>
+              <AdvancedMLEngine 
+                marketData={marketData} 
+                selectedTrades={selectedTrades}
+              />
+            </ErrorBoundary>
           </TabPanel>
           
           <TabPanel value={activeTab} index={4}>
