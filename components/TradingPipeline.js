@@ -898,7 +898,7 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                   portfolioValue={pipelineConfig.maxInvestment}
                   onPositionSizeCalculated={(size) => {
                     setRiskCalculatedPosition(size);
-                    alert(`📊 Kelly Criterion Position Size: ${size.kellyPercentage.toFixed(2)}%\nOptimal Size: $${size.optimalSize.toLocaleString()}\nRisk Level: ${size.riskLevel}`);
+                   alert(`📊 Kelly Criterion Position Size: ${typeof size.kellyPercentage === 'number' ? size.kellyPercentage.toFixed(2) : 'N/A'}%\nOptimal Size: $${size.optimalSize ? size.optimalSize.toLocaleString() : 'N/A'}\nRisk Level: ${size.riskLevel || 'N/A'}`);
                   }}
                 />
                 
