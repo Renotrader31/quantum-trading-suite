@@ -201,7 +201,31 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
         const results = data.opportunities || data.results || [];
         console.log('🔍 DEBUG: First stock data:', JSON.stringify(results[0], null, 2));
         console.log('🔍 DEBUG: Data source:', data.dataSource);
-        setStocks(results);
+        
+        // Transform API response to expected SqueezeScanner format
+        const transformedResults = results.map(stock => ({
+          ...stock,
+          flowAnalysis: stock.flowAnalysis || {
+            unusual: {
+              multiplier: stock.unusual ? 3.0 : 1.0,
+              percentile: 75
+            },
+            sweeps: {
+              count: 0,
+              bullish: 0,
+              bearish: 0
+            },
+            sentiment: {
+              score: stock.sentiment === 'POSITIVE' ? 70 : stock.sentiment === 'NEGATIVE' ? 30 : 50,
+              overall: stock.flow === 'VERY_BULLISH' ? 'BULLISH' : stock.flow === 'BULLISH' ? 'BULLISH' : stock.flow === 'BEARISH' ? 'BEARISH' : 'NEUTRAL'
+            },
+            blocks: {
+              count: 0
+            }
+          }
+        }));
+        
+        setStocks(transformedResults);
         setLastUpdate(new Date().toISOString());
         
         // Show success alert with enhanced data info
@@ -216,7 +240,7 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
         }
         
         // Check for high holy grail scores
-        results.forEach(stock => {
+        transformedResults.forEach(stock => {
           if (stock.holyGrail >= 85) {
             addAlert({
               type: 'HOLY_GRAIL',
@@ -704,7 +728,30 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
       
       if (scanData.success && (scanData.opportunities || scanData.results) && (scanData.opportunities || scanData.results).length > 0) {
         const results = scanData.opportunities || scanData.results;
-        const stockData = results[0];
+        let stockData = results[0];
+        
+        // Transform data to expected format
+        stockData = {
+          ...stockData,
+          flowAnalysis: stockData.flowAnalysis || {
+            unusual: {
+              multiplier: stockData.unusual ? 3.0 : 1.0,
+              percentile: 75
+            },
+            sweeps: {
+              count: 0,
+              bullish: 0,
+              bearish: 0
+            },
+            sentiment: {
+              score: stockData.sentiment === 'POSITIVE' ? 70 : stockData.sentiment === 'NEGATIVE' ? 30 : 50,
+              overall: stockData.flow === 'VERY_BULLISH' ? 'BULLISH' : stockData.flow === 'BULLISH' ? 'BULLISH' : stockData.flow === 'BEARISH' ? 'BEARISH' : 'NEUTRAL'
+            },
+            blocks: {
+              count: 0
+            }
+          }
+        };
         
         // Use the scanned stock data for trade analysis
         handleStockClick(stockData, { stopPropagation: () => {} });
