@@ -37,6 +37,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import OptionsStrategyEngine from '../lib/OptionsStrategyEngine';
+import ErrorBoundary from './ErrorBoundary';
 
 // Utility function to safely access severity property
 const getSafeSeverity = (item) => {
@@ -100,14 +101,31 @@ export default function TradingPipeline() {
   
   // Initialize strategy engine safely on client side
   useEffect(() => {
-    try {
-      const engine = new OptionsStrategyEngine();
-      setStrategyEngine(engine);
-      console.log('✅ OptionsStrategyEngine initialized successfully');
-    } catch (error) {
-      console.error('❌ Failed to initialize OptionsStrategyEngine:', error);
-      showError('Failed to initialize options strategy engine');
-    }
+    let isMounted = true;
+    
+    const initializeEngine = async () => {
+      try {
+        // Small delay to ensure component is fully mounted
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        if (!isMounted) return;
+        
+        const engine = new OptionsStrategyEngine();
+        setStrategyEngine(engine);
+        console.log('✅ OptionsStrategyEngine initialized successfully');
+      } catch (error) {
+        console.error('❌ Failed to initialize OptionsStrategyEngine:', error);
+        if (isMounted) {
+          showError('Failed to initialize options strategy engine');
+        }
+      }
+    };
+    
+    initializeEngine();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
   
   // Debug state changes
@@ -324,7 +342,7 @@ export default function TradingPipeline() {
   };
 
   // Handle stock selection for options strategy analysis
-  const handleStockSelect = async (stock) => {
+  const handleStockSelect = useCallback(async (stock) => {
     console.log('🎯 Stock selected for options analysis:', stock.symbol);
     
     if (!strategyEngine) {
@@ -332,8 +350,12 @@ export default function TradingPipeline() {
       return;
     }
     
-    setSelectedStock(stock);
+    // Cancel any previous analysis
     setStrategyLoading(true);
+    setSelectedStock(stock);
+    
+    // Use AbortController to handle cleanup
+    const controller = new AbortController();
     
     try {
       // Prepare stock data for analysis
@@ -372,13 +394,22 @@ export default function TradingPipeline() {
       showSuccess(`Generated ${analysis.recommendations?.length || 0} strategy recommendations for ${stock.symbol}`);
       
     } catch (error) {
-      console.error('❌ Options strategy analysis failed:', error);
-      showError(`Failed to analyze options strategies: ${error.message}`);
-      setStrategyRecommendations([]);
+      if (!controller.signal.aborted) {
+        console.error('❌ Options strategy analysis failed:', error);
+        showError(`Failed to analyze options strategies: ${error.message}`);
+        setStrategyRecommendations([]);
+      }
     } finally {
-      setStrategyLoading(false);
+      if (!controller.signal.aborted) {
+        setStrategyLoading(false);
+      }
     }
-  };
+    
+    // Cleanup function
+    return () => {
+      controller.abort();
+    };
+  }, [strategyEngine, showError, showSuccess, setActiveTab]);
 
   // Handle strategy selection and ML feedback
   const handleStrategySelect = async (strategy) => {
@@ -940,78 +971,82 @@ export default function TradingPipeline() {
   );
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      {/* Error and Success Messages */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
-          {success}
-        </Alert>
-      )}
-      
-      {/* Header */}
-      <Typography variant="h4" component="h1" gutterBottom>
-        Quantum Trading Suite
-      </Typography>
-      
-      {/* Main Actions */}
-      <Paper sx={{ mb: 3 }}>
-        <Box sx={{ p: 2 }}>
-          <Grid container spacing={2}>
-            <Grid item>
-              <Button
-                variant="contained"
-                onClick={runMarketScan}
-                disabled={loading}
-                size="large"
-              >
-                {loading ? <CircularProgress size={20} /> : 'Run Market Scan'}
-              </Button>
+    <ErrorBoundary>
+      <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+        {/* Error and Success Messages */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
+            {success}
+          </Alert>
+        )}
+        
+        {/* Header */}
+        <Typography variant="h4" component="h1" gutterBottom>
+          Quantum Trading Suite
+        </Typography>
+        
+        {/* Main Actions */}
+        <Paper sx={{ mb: 3 }}>
+          <Box sx={{ p: 2 }}>
+            <Grid container spacing={2}>
+              <Grid item>
+                <Button
+                  variant="contained"
+                  onClick={runMarketScan}
+                  disabled={loading}
+                  size="large"
+                >
+                  {loading ? <CircularProgress size={20} /> : 'Run Market Scan'}
+                </Button>
+              </Grid>
+              <Grid item>
+                <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+                  Selected Trades: {selectedTrades.length} | 
+                  Scan Results: {scanResults.length} | 
+                  Active Positions: {portfolioPositions.length}
+                </Typography>
+              </Grid>
             </Grid>
-            <Grid item>
-              <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
-                Selected Trades: {selectedTrades.length} | 
-                Scan Results: {scanResults.length} | 
-                Active Positions: {portfolioPositions.length}
-              </Typography>
-            </Grid>
-          </Grid>
-        </Box>
-      </Paper>
-      
-      {/* Tabs */}
-      <Paper>
-        <Tabs 
-          value={activeTab} 
-          onChange={(e, newValue) => setActiveTab(newValue)}
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
-        >
-          <Tab label="Market Opportunities" />
-          <Tab label="Options Strategies" />
-          <Tab label="Risk Management" />
-          <Tab label="Configuration" />
-        </Tabs>
+          </Box>
+        </Paper>
         
-        <TabPanel value={activeTab} index={0}>
-          {renderScanResults()}
-        </TabPanel>
-        
-        <TabPanel value={activeTab} index={1}>
-          {renderOptionsStrategies()}
-        </TabPanel>
-        
-        <TabPanel value={activeTab} index={2}>
-          {renderRiskManagement()}
-        </TabPanel>
-        
-        <TabPanel value={activeTab} index={3}>
-          {renderConfiguration()}
-        </TabPanel>
-      </Paper>
-    </Container>
+        {/* Tabs */}
+        <Paper>
+          <Tabs 
+            value={activeTab} 
+            onChange={(e, newValue) => setActiveTab(newValue)}
+            sx={{ borderBottom: 1, borderColor: 'divider' }}
+          >
+            <Tab label="Market Opportunities" />
+            <Tab label="Options Strategies" />
+            <Tab label="Risk Management" />
+            <Tab label="Configuration" />
+          </Tabs>
+          
+          <TabPanel value={activeTab} index={0}>
+            {renderScanResults()}
+          </TabPanel>
+          
+          <TabPanel value={activeTab} index={1}>
+            <ErrorBoundary>
+              {renderOptionsStrategies()}
+            </ErrorBoundary>
+          </TabPanel>
+          
+          <TabPanel value={activeTab} index={2}>
+            {renderRiskManagement()}
+          </TabPanel>
+          
+          <TabPanel value={activeTab} index={3}>
+            {renderConfiguration()}
+          </TabPanel>
+        </Paper>
+      </Container>
+    </ErrorBoundary>
   );
 }

@@ -7,6 +7,7 @@ import OptionsStrategies from '../components/OptionsStrategies';
 import QuantumTradeAI from '../components/QuantumTradeAI';
 import TradingPipeline from '../components/TradingPipeline';
 import IntelligentTradingScanner from '../components/IntelligentTradingScanner';
+import ErrorBoundary from '../components/ErrorBoundary';
 
 export default function Home() {
   const [activeMode, setActiveMode] = useState('dashboard');
@@ -15,6 +16,7 @@ export default function Home() {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isClient, setIsClient] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
+  const [navigationLoading, setNavigationLoading] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -110,7 +112,11 @@ export default function Home() {
       case 'scanner':
         return <SqueezeScanner {...commonProps} />;
       case 'pipeline':
-        return <TradingPipeline {...commonProps} />;
+        return (
+          <ErrorBoundary>
+            <TradingPipeline {...commonProps} />
+          </ErrorBoundary>
+        );
       case 'ai':
         return <AIRecommendations {...commonProps} />;
       case 'quantum':
@@ -173,10 +179,22 @@ export default function Home() {
             {modes.map((mode) => (
               <button
                 key={mode.id}
-                onClick={() => setActiveMode(mode.id)}
+                onClick={() => {
+                  if (!navigationLoading && activeMode !== mode.id) {
+                    setNavigationLoading(true);
+                    // Small delay to prevent rapid navigation
+                    setTimeout(() => {
+                      setActiveMode(mode.id);
+                      setNavigationLoading(false);
+                    }, 50);
+                  }
+                }}
+                disabled={navigationLoading}
                 className={`py-3 px-4 text-sm font-medium transition-colors border-b-2 ${
                   activeMode === mode.id
                     ? 'text-purple-400 border-purple-400'
+                    : navigationLoading
+                    ? 'text-gray-500 border-transparent cursor-not-allowed'
                     : 'text-gray-300 hover:text-white border-transparent hover:border-gray-600'
                 }`}
               >
