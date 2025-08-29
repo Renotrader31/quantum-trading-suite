@@ -713,6 +713,7 @@ function calculatePreciseMaxGain(strategyKey, price, positionSize, dte, iv) {
 
 // ENHANCED: Precise strike calculations based on market data and Greeks
 function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
+  console.log(`\n🎯 CALCULATING STRIKES: Strategy=${strategyKey}, Price=$${price}`);
   const atm = Math.round(price);
   
   // SANITY CHECK: Cap implied volatility to prevent wild calculations
@@ -766,6 +767,7 @@ function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
       break;
       
     case 'callSpread':
+    case 'bullCallSpread':
       // FIXED: Conservative bull call spread - buy ATM/slightly ITM, sell OTM
       strikes.buyCall = Math.max(atm - Math.round(price * 0.02), Math.round(atm * 0.98)); // Slightly ITM or ATM
       strikes.sellCall = strikes.buyCall + Math.max(5, Math.round(price * 0.025)); // 2.5% spread width minimum $5
@@ -783,12 +785,40 @@ function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
       break;
       
     case 'putSpread':
-      strikes.sellPut = Math.round(atm - priceMove * 0.2); // Slightly OTM
-      strikes.buyPut = strikes.sellPut - Math.round(price * 0.04);
+    case 'bullPutSpread':
+      // Bull put spread: sell higher strike put, buy lower strike put
+      strikes.sellPut = Math.max(atm - Math.round(price * 0.05), Math.round(price * 0.92)); // Slightly OTM
+      strikes.buyPut = strikes.sellPut - Math.max(2, Math.round(price * 0.025)); // $2 minimum width
       
       // SANITY CHECK: Keep put spreads reasonable
-      strikes.sellPut = Math.max(strikes.sellPut, atm - price * 0.1);
-      strikes.buyPut = Math.max(strikes.buyPut, atm - price * 0.2);
+      strikes.sellPut = Math.max(Math.round(price * 0.85), Math.min(strikes.sellPut, Math.round(price * 0.98))); // 85%-98% of stock price
+      strikes.buyPut = Math.max(Math.round(price * 0.80), Math.min(strikes.buyPut, strikes.sellPut - 1)); // At least $1 below sell put
+      
+      console.log(`📊 BULL PUT SPREAD FIX - Stock: $${price}, Sell: $${strikes.sellPut}, Buy: $${strikes.buyPut}, Width: $${strikes.sellPut - strikes.buyPut}`);
+      break;
+      
+    case 'bearCallSpread':
+      // Bear call spread: sell lower strike call, buy higher strike call
+      strikes.sellCall = Math.min(atm + Math.round(price * 0.05), Math.round(price * 1.08)); // Slightly OTM
+      strikes.buyCall = strikes.sellCall + Math.max(2, Math.round(price * 0.025)); // $2 minimum width
+      
+      // SANITY CHECK: Keep bear call spreads reasonable  
+      strikes.sellCall = Math.max(Math.round(price * 1.02), Math.min(strikes.sellCall, Math.round(price * 1.15))); // 102%-115% of stock price
+      strikes.buyCall = Math.min(Math.round(price * 1.20), Math.max(strikes.buyCall, strikes.sellCall + 1)); // At least $1 above sell call
+      
+      console.log(`📊 BEAR CALL SPREAD FIX - Stock: $${price}, Sell: $${strikes.sellCall}, Buy: $${strikes.buyCall}, Width: $${strikes.buyCall - strikes.sellCall}`);
+      break;
+      
+    case 'bearPutSpread':
+      // Bear put spread: buy higher strike put, sell lower strike put
+      strikes.buyPut = Math.min(atm + Math.round(price * 0.02), Math.round(price * 1.05)); // Slightly ITM
+      strikes.sellPut = strikes.buyPut - Math.max(2, Math.round(price * 0.025)); // $2 minimum width
+      
+      // SANITY CHECK: Keep bear put spreads reasonable
+      strikes.buyPut = Math.max(Math.round(price * 0.95), Math.min(strikes.buyPut, Math.round(price * 1.08))); // 95%-108% of stock price
+      strikes.sellPut = Math.max(Math.round(price * 0.85), Math.min(strikes.sellPut, strikes.buyPut - 1)); // At least $1 below buy put
+      
+      console.log(`📊 BEAR PUT SPREAD FIX - Stock: $${price}, Buy: $${strikes.buyPut}, Sell: $${strikes.sellPut}, Width: $${strikes.buyPut - strikes.sellPut}`);
       break;
       
     default:
