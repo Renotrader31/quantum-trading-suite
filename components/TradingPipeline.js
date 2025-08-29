@@ -944,7 +944,6 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
   severity: pos.severity || 'info'  // Ensure severity exists
 }));
 setPortfolioPositions(safePositions);
-                            setPortfolioPositions(positions);
                             console.log(`✅ Loaded ${positions.length} active positions for risk analysis`);
                             
                             // Show user feedback
