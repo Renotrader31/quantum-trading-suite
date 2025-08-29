@@ -713,23 +713,116 @@ function calculatePreciseMaxGain(strategyKey, price, positionSize, dte, iv) {
 
 // ENHANCED: Precise strike calculations based on market data and Greeks
 function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
-  console.log(`\n🎯 CALCULATING STRIKES: Strategy=${strategyKey}, Price=$${price}`);
-  const atm = Math.round(price);
+  console.log(`🎯 CALCULATING STRIKES: Strategy=${strategyKey}, Price=${price}`);
+  
+  const stockPrice = parseFloat(price);
   
   // SANITY CHECK: Cap implied volatility to prevent wild calculations
   const cappedIV = Math.min(Math.max(iv || 0.25, 0.10), 2.0); // Cap between 10% and 200%
   
   // Expected 1-sigma move with sanity limits
-  let priceMove = price * cappedIV * Math.sqrt(dte / 365);
+  let priceMove = stockPrice * cappedIV * Math.sqrt(dte / 365);
   
   // ADDITIONAL SANITY CHECK: Cap price move to reasonable percentage of stock price
   const maxMovePercent = 0.5; // Max 50% move for strike calculations
-  priceMove = Math.min(priceMove, price * maxMovePercent);
+  priceMove = Math.min(priceMove, stockPrice * maxMovePercent);
   
   // Debug logging for wild strikes
-  if (priceMove > price * 0.3) {
-    console.warn(`🚨 Large priceMove detected: ${priceMove.toFixed(2)} for ${strategyKey} on stock price ${price}, IV: ${iv}, DTE: ${dte}`);
+  if (priceMove > stockPrice * 0.3) {
+    console.warn(`🚨 Large priceMove detected: ${priceMove.toFixed(2)} for ${strategyKey} on stock price ${stockPrice}, IV: ${iv}, DTE: ${dte}`);
   }
+  
+  // CONSERVATIVE STRIKE GENERATION - Much tighter bounds
+  switch (strategyKey.toLowerCase()) {
+    case 'bullcallspread':
+    case 'bull_call_spread':
+      // Buy call at 2% ITM, sell call at 3% OTM (max 5% spread)
+      const buyCallStrike = Math.round(stockPrice * 0.98);
+      const sellCallStrike = Math.round(stockPrice * 1.03);
+      const callSpreadWidth = sellCallStrike - buyCallStrike;
+      
+      return {
+        longStrike: buyCallStrike,
+        shortStrike: sellCallStrike,
+        maxProfit: callSpreadWidth,
+        maxLoss: Math.round(callSpreadWidth * 0.4), // Conservative debit estimate
+        breakeven: buyCallStrike + Math.round(callSpreadWidth * 0.4),
+        strategy: 'Bull Call Spread'
+      };
+      
+    case 'ironbutterfly':
+    case 'iron_butterfly':
+      // Very tight butterfly with 2% wings
+      const centerStrike = Math.round(stockPrice);
+      const wingSpread = Math.max(1, Math.round(stockPrice * 0.02)); // 2% wings maximum
+      const lowerWing = centerStrike - wingSpread;
+      const upperWing = centerStrike + wingSpread;
+      
+      const butterflyNetCredit = Math.round(wingSpread * 0.3); // Conservative credit
+      
+      return {
+        putStrike: lowerWing,
+        callStrike: centerStrike,
+        shortCallStrike: upperWing,
+        shortPutStrike: centerStrike,
+        maxProfit: butterflyNetCredit,
+        maxLoss: wingSpread - butterflyNetCredit,
+        breakeven: [centerStrike - butterflyNetCredit, centerStrike + butterflyNetCredit],
+        strategy: 'Iron Butterfly'
+      };
+      
+    case 'bearputspread':
+    case 'bear_put_spread':
+      // Buy put 3% OTM, sell put 7% OTM
+      const buyPutStrike = Math.round(stockPrice * 0.97);
+      const sellPutStrike = Math.round(stockPrice * 0.93);
+      const putSpreadWidth = buyPutStrike - sellPutStrike;
+      
+      return {
+        longStrike: buyPutStrike,
+        shortStrike: sellPutStrike,
+        maxProfit: putSpreadWidth,
+        maxLoss: Math.round(putSpreadWidth * 0.4),
+        breakeven: buyPutStrike - Math.round(putSpreadWidth * 0.4),
+        strategy: 'Bear Put Spread'
+      };
+      
+    case 'ironcondor':
+    case 'iron_condor':
+      // Conservative iron condor with 3% wings
+      const icCenter = Math.round(stockPrice);
+      const icWing = Math.max(2, Math.round(stockPrice * 0.03));
+      
+      return {
+        putStrike: icCenter - icWing * 2,
+        shortPutStrike: icCenter - icWing,
+        shortCallStrike: icCenter + icWing,
+        callStrike: icCenter + icWing * 2,
+        maxProfit: Math.round(icWing * 0.25),
+        maxLoss: icWing - Math.round(icWing * 0.25),
+        breakeven: [icCenter - icWing + Math.round(icWing * 0.25), 
+                   icCenter + icWing - Math.round(icWing * 0.25)],
+        strategy: 'Iron Condor'
+      };
+      
+    default:
+      // Conservative default spread
+      const defaultBuy = Math.round(stockPrice * 0.99);  // 1% ITM
+      const defaultSell = Math.round(stockPrice * 1.02); // 2% OTM
+      const defaultWidth = defaultSell - defaultBuy;
+      
+      console.warn(`Unknown strategy: ${strategyKey}, using conservative default`);
+      
+      return {
+        longStrike: defaultBuy,
+        shortStrike: defaultSell,
+        maxProfit: defaultWidth,
+        maxLoss: Math.round(defaultWidth * 0.5),
+        breakeven: defaultBuy + Math.round(defaultWidth * 0.5),
+        strategy: 'Conservative Default'
+      };
+  }
+}
   
   // Strategy-specific strike calculations
   const strikes = {};
