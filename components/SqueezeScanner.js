@@ -45,7 +45,7 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
     minHolyGrail: 5,   // Very low threshold to show more results
     minUnusual: 0.5,   // Very low threshold for unusual activity  
     minSweeps: 0,      // Allow stocks without sweeps
-    minFlow: 10,       // Very low flow threshold
+    minFlow: 0,        // No flow threshold
     minGamma: 0.001,   // Very low gamma threshold
     maxDTC: 50,        // Much higher DTC allowance
     minShortInterest: 0  // No short interest requirement
@@ -301,22 +301,42 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
 
   // Filtering logic
   const filteredStocks = stocks.filter(stock => {
+    console.log('🔍 Filtering stock:', stock.symbol, 'Filter:', filter);
+    
     if (searchTerm && !stock.symbol.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-    if (filter === 'unusual' && stock.flowAnalysis.unusual.multiplier < 2) return false;
-    if (filter === 'sweeps' && stock.flowAnalysis.sweeps.count === 0) return false;
-    if (filter === 'bullish' && stock.flowAnalysis.sentiment.score < 60) return false;
-    if (filter === 'squeeze' && stock.squeeze < 85) return false;
+    if (filter === 'unusual' && (stock.flowAnalysis?.unusual?.multiplier || 1) < 2) {
+      console.log('❌ Filtered out', stock.symbol, 'unusual multiplier too low:', stock.flowAnalysis?.unusual?.multiplier);
+      return false;
+    }
+    if (filter === 'sweeps' && (stock.flowAnalysis?.sweeps?.count || 0) === 0) {
+      console.log('❌ Filtered out', stock.symbol, 'no sweeps');
+      return false;
+    }
+    if (filter === 'bullish' && (stock.flowAnalysis?.sentiment?.score || 50) < 60) {
+      console.log('❌ Filtered out', stock.symbol, 'sentiment score too low:', stock.flowAnalysis?.sentiment?.score);
+      return false;
+    }
+    if (filter === 'squeeze' && (stock.squeeze || 0) < 85) {
+      console.log('❌ Filtered out', stock.symbol, 'squeeze too low:', stock.squeeze, 'min: 85');
+      return false;
+    }
     
     // Advanced filters
-    if (stock.holyGrail < advancedFilters.minHolyGrail) return false;
-    if (stock.flowAnalysis.unusual.multiplier < advancedFilters.minUnusual) return false;
-    if (stock.flowAnalysis.sweeps.count < advancedFilters.minSweeps) return false;
-    if (stock.flow < advancedFilters.minFlow) return false;
-    if (stock.gamma < advancedFilters.minGamma) return false;
-    if (stock.dtc > advancedFilters.maxDTC) return false;
+    if ((stock.holyGrail || 0) < advancedFilters.minHolyGrail) {
+      console.log('❌ Filtered out', stock.symbol, 'holyGrail too low:', stock.holyGrail, 'min:', advancedFilters.minHolyGrail);
+      return false;
+    }
+    if ((stock.flowAnalysis?.unusual?.multiplier || 1) < advancedFilters.minUnusual) return false;
+    if ((stock.flowAnalysis?.sweeps?.count || 0) < advancedFilters.minSweeps) return false;
+    if ((stock.flow || 0) < advancedFilters.minFlow) return false;
+    if ((stock.gamma || 0) < advancedFilters.minGamma) return false;
+    if ((stock.dtc || 0) > advancedFilters.maxDTC) return false;
     
+    console.log('✅ Stock', stock.symbol, 'passed all filters');
     return true;
   });
+  
+  console.log('🎯 Filter results:', filteredStocks.length, 'out of', stocks.length, 'stocks passed filtering');
 
   // Sorting logic
   const sortedStocks = [...filteredStocks].sort((a, b) => {
@@ -324,12 +344,12 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
     let bVal = b[sortBy];
     
     if (sortBy === 'unusual') {
-      aVal = a.flowAnalysis.unusual.multiplier;
-      bVal = b.flowAnalysis.unusual.multiplier;
+      aVal = a.flowAnalysis?.unusual?.multiplier || 1;
+      bVal = b.flowAnalysis?.unusual?.multiplier || 1;
     }
     if (sortBy === 'sentiment') {
-      aVal = a.flowAnalysis.sentiment.score;
-      bVal = b.flowAnalysis.sentiment.score;
+      aVal = a.flowAnalysis?.sentiment?.score || 50;
+      bVal = b.flowAnalysis?.sentiment?.score || 50;
     }
     
     return sortOrder === 'desc' ? bVal - aVal : aVal - bVal;
