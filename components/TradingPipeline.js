@@ -201,6 +201,7 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
       // Enhanced results with intelligent analysis
       const enhancedResults = (data.opportunities || []).map(opportunity => {
         const analysis = analyzeStrategy(opportunity);
+        console.log(`Strategy Analysis for ${opportunity.symbol}:`, analysis);
         return {
           ...opportunity,
           ...analysis,
@@ -209,6 +210,7 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
         };
       });
       
+      console.log('Enhanced scan results:', enhancedResults);
       setScanResults(enhancedResults);
       showSuccess(`🎯 Found ${enhancedResults.length} intelligent trading opportunities!`);
       return data;
@@ -871,7 +873,12 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
           </TabPanel>
           
           <TabPanel value={activeTab} index={1}>
-            <OptionsStrategyTab marketData={marketData} loading={externalLoading} onRefresh={onRefresh} />
+            <OptionsStrategyTab 
+              marketData={marketData} 
+              selectedTrades={selectedTrades}
+              loading={externalLoading} 
+              onRefresh={onRefresh} 
+            />
           </TabPanel>
           
           <TabPanel value={activeTab} index={2}>

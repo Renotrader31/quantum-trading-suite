@@ -206,7 +206,7 @@ const STRATEGIES_DATA = {
   }
 };
 
-export default function OptionsStrategyTab({ marketData = {}, loading: externalLoading = false, onRefresh }) {
+export default function OptionsStrategyTab({ marketData = {}, selectedTrades = [], loading: externalLoading = false, onRefresh }) {
   const [selectedStock, setSelectedStock] = useState(null);
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -392,15 +392,20 @@ export default function OptionsStrategyTab({ marketData = {}, loading: externalL
           Select Stock for Analysis
         </Typography>
         <Grid container spacing={2}>
-          {['AAPL', 'NVDA', 'TSLA', 'MSFT', 'GOOGL'].map(symbol => {
+          {/* Show selected trades first, then fallback to default symbols */}
+          {(selectedTrades.length > 0 
+            ? selectedTrades.map(trade => trade.symbol).filter(Boolean)
+            : ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'GOOGL']
+          ).map(symbol => {
             const stockData = marketData[symbol] || {};
             const hasLiveData = !!stockData.price;
+            const isSelected = selectedTrades.some(trade => trade.symbol === symbol);
             
             return (
               <Grid item key={symbol}>
                 <Button
                   variant={hasLiveData ? "contained" : "outlined"}
-                  color={hasLiveData ? "primary" : "inherit"}
+                  color={isSelected ? "secondary" : (hasLiveData ? "primary" : "inherit")}
                   onClick={() => handleStockAnalysis({
                     symbol: symbol,
                     price: stockData.price || 100 + Math.random() * 200,
@@ -411,12 +416,25 @@ export default function OptionsStrategyTab({ marketData = {}, loading: externalL
                     sentiment: stockData.sentiment || 'NEUTRAL'
                   })}
                   disabled={loading}
+                  sx={isSelected ? { 
+                    border: '2px solid', 
+                    borderColor: 'secondary.main',
+                    fontWeight: 'bold'
+                  } : {}}
                 >
-                  Analyze {symbol}
+                  {isSelected ? '✓ ' : ''}Analyze {symbol}
                   {hasLiveData && (
                     <Chip 
                       label="LIVE" 
                       color="success" 
+                      size="small" 
+                      sx={{ ml: 1, fontSize: '0.7rem' }}
+                    />
+                  )}
+                  {isSelected && (
+                    <Chip 
+                      label="SELECTED" 
+                      color="secondary" 
                       size="small" 
                       sx={{ ml: 1, fontSize: '0.7rem' }}
                     />
@@ -430,13 +448,23 @@ export default function OptionsStrategyTab({ marketData = {}, loading: externalL
         {/* Live Data Status */}
         <Box sx={{ mt: 2 }}>
           <Typography variant="body2" color="textSecondary">
-            📊 Live Data Available: {Object.keys(marketData).filter(symbol => ['AAPL', 'NVDA', 'TSLA', 'MSFT', 'GOOGL'].includes(symbol) && marketData[symbol]?.price).length}/5 stocks
+            {selectedTrades.length > 0 ? (
+              <>🎯 Selected Trades: {selectedTrades.length} | </>
+            ) : (
+              <>📊 Default Symbols Available | </>
+            )}
+            Live Data: {Object.keys(marketData).length} stocks
             {onRefresh && (
               <Button size="small" onClick={onRefresh} sx={{ ml: 2 }}>
                 🔄 Refresh Data
               </Button>
             )}
           </Typography>
+          {selectedTrades.length > 0 && (
+            <Typography variant="body2" color="primary" sx={{ mt: 1 }}>
+              ✓ Showing symbols from your Market Opportunities selections
+            </Typography>
+          )}
         </Box>
       </Paper>
 
