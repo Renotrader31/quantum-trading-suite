@@ -898,8 +898,10 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                   portfolioValue={pipelineConfig.maxInvestment}
                   onPositionSizeCalculated={(size) => {
                     setRiskCalculatedPosition(size);
-                   alert(`📊 Kelly Criterion Position Size: ${typeof size.kellyPercentage === 'number' ? size.kellyPercentage.toFixed(2) : 'N/A'}%\nOptimal Size: $${size.optimalSize ? size.optimalSize.toLocaleString() : 'N/A'}\nRisk Level: ${size.riskLevel || 'N/A'}`);
-
+                    const kellyPercent = (size?.kellyPercentage || 0).toFixed(2);
+                    const optimalSize = (size?.optimalSize || 0).toLocaleString();
+                    const riskLevel = size?.riskLevel || 'Unknown';
+                    alert(`📊 Kelly Criterion Position Size: ${kellyPercent}%\nOptimal Size: $${optimalSize}\nRisk Level: ${riskLevel}`);
                   }}
                 />
                 
@@ -912,16 +914,29 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                     <button
                       onClick={async () => {
                         try {
+                          console.log('🔄 Loading active positions from Portfolio Tracker...');
                           const response = await fetch('/api/trade-entry?action=getActiveTrades');
                           if (response.ok) {
                             const data = await response.json();
-                            setPortfolioPositions(data.activeTrades || []);
+                            const positions = data.activeTrades || [];
+                            setPortfolioPositions(positions);
+                            console.log(`✅ Loaded ${positions.length} active positions for risk analysis`);
+                            
+                            // Show user feedback
+                            if (positions.length > 0) {
+                              alert(`✅ Successfully loaded ${positions.length} active positions from your Portfolio Tracker!\n\nPositions now available for risk analysis and Kelly Criterion calculations.`);
+                            } else {
+                              alert('📝 No active positions found in your Portfolio Tracker.\n\nAdd some trades to your portfolio first, then sync again.');
+                            }
+                          } else {
+                            throw new Error(`API responded with status ${response.status}`);
                           }
                         } catch (error) {
-                          console.error('Failed to load portfolio positions:', error);
+                          console.error('❌ Failed to load portfolio positions:', error);
+                          alert(`❌ Error loading positions: ${error.message}\n\nPlease check your connection and try again.`);
                         }
                       }}
-                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm"
+                      className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors"
                     >
                       Load Active Positions
                     </button>
@@ -1031,20 +1046,19 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                       <div>
                         <div className="text-green-200 font-medium">Kelly %:</div>
-                        <div className="text-white">{typeof riskCalculatedPosition.kellyPercentage === 'number' ? riskCalculatedPosition.kellyPercentage.toFixed(2) : 'N/A'}%
-</div>
+                        <div className="text-white">{(riskCalculatedPosition?.kellyPercentage || 0).toFixed(2)}%</div>
                       </div>
                       <div>
                         <div className="text-green-200 font-medium">Optimal Size:</div>
-                        <div className="text-white">${riskCalculatedPosition.optimalSize.toLocaleString()}</div>
+                        <div className="text-white">${(riskCalculatedPosition?.optimalSize || 0).toLocaleString()}</div>
                       </div>
                       <div>
                         <div className="text-green-200 font-medium">Risk Level:</div>
-                        <div className="text-white">{riskCalculatedPosition.riskLevel}</div>
+                        <div className="text-white">{riskCalculatedPosition?.riskLevel || 'Unknown'}</div>
                       </div>
                       <div>
                         <div className="text-green-200 font-medium">Max Loss:</div>
-                        <div className="text-white">${riskCalculatedPosition.maxLoss.toLocaleString()}</div>
+                        <div className="text-white">${(riskCalculatedPosition?.maxLoss || 0).toLocaleString()}</div>
                       </div>
                     </div>
                   </div>
