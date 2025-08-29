@@ -939,6 +939,11 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                           if (response.ok) {
                             const data = await response.json();
                             const positions = data.activeTrades || [];
+                            const safePositions = positions.map(pos => ({
+  ...pos,
+  severity: pos.severity || 'info'  // Ensure severity exists
+}));
+setPortfolioPositions(safePositions);
                             setPortfolioPositions(positions);
                             console.log(`✅ Loaded ${positions.length} active positions for risk analysis`);
                             
