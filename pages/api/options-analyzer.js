@@ -713,6 +713,7 @@ function calculatePreciseMaxGain(strategyKey, price, positionSize, dte, iv) {
 
 // ENHANCED: Precise strike calculations based on market data and Greeks
 function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
+  function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
   console.log(`🎯 CALCULATING STRIKES: Strategy=${strategyKey}, Price=${price}`);
   
   const stockPrice = parseFloat(price);
@@ -731,6 +732,73 @@ function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
   if (priceMove > stockPrice * 0.3) {
     console.warn(`🚨 Large priceMove detected: ${priceMove.toFixed(2)} for ${strategyKey} on stock price ${stockPrice}, IV: ${iv}, DTE: ${dte}`);
   }
+  
+  // CONSERVATIVE STRIKE GENERATION - Much tighter bounds
+  switch (strategyKey.toLowerCase()) {
+    case 'bullcallspread':
+    case 'bull_call_spread':
+      const buyCallStrike = Math.round(stockPrice * 0.98);
+      const sellCallStrike = Math.round(stockPrice * 1.03);
+      const callSpreadWidth = sellCallStrike - buyCallStrike;
+      
+      return {
+        longStrike: buyCallStrike,
+        shortStrike: sellCallStrike,
+        maxProfit: callSpreadWidth,
+        maxLoss: Math.round(callSpreadWidth * 0.4),
+        breakeven: buyCallStrike + Math.round(callSpreadWidth * 0.4),
+        strategy: 'Bull Call Spread'
+      };
+      
+    case 'ironbutterfly':
+    case 'iron_butterfly':
+      const centerStrike = Math.round(stockPrice);
+      const wingSpread = Math.max(1, Math.round(stockPrice * 0.02));
+      const lowerWing = centerStrike - wingSpread;
+      const upperWing = centerStrike + wingSpread;
+      const butterflyNetCredit = Math.round(wingSpread * 0.3);
+      
+      return {
+        putStrike: lowerWing,
+        callStrike: centerStrike,
+        shortCallStrike: upperWing,
+        shortPutStrike: centerStrike,
+        maxProfit: butterflyNetCredit,
+        maxLoss: wingSpread - butterflyNetCredit,
+        breakeven: [centerStrike - butterflyNetCredit, centerStrike + butterflyNetCredit],
+        strategy: 'Iron Butterfly'
+      };
+      
+    case 'bearputspread':
+    case 'bear_put_spread':
+      const buyPutStrike = Math.round(stockPrice * 0.97);
+      const sellPutStrike = Math.round(stockPrice * 0.93);
+      const putSpreadWidth = buyPutStrike - sellPutStrike;
+      
+      return {
+        longStrike: buyPutStrike,
+        shortStrike: sellPutStrike,
+        maxProfit: putSpreadWidth,
+        maxLoss: Math.round(putSpreadWidth * 0.4),
+        breakeven: buyPutStrike - Math.round(putSpreadWidth * 0.4),
+        strategy: 'Bear Put Spread'
+      };
+      
+    default:
+      const defaultBuy = Math.round(stockPrice * 0.99);
+      const defaultSell = Math.round(stockPrice * 1.02);
+      const defaultWidth = defaultSell - defaultBuy;
+      
+      return {
+        longStrike: defaultBuy,
+        shortStrike: defaultSell,
+        maxProfit: defaultWidth,
+        maxLoss: Math.round(defaultWidth * 0.5),
+        breakeven: defaultBuy + Math.round(defaultWidth * 0.5),
+        strategy: 'Conservative Default'
+      };
+  }
+}
   
   // CONSERVATIVE STRIKE GENERATION - Much tighter bounds
   switch (strategyKey.toLowerCase()) {
