@@ -339,9 +339,10 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
   console.log('🎯 Filter results:', filteredStocks.length, 'out of', stocks.length, 'stocks passed filtering');
 
   // Sorting logic
+  console.log('📊 Starting sort with', filteredStocks.length, 'stocks, sortBy:', sortBy, 'sortOrder:', sortOrder);
   const sortedStocks = [...filteredStocks].sort((a, b) => {
-    let aVal = a[sortBy];
-    let bVal = b[sortBy];
+    let aVal = a[sortBy] || 0;
+    let bVal = b[sortBy] || 0;
     
     if (sortBy === 'unusual') {
       aVal = a.flowAnalysis?.unusual?.multiplier || 1;
@@ -352,8 +353,17 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
       bVal = b.flowAnalysis?.sentiment?.score || 50;
     }
     
+    // Ensure we have valid numbers for comparison
+    aVal = typeof aVal === 'number' && !isNaN(aVal) ? aVal : 0;
+    bVal = typeof bVal === 'number' && !isNaN(bVal) ? bVal : 0;
+    
+    console.log('🔢 Sorting:', a.symbol, ':', aVal, 'vs', b.symbol, ':', bVal);
+    
     return sortOrder === 'desc' ? bVal - aVal : aVal - bVal;
   });
+  
+  console.log('🎯 Final sorted stocks:', sortedStocks.length, 'stocks ready for display');
+  console.log('📋 Stock symbols:', sortedStocks.map(s => s.symbol));
 
   const handleSort = (field) => {
     if (sortBy === field) {
@@ -957,14 +967,14 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
           </div>
           <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
             <div className="text-3xl font-bold text-yellow-400">
-              {stocks.filter(s => s.flowAnalysis.unusual.multiplier >= 3).length}
+              {stocks.filter(s => (s.flowAnalysis?.unusual?.multiplier || 1) >= 3).length}
             </div>
             <div className="text-sm text-gray-400">Very Unusual</div>
             <div className="text-xs text-gray-500">3x+ activity</div>
           </div>
           <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
             <div className="text-3xl font-bold text-purple-400">
-              {stocks.reduce((sum, s) => sum + s.flowAnalysis.sweeps.count, 0)}
+              {stocks.reduce((sum, s) => sum + (s.flowAnalysis?.sweeps?.count || 0), 0)}
             </div>
             <div className="text-sm text-gray-400">Total Sweeps</div>
             <div className="text-xs text-gray-500">Aggressive orders</div>
@@ -1110,11 +1120,11 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                         </td>
                         <td className="p-4 text-center">
                           <div className="text-xl font-bold text-orange-400">
-                            {stock.flowAnalysis.unusual.multiplier.toFixed(1)}x
+                            {(stock.flowAnalysis?.unusual?.multiplier || 1).toFixed(1)}x
                           </div>
-                          {stock.flowAnalysis.sweeps.count > 0 && (
+                          {(stock.flowAnalysis?.sweeps?.count || 0) > 0 && (
                             <span className="bg-orange-900/50 text-orange-400 px-1.5 py-0.5 rounded text-xs">
-                              {stock.flowAnalysis.sweeps.count} SWEEP
+                              {stock.flowAnalysis?.sweeps?.count || 0} SWEEP
                             </span>
                           )}
                         </td>
@@ -1128,19 +1138,19 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                         </td>
                         <td className="p-4 text-center">
                           <div className={`text-lg font-bold ${
-                            stock.flowAnalysis.sentiment.score >= 70 ? 'text-green-400' : 
-                            stock.flowAnalysis.sentiment.score >= 50 ? 'text-yellow-400' : 'text-red-400'
+                            (stock.flowAnalysis?.sentiment?.score || 50) >= 70 ? 'text-green-400' : 
+                            (stock.flowAnalysis?.sentiment?.score || 50) >= 50 ? 'text-yellow-400' : 'text-red-400'
                           }`}>
-                            {stock.flowAnalysis.sentiment.score}%
+                            {stock.flowAnalysis?.sentiment?.score || 50}%
                           </div>
                           <span className={`px-2 py-0.5 rounded text-xs ${
-                            stock.flowAnalysis.sentiment.overall === 'BULLISH'
+                            (stock.flowAnalysis?.sentiment?.overall || 'NEUTRAL') === 'BULLISH'
                               ? 'bg-green-900/50 text-green-400'
-                              : stock.flowAnalysis.sentiment.overall === 'BEARISH'
+                              : (stock.flowAnalysis?.sentiment?.overall || 'NEUTRAL') === 'BEARISH'
                               ? 'bg-red-900/50 text-red-400'
                               : 'bg-gray-700 text-gray-300'
                           }`}>
-                            {stock.flowAnalysis.sentiment.overall}
+                            {stock.flowAnalysis?.sentiment?.overall || 'NEUTRAL'}
                           </span>
                         </td>
                         <td className="p-4 text-center">
@@ -1225,15 +1235,15 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                                 <div className="space-y-2 text-sm">
                                   <div className="flex justify-between">
                                     <span className="text-gray-400">Unusual Score</span>
-                                    <span>{stock.flowAnalysis.unusual.percentile}th percentile</span>
+                                    <span>{stock.flowAnalysis?.unusual?.percentile || 75}th percentile</span>
                                   </div>
                                   <div className="flex justify-between">
                                     <span className="text-gray-400">Bullish Sweeps</span>
-                                    <span className="text-green-400">{stock.flowAnalysis.sweeps.bullish}</span>
+                                    <span className="text-green-400">{stock.flowAnalysis?.sweeps?.bullish || 0}</span>
                                   </div>
                                   <div className="flex justify-between">
                                     <span className="text-gray-400">Bearish Sweeps</span>
-                                    <span className="text-red-400">{stock.flowAnalysis.sweeps.bearish}</span>
+                                    <span className="text-red-400">{stock.flowAnalysis?.sweeps?.bearish || 0}</span>
                                   </div>
                                   <div className="flex justify-between">
                                     <span className="text-gray-400">Block Trades</span>
