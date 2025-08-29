@@ -1030,7 +1030,8 @@ export default function TradingPipeline({ marketData, loading, onRefresh, lastUp
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                       <div>
                         <div className="text-green-200 font-medium">Kelly %:</div>
-                        <div className="text-white">{riskCalculatedPosition.kellyPercentage.toFixed(2)}%</div>
+                        <div className="text-white">{typeof riskCalculatedPosition.kellyPercentage === 'number' ? riskCalculatedPosition.kellyPercentage.toFixed(2) : 'N/A'}%
+</div>
                       </div>
                       <div>
                         <div className="text-green-200 font-medium">Optimal Size:</div>
