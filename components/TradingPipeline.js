@@ -28,6 +28,7 @@ import {
 
 import ErrorBoundary from './ErrorBoundary';
 import OptionsStrategyTab from './OptionsStrategyTab';
+import AdvancedRiskManagement from './AdvancedRiskManagement';
 
 // Utility function to safely access severity property
 const getSafeSeverity = (item) => {
@@ -629,7 +630,11 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
           </TabPanel>
           
           <TabPanel value={activeTab} index={2}>
-            {renderRiskManagement()}
+            <AdvancedRiskManagement 
+              marketData={marketData} 
+              selectedTrades={selectedTrades}
+              portfolioValue={100000}
+            />
           </TabPanel>
           
           <TabPanel value={activeTab} index={3}>
