@@ -125,15 +125,15 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
     }
   };
 
-  // Enhanced market scan with proper error handling
+  // Enhanced market scan with intelligent strategy analysis
   const runMarketScan = async () => {
     const result = await safeApiCall(async () => {
       const response = await fetch('/api/enhanced-scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          scanType: 'comprehensive',
-          riskTolerance: config.riskTolerance 
+          scanType: config.scanType || 'comprehensive',
+          riskTolerance: config.riskTolerance || 'moderate'
         })
       });
       
@@ -143,15 +143,74 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
       
       const data = await response.json();
       
-      // Safety check for scan results
-      const safeResults = (data.opportunities || []).map(opportunity => ({
-        ...opportunity,
-        severity: opportunity.severity || 'info',
-        risk: opportunity.risk || 'medium'
-      }));
+      // Intelligent strategy analysis based on market data
+      const analyzeStrategy = (opportunity) => {
+        const { flow, iv, squeeze, holyGrail, gamma, pinRisk } = opportunity;
+        
+        // Strategy selection based on market conditions
+        let strategy = 'Not specified';
+        let expectedReturn = 'N/A';
+        let risk = 'Unknown';
+        let severity = 'info';
+        
+        if (flow === 'VERY_BULLISH' && iv > 40) {
+          strategy = 'Bull Call Spread';
+          expectedReturn = '15-25%';
+          risk = 'Medium';
+          severity = 'high';
+        } else if (flow === 'BULLISH' && squeeze > 80) {
+          strategy = 'Long Call';
+          expectedReturn = '20-35%';
+          risk = 'High';
+          severity = 'high';
+        } else if (flow === 'BEARISH' && iv > 35) {
+          strategy = 'Bear Put Spread';
+          expectedReturn = '12-20%';
+          risk = 'Medium';
+          severity = 'medium';
+        } else if (squeeze > 75 && iv < 30) {
+          strategy = 'Iron Condor';
+          expectedReturn = '8-15%';
+          risk = 'Low';
+          severity = 'medium';
+        } else if (gamma > 0.5 && holyGrail > 70) {
+          strategy = 'Jade Lizard';
+          expectedReturn = '10-18%';
+          risk = 'Medium';
+          severity = 'high';
+        } else if (iv > 45) {
+          strategy = 'Short Straddle';
+          expectedReturn = '6-12%';
+          risk = 'Low';
+          severity = 'info';
+        } else if (flow === 'BULLISH' && pinRisk === 'LOW') {
+          strategy = 'Covered Call';
+          expectedReturn = '5-10%';
+          risk = 'Low';
+          severity = 'info';
+        } else {
+          strategy = 'Cash-Secured Put';
+          expectedReturn = '4-8%';
+          risk = 'Low';
+          severity = 'info';
+        }
+        
+        return { strategy, expectedReturn, risk, severity };
+      };
       
-      setScanResults(safeResults);
-      showSuccess(`Market scan completed! Found ${safeResults.length} opportunities.`);
+      // Enhanced results with intelligent analysis
+      const enhancedResults = (data.opportunities || []).map(opportunity => {
+        const analysis = analyzeStrategy(opportunity);
+        return {
+          ...opportunity,
+          ...analysis,
+          id: opportunity.symbol || Math.random().toString(36),
+          symbol: opportunity.symbol || 'Unknown'
+        };
+      });
+      
+      setScanResults(enhancedResults);
+      showSuccess(`🎯 Found ${enhancedResults.length} intelligent trading opportunities!`);
       return data;
     }, 'Market scan failed');
   };
