@@ -77,6 +77,18 @@ export default function AdvancedMLEngine({ marketData = {}, selectedTrades = [] 
       return stored ? { ...defaultPerformance, ...JSON.parse(stored) } : defaultPerformance;
     }
 
+    // Initialize market regime configurations
+    initializeMarketRegimes() {
+      return {
+        bull: { description: 'Bullish Market', characteristics: ['uptrend', 'high_volume', 'positive_sentiment'] },
+        bear: { description: 'Bearish Market', characteristics: ['downtrend', 'fear', 'negative_sentiment'] },
+        sideways: { description: 'Sideways Market', characteristics: ['range_bound', 'low_directional_movement'] },
+        high_vol: { description: 'High Volatility', characteristics: ['elevated_iv', 'market_uncertainty'] },
+        low_vol: { description: 'Low Volatility', characteristics: ['compressed_iv', 'stable_conditions'] },
+        vol_expansion: { description: 'Volatility Expansion', characteristics: ['increasing_iv', 'pending_catalysts'] }
+      };
+    }
+
     // Market regime detection using multiple indicators
     detectMarketRegime(marketData) {
       const symbols = Object.keys(marketData);
