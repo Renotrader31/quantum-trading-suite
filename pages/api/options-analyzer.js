@@ -766,6 +766,26 @@ function calculatePreciseStrikes(strategyKey, price, iv, dte, greeks) {
       strikes.buyPut = Math.max(strikes.buyPut, atm - price * 0.3);
       break;
       
+    case 'ironButterfly':
+    case 'butterfly':
+      // FIXED: Iron Butterfly - sell straddle at ATM, buy protective wings
+      strikes.sellCall = atm; // Sell ATM call
+      strikes.sellPut = atm;  // Sell ATM put
+      
+      // Buy protective wings - reasonable distance from ATM
+      const wingDistance = Math.max(2, Math.min(Math.round(price * 0.08), Math.round(priceMove * 0.6))); // 8% max, capped by priceMove
+      strikes.buyCall = atm + wingDistance;  // Buy OTM call protection
+      strikes.buyPut = atm - wingDistance;   // Buy OTM put protection
+      
+      // STRICT SANITY CHECK: Keep butterfly wings close to stock price
+      strikes.sellCall = Math.max(Math.round(price * 0.95), Math.min(strikes.sellCall, Math.round(price * 1.05))); // Within ±5%
+      strikes.sellPut = Math.max(Math.round(price * 0.95), Math.min(strikes.sellPut, Math.round(price * 1.05))); // Within ±5%
+      strikes.buyCall = Math.max(atm + 1, Math.min(strikes.buyCall, Math.round(price * 1.15))); // Max 15% OTM
+      strikes.buyPut = Math.max(Math.round(price * 0.85), Math.min(strikes.buyPut, atm - 1)); // Min 85% of stock price
+      
+      console.log(`📊 IRON BUTTERFLY FIX - Stock: $${price}, ATM: $${atm}, Wings: $${strikes.buyPut}/$${strikes.buyCall}, Distance: $${wingDistance}`);
+      break;
+      
     case 'callSpread':
     case 'bullCallSpread':
       // FIXED: Conservative bull call spread - buy ATM/slightly ITM, sell OTM
@@ -1051,6 +1071,16 @@ function generatePreciseOptionLegs(strategyKey, price, strikes, dte, expirationD
       );
       break;
       
+    case 'ironButterfly':
+    case 'butterfly':
+      legs.push(
+        { type: 'put', action: 'buy', strike: strikes.buyPut, expiry: expirationDate, dte, quantity: 1, premium: estimatePremium('put', strikes.buyPut, price, dte), description: `Buy ${strikes.buyPut} Put (protective wing)` },
+        { type: 'put', action: 'sell', strike: strikes.sellPut, expiry: expirationDate, dte, quantity: 1, premium: estimatePremium('put', strikes.sellPut, price, dte), description: `Sell ${strikes.sellPut} Put (ATM short)` },
+        { type: 'call', action: 'sell', strike: strikes.sellCall, expiry: expirationDate, dte, quantity: 1, premium: estimatePremium('call', strikes.sellCall, price, dte), description: `Sell ${strikes.sellCall} Call (ATM short)` },
+        { type: 'call', action: 'buy', strike: strikes.buyCall, expiry: expirationDate, dte, quantity: 1, premium: estimatePremium('call', strikes.buyCall, price, dte), description: `Buy ${strikes.buyCall} Call (protective wing)` }
+      );
+      break;
+      
     case 'callSpread':
       legs.push(
         { type: 'call', action: 'buy', strike: strikes.buyCall, expiry: expirationDate, dte, quantity: 1, premium: estimatePremium('call', strikes.buyCall, price, dte) },
@@ -1142,6 +1172,13 @@ function calculateBreakevens(strategyKey, strikes, price) {
       break;
     case 'ironCondor':
       breakevens.push(strikes.sellCall - 1, strikes.sellPut + 1);
+      break;
+    case 'ironButterfly':
+    case 'butterfly':
+      // Iron butterfly breakeven = ATM +/- net debit (wing distance - net credit)
+      const netCredit = estimatePremium('call', strikes.sellCall, price, 30) + estimatePremium('put', strikes.sellPut, price, 30) - estimatePremium('call', strikes.buyCall, price, 30) - estimatePremium('put', strikes.buyPut, price, 30);
+      const wingDistance = strikes.buyCall - strikes.sellCall; // Distance from ATM to wing
+      breakevens.push(strikes.sellCall - Math.max(wingDistance - netCredit, 1), strikes.sellCall + Math.max(wingDistance - netCredit, 1));
       break;
     case 'callSpread':
     case 'bullCallSpread':
