@@ -321,10 +321,12 @@ export default function OptionsStrategyTab({ marketData = {}, loading: externalL
       };
     });
     
-    // Sort by score and return top 4
-    return recommendations
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 4);
+    // Sort by score and return top strategies (show more to demonstrate full strategy range)
+    const sortedStrategies = recommendations.sort((a, b) => b.score - a.score);
+    
+    // For demonstration, show top 8 strategies so user can see the variety
+    // In production, you might want top 4, but let's show the breadth of strategies
+    return sortedStrategies.slice(0, 8);
   };
 
   const handleStockAnalysis = (stock) => {
@@ -449,6 +451,9 @@ export default function OptionsStrategyTab({ marketData = {}, loading: externalL
             <Box>
               <Typography variant="h6" gutterBottom>
                 Top {strategies.length} Recommended Strategies
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                📊 Analyzed {Object.keys(STRATEGIES_DATA).length} total strategies including Iron Condor, Jade Lizard, Straddles, Strangles, Butterfly Spreads, and more
               </Typography>
               
               {strategies.map((strategy, index) => (
