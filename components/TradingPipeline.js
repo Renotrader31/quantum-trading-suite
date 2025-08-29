@@ -98,6 +98,16 @@ export default function TradingPipeline() {
   const [strategyLoading, setStrategyLoading] = useState(false);
   const [strategyEngine] = useState(() => new OptionsStrategyEngine());
   
+  // Debug state changes
+  useEffect(() => {
+    console.log('🔍 Strategy state changed:', {
+      selectedStock: selectedStock?.symbol,
+      recommendationsCount: strategyRecommendations.length,
+      strategyLoading,
+      recommendations: strategyRecommendations
+    });
+  }, [selectedStock, strategyRecommendations, strategyLoading]);
+  
   // Configuration state
   const [config, setConfig] = useState({
     riskTolerance: 'medium',
@@ -329,8 +339,16 @@ export default function TradingPipeline() {
       console.log('📊 Analyzing strategies with data:', { stockData, marketConditions });
       
       // Get strategy recommendations
+      console.log('🔧 Calling strategyEngine.analyzeStrategies...');
       const analysis = await strategyEngine.analyzeStrategies(stockData, marketConditions);
+      console.log('📋 Raw analysis result:', analysis);
+      console.log('📊 Recommendations array:', analysis.recommendations);
+      console.log('📏 Recommendations length:', analysis.recommendations?.length);
+      
       setStrategyRecommendations(analysis.recommendations || []);
+      
+      // Auto-switch to Options Strategies tab to show results
+      setActiveTab(1);
       
       console.log('✅ Strategy analysis complete:', analysis);
       showSuccess(`Generated ${analysis.recommendations?.length || 0} strategy recommendations for ${stock.symbol}`);
@@ -531,6 +549,11 @@ export default function TradingPipeline() {
             
             {selectedStock ? (
               <Box>
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Analyzing options strategies for {selectedStock.symbol}. 
+                  Found {strategyRecommendations.length} recommendations.
+                  {strategyLoading && ' Analysis in progress...'}
+                </Alert>
                 <Box display="flex" alignItems="center" gap={2} mb={2}>
                   <Typography variant="h5" color="primary">
                     {selectedStock.symbol}
@@ -720,14 +743,24 @@ export default function TradingPipeline() {
               </Box>
             ) : (
               <Box textAlign="center" py={4}>
-                <Typography color="textSecondary" paragraph>
-                  Select a stock from the Market Opportunities tab to analyze options strategies.
-                </Typography>
+                <Alert severity="info" sx={{ mb: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Options Strategy Analysis
+                  </Typography>
+                  <Typography paragraph>
+                    Click "Analyze Options" on any stock from the Market Opportunities tab to get personalized strategy recommendations.
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Features: 15+ strategies, Greeks analysis, risk management, ML learning
+                  </Typography>
+                </Alert>
                 <Button
-                  variant="outlined"
+                  variant="contained"
+                  color="primary"
                   onClick={() => setActiveTab(0)}
+                  size="large"
                 >
-                  Go to Market Opportunities
+                  Browse Market Opportunities
                 </Button>
               </Box>
             )}
