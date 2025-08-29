@@ -349,9 +349,29 @@ export default function OptionsStrategyTab({ marketData = {}, loading: externalL
   };
 
   const handleStrategySelect = (strategy) => {
-    // Mock ML feedback
+    // Send strategy selection to ML engine for learning
     console.log('Strategy selected for ML learning:', strategy.strategy);
-    alert(`Selected ${strategy.strategy} for ML learning!`);
+    
+    // Save selection to localStorage for ML Engine to learn from
+    const mlFeedback = {
+      timestamp: Date.now(),
+      strategy: strategy.strategy,
+      symbol: selectedStock.symbol,
+      marketConditions: {
+        sentiment: selectedStock.flow,
+        iv: selectedStock.iv,
+        volume: selectedStock.volume,
+        price: selectedStock.price
+      },
+      type: 'strategy_selection'
+    };
+    
+    // Store in ML feedback queue
+    const existingFeedback = JSON.parse(localStorage.getItem('mlFeedbackQueue') || '[]');
+    existingFeedback.push(mlFeedback);
+    localStorage.setItem('mlFeedbackQueue', JSON.stringify(existingFeedback));
+    
+    alert(`✅ ${strategy.strategy} selected! ML system will learn from this choice.`);
   };
 
   return (
