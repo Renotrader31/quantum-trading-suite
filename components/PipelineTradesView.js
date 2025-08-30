@@ -5,9 +5,13 @@ export default function PipelineTradesView() {
   const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({});
+  const [error, setError] = useState(null);
 
   const loadTrades = async () => {
     setLoading(true);
+    setError(null);
+    console.log('📊 Pipeline Viewer: Loading trades...');
+    
     try {
       const response = await fetch('/api/trade-entry', {
         method: 'POST',
@@ -17,22 +21,41 @@ export default function PipelineTradesView() {
 
       if (response.ok) {
         const data = await response.json();
-        setTrades(data.trades || []);
+        console.log('📊 Pipeline Viewer: Received data:', data);
+        
+        const tradesArray = data.trades || [];
+        setTrades(tradesArray);
         
         // Calculate summary
-        const totalValue = data.trades.reduce((sum, trade) => sum + (trade.initialValue || 0), 0);
-        const strategies = [...new Set(data.trades.map(trade => trade.strategy))];
-        const symbols = [...new Set(data.trades.map(trade => trade.symbol))];
-        
-        setSummary({
-          totalTrades: data.trades.length,
-          totalValue: totalValue,
-          uniqueStrategies: strategies.length,
-          uniqueSymbols: symbols.length
-        });
+        if (tradesArray.length > 0) {
+          const totalValue = tradesArray.reduce((sum, trade) => sum + (trade.initialValue || 0), 0);
+          const strategies = [...new Set(tradesArray.map(trade => trade.strategy))];
+          const symbols = [...new Set(tradesArray.map(trade => trade.symbol))];
+          
+          setSummary({
+            totalTrades: tradesArray.length,
+            totalValue: totalValue,
+            uniqueStrategies: strategies.length,
+            uniqueSymbols: symbols.length
+          });
+          console.log('📊 Pipeline Viewer: Loaded', tradesArray.length, 'trades');
+        } else {
+          setSummary({
+            totalTrades: 0,
+            totalValue: 0,
+            uniqueStrategies: 0,
+            uniqueSymbols: 0
+          });
+          console.log('📊 Pipeline Viewer: No trades found');
+        }
+      } else {
+        const errorData = await response.text();
+        console.error('❌ Pipeline Viewer: API error:', errorData);
+        setError('Failed to load trades');
       }
     } catch (error) {
-      console.error('Error loading trades:', error);
+      console.error('❌ Pipeline Viewer: Error loading trades:', error);
+      setError(error.message || 'Failed to load trades');
     } finally {
       setLoading(false);
     }
@@ -124,6 +147,16 @@ export default function PipelineTradesView() {
             </div>
           </div>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2 text-red-400">
+              <span className="text-xl">⚠️</span>
+              <span className="font-medium">Error loading trades: {error}</span>
+            </div>
+          </div>
+        )}
 
         {/* Trades Table */}
         <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">

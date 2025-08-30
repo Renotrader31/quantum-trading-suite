@@ -1805,5 +1805,53 @@
     "status": "active",
     "pnl": 0,
     "initialValue": 17.4
+  },
+  {
+    "tradeId": "trade_1756580935584_v8zbo4u31",
+    "symbol": "SOFI",
+    "strategyName": "Jade Lizard",
+    "entryPrice": 26.25,
+    "strikes": [],
+    "expiration": "2025-10-05",
+    "dte": 36,
+    "positionSize": 5250,
+    "maxLoss": 2,
+    "maxGain": 4,
+    "squeezeContext": {
+      "holyGrail": 89,
+      "squeeze": 89,
+      "gamma": 0.27,
+      "darkPool": {
+        "ratio": 0.63,
+        "volume": 1958981,
+        "averageSize": 387,
+        "sentiment": "NEUTRAL"
+      },
+      "optionsMetrics": {
+        "totalVolume": 12957291,
+        "putCallRatio": 1.2,
+        "volumeOIRatio": 2.5,
+        "netPremium": 0,
+        "ivRank": 50,
+        "atmIV": 30,
+        "skew": 100,
+        "term": "NEUTRAL"
+      },
+      "technicals": {}
+    },
+    "marketConditions": {
+      "price": 26.25,
+      "volume": 12957291,
+      "change": 0.21,
+      "changePercent": 0.82,
+      "avgVolume": 12423750
+    },
+    "neuralNetworkPrediction": 0,
+    "aiScore": 90,
+    "probability": 82,
+    "recordedAt": "2025-08-30T19:08:55.584Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 0
   }
 ]

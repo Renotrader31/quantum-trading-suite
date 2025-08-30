@@ -29,6 +29,7 @@ import {
 
 import ErrorBoundary from './ErrorBoundary';
 import OptionsStrategyTab from './OptionsStrategyTab';
+import StandaloneOptionsStrategy from './StandaloneOptionsStrategy';
 import AdvancedRiskManagement from './AdvancedRiskManagement';
 import AdvancedMLEngine from './AdvancedMLEngine';
 
@@ -952,11 +953,9 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
           
           <TabPanel value={activeTab} index={1}>
             <ErrorBoundary>
-              <OptionsStrategyTab 
+              <StandaloneOptionsStrategy 
                 marketData={marketData} 
                 selectedTrades={selectedTrades}
-                loading={externalLoading} 
-                onRefresh={onRefresh} 
               />
             </ErrorBoundary>
           </TabPanel>
