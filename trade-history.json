@@ -1,0 +1,1399 @@
+[
+  {
+    "id": "trade_1756515806426_r42jn8qip",
+    "timestamp": "2025-08-30T01:03:26.426Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 66.52388136775528,
+    "marketData": {
+      "price": 66.52388136775528,
+      "volume": 516087,
+      "change": 0.018813525938168426,
+      "changePercent": 0.018813525938168426,
+      "aiScore": 46.402174514087214,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 89.3,
+        "options_flow": 15,
+        "gamma_exposure": 18.463796726189784,
+        "dark_pool": 55.64925035833349,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756515808605_qt2exj1s7",
+    "timestamp": "2025-08-30T01:03:28.605Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 66.52388136775528,
+    "marketData": {
+      "price": 66.52388136775528,
+      "volume": 516087,
+      "change": 0.018813525938168426,
+      "changePercent": 0.018813525938168426,
+      "aiScore": 46.402174514087214,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 89.3,
+        "options_flow": 15,
+        "gamma_exposure": 18.463796726189784,
+        "dark_pool": 55.64925035833349,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516183395_6gi644yr3",
+    "timestamp": "2025-08-30T01:09:43.395Z",
+    "symbol": "META",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 485.2,
+    "marketData": {
+      "price": 485.2,
+      "volume": 7754761,
+      "change": -0.048567920484435034,
+      "changePercent": -0.048567920484435034,
+      "aiScore": 46.74967638353115,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 96.7,
+        "options_flow": 15,
+        "gamma_exposure": 10.42601838775938,
+        "dark_pool": 58.37203991342756,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516216269_9mublcwjr",
+    "timestamp": "2025-08-30T01:10:16.269Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 54.15793149171941,
+    "marketData": {
+      "price": 54.15793149171941,
+      "volume": 3349743,
+      "change": -9.05676649457577,
+      "changePercent": -9.05676649457577,
+      "aiScore": 48.12907189099371,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 90.4,
+        "options_flow": 15,
+        "gamma_exposure": 17.424712425091123,
+        "dark_pool": 65.94971892087109,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516217487_1dtzqv0g8",
+    "timestamp": "2025-08-30T01:10:17.487Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 54.15793149171941,
+    "marketData": {
+      "price": 54.15793149171941,
+      "volume": 3349743,
+      "change": -9.05676649457577,
+      "changePercent": -9.05676649457577,
+      "aiScore": 48.12907189099371,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 90.4,
+        "options_flow": 15,
+        "gamma_exposure": 17.424712425091123,
+        "dark_pool": 65.94971892087109,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516282531_a9qi9hn0u",
+    "timestamp": "2025-08-30T01:11:22.531Z",
+    "symbol": "BABA",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 91.22506486497817,
+    "marketData": {
+      "price": 91.22506486497817,
+      "volume": 937111,
+      "change": 5.021912361228167,
+      "changePercent": 5.021912361228167,
+      "aiScore": 45.5102001307398,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 95.8,
+        "options_flow": 15,
+        "gamma_exposure": 18.234110975481528,
+        "dark_pool": 44.02708980895724,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516642671_r52ekmo3a",
+    "timestamp": "2025-08-30T01:17:22.671Z",
+    "symbol": "INTC",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 114.05640280539887,
+    "marketData": {
+      "price": 114.05640280539887,
+      "volume": 6435341,
+      "change": -0.3551659585376352,
+      "changePercent": -0.3551659585376352,
+      "aiScore": 47.909771110170304,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 98,
+        "options_flow": 15,
+        "gamma_exposure": 4.9864308804202695,
+        "dark_pool": 69.47219578060155,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516673953_m2ozje2ue",
+    "timestamp": "2025-08-30T01:17:53.953Z",
+    "symbol": "META",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 485.2,
+    "marketData": {
+      "price": 485.2,
+      "volume": 4990291,
+      "change": -2.1697593845194962,
+      "changePercent": -0.4471886612777197,
+      "marketCap": 82144744453,
+      "avgVolume": 3860694,
+      "beta": 2.2809208693480625,
+      "peRatio": 35.970819393882294,
+      "eps": 5.659630135941368,
+      "dividend": 2.103378645030652,
+      "sector": "Financial",
+      "industry": "Software"
+    },
+    "squeezeContext": {
+      "holyGrail": 78,
+      "squeeze": 69,
+      "gamma": 0.5549944382344969,
+      "flow": 32,
+      "dix": 0.4745762278065108,
+      "gex": -141.65953677671905,
+      "darkPool": {
+        "ratio": 0.37351338872935036,
+        "volume": 1119684,
+        "trades": 688
+      },
+      "shortInterest": 5.538103215069805,
+      "institutionalOwnership": 34.095618366787704,
+      "optionsMetrics": {
+        "totalVolume": 24549,
+        "putCallRatio": 1.9691130363940912,
+        "volumeOIRatio": 1.1197666729097284,
+        "netPremium": 14761406.219116025,
+        "ivRank": 30,
+        "atmIV": 61.037934982229125,
+        "skew": 101.35079491430827,
+        "term": "BACKWARDATION"
+      },
+      "technicals": {
+        "rsi": 64.96213076093731,
+        "macd": 0.29491311728897696,
+        "ema20": 482.2988402199686,
+        "sma50": 475.15135312170895,
+        "bollinger": {
+          "upper": 507.34472433900305,
+          "lower": 461.9026279404468
+        },
+        "vwap": 489.2783033740161
+      }
+    },
+    "aiScore": 89,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516689403_e2q4nrr7r",
+    "timestamp": "2025-08-30T01:18:09.403Z",
+    "symbol": "META",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 485.2,
+    "marketData": {
+      "price": 485.2,
+      "volume": 6255730,
+      "change": 0.22551828460593012,
+      "changePercent": 0.22551828460593012,
+      "aiScore": 47.407936420503795,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 90.5,
+        "options_flow": 15,
+        "gamma_exposure": 11.756151425523832,
+        "dark_pool": 67.19146709749894,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516871323_giuoxbch3",
+    "timestamp": "2025-08-30T01:21:11.323Z",
+    "symbol": "GOOGL",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 142.35,
+    "marketData": {
+      "price": 142.35,
+      "volume": 3289563,
+      "change": 0.072909909391103,
+      "changePercent": 0.072909909391103,
+      "aiScore": 49.29703049820322,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 12.886105355301565,
+        "dark_pool": 67.89607763391774,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516882097_ffpj6bzgu",
+    "timestamp": "2025-08-30T01:21:22.098Z",
+    "symbol": "AMD",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 125.7,
+    "marketData": {
+      "price": 125.7,
+      "volume": 6940346,
+      "change": 3.1327676231121946,
+      "changePercent": 3.1327676231121946,
+      "aiScore": 47.30399360494948,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 4.027922539180437,
+        "dark_pool": 64.79603909051643,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516911950_awyhm19qg",
+    "timestamp": "2025-08-30T01:21:51.950Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 216.6618644140809,
+    "marketData": {
+      "price": 216.6618644140809,
+      "volume": 9349271,
+      "change": -1.6272517268775943,
+      "changePercent": -1.6272517268775943,
+      "aiScore": 44.50075130145041,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 93.4,
+        "options_flow": 15,
+        "gamma_exposure": 1.9657914579054925,
+        "dark_pool": 56.63871635079697,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516913215_u19npxyer",
+    "timestamp": "2025-08-30T01:21:53.215Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 216.6618644140809,
+    "marketData": {
+      "price": 216.6618644140809,
+      "volume": 9349271,
+      "change": -1.6272517268775943,
+      "changePercent": -1.6272517268775943,
+      "aiScore": 44.50075130145041,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 93.4,
+        "options_flow": 15,
+        "gamma_exposure": 1.9657914579054925,
+        "dark_pool": 56.63871635079697,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516913735_rz6q3xiem",
+    "timestamp": "2025-08-30T01:21:53.735Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 216.6618644140809,
+    "marketData": {
+      "price": 216.6618644140809,
+      "volume": 9349271,
+      "change": -1.6272517268775943,
+      "changePercent": -1.6272517268775943,
+      "aiScore": 44.50075130145041,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 93.4,
+        "options_flow": 15,
+        "gamma_exposure": 1.9657914579054925,
+        "dark_pool": 56.63871635079697,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516922520_q5yk24mho",
+    "timestamp": "2025-08-30T01:22:02.520Z",
+    "symbol": "CRM",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 101.11250544619409,
+    "marketData": {
+      "price": 101.11250544619409,
+      "volume": 5435055,
+      "change": 3.3711847781568856,
+      "changePercent": 3.3711847781568856,
+      "aiScore": 49.483299898368955,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 19.11109017903431,
+        "dark_pool": 62.78870921117945,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516922978_6dedgb745",
+    "timestamp": "2025-08-30T01:22:02.978Z",
+    "symbol": "CRM",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 101.11250544619409,
+    "marketData": {
+      "price": 101.11250544619409,
+      "volume": 5435055,
+      "change": 3.3711847781568856,
+      "changePercent": 3.3711847781568856,
+      "aiScore": 49.483299898368955,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 19.11109017903431,
+        "dark_pool": 62.78870921117945,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516923864_3ho4ls17y",
+    "timestamp": "2025-08-30T01:22:03.864Z",
+    "symbol": "CRM",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 101.11250544619409,
+    "marketData": {
+      "price": 101.11250544619409,
+      "volume": 5435055,
+      "change": 3.3711847781568856,
+      "changePercent": 3.3711847781568856,
+      "aiScore": 49.483299898368955,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 19.11109017903431,
+        "dark_pool": 62.78870921117945,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756518890602_mfeoes1dm",
+    "timestamp": "2025-08-30T01:54:50.602Z",
+    "symbol": "TSLA",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 248.42,
+    "marketData": {
+      "price": 248.42,
+      "volume": 980668,
+      "change": -0.7307708167294162,
+      "changePercent": -0.7307708167294162,
+      "aiScore": 48.652441986787814,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 88,
+        "options_flow": 15,
+        "gamma_exposure": 19.515268938802276,
+        "dark_pool": 69.39938298192465,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756518899125_frsjik7ap",
+    "timestamp": "2025-08-30T01:54:59.125Z",
+    "symbol": "SPY",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 445.2,
+    "marketData": {
+      "price": 445.2,
+      "volume": 9021268,
+      "change": 3.6505267851012646,
+      "changePercent": 0.8199745698789902,
+      "marketCap": 282734355165,
+      "avgVolume": 10389719,
+      "beta": 1.6461240700784443,
+      "peRatio": 57.57102779230789,
+      "eps": 8.20885378162597,
+      "dividend": 2.679163982624762,
+      "sector": "Consumer",
+      "industry": "Software"
+    },
+    "squeezeContext": {
+      "holyGrail": 83,
+      "squeeze": 59,
+      "gamma": 1.1126245847686422,
+      "flow": 83,
+      "dix": 0.2751980555623178,
+      "gex": 178.05878928791196,
+      "darkPool": {
+        "ratio": 0.6725035070264703,
+        "volume": 3126760,
+        "trades": 913
+      },
+      "shortInterest": 23.32544157431456,
+      "institutionalOwnership": 55.48584234202819,
+      "optionsMetrics": {
+        "totalVolume": 44078,
+        "putCallRatio": 1.235653893154627,
+        "volumeOIRatio": 4.264706776116979,
+        "netPremium": -11872720.99294101,
+        "ivRank": 20,
+        "atmIV": 55.097805665728124,
+        "skew": 99.78103128990047,
+        "term": "CONTANGO"
+      },
+      "technicals": {
+        "rsi": 87.19723908344233,
+        "macd": -1.0550540919035853,
+        "ema20": 448.29369561659865,
+        "sma50": 448.2434124781221,
+        "bollinger": {
+          "upper": 464.08520748005753,
+          "lower": 423.1184622328319
+        },
+        "vwap": 448.0506788381572
+      }
+    },
+    "aiScore": 89.8,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756518931233_v1u3e065b",
+    "timestamp": "2025-08-30T01:55:31.233Z",
+    "symbol": "TSLA",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 248.42,
+    "marketData": {
+      "price": 248.42,
+      "volume": 8730051,
+      "change": -0.7366641272635379,
+      "changePercent": -0.7366641272635379,
+      "aiScore": 49.05801217649641,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 16.69128866937538,
+        "dark_pool": 62.65678438960309,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756518951590_389jaztyg",
+    "timestamp": "2025-08-30T01:55:51.590Z",
+    "symbol": "GOOGL",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 142.35,
+    "marketData": {
+      "price": 142.35,
+      "volume": 1955179,
+      "change": 3.7078189202533185,
+      "changePercent": 2.604720000177955,
+      "marketCap": 119785444811,
+      "avgVolume": 1655502,
+      "beta": 1.2253157910894998,
+      "peRatio": 11.607450641231756,
+      "eps": 6.135679056780511,
+      "dividend": 0,
+      "sector": "Healthcare",
+      "industry": "Software"
+    },
+    "squeezeContext": {
+      "holyGrail": 78,
+      "squeeze": 79,
+      "gamma": 1.1502326325097334,
+      "flow": 36,
+      "dix": 0.5467059863584458,
+      "gex": 147.2534215669392,
+      "darkPool": {
+        "ratio": 0.45337710565659395,
+        "volume": 646572,
+        "trades": 867
+      },
+      "shortInterest": 27.257797467836944,
+      "institutionalOwnership": 66.27388328931491,
+      "optionsMetrics": {
+        "totalVolume": 102929,
+        "putCallRatio": 2.2817927328898224,
+        "volumeOIRatio": 2.2681451393084293,
+        "netPremium": 232459.00201196433,
+        "ivRank": 45,
+        "atmIV": 49.83344228690305,
+        "skew": 106.36350359293785,
+        "term": "CONTANGO"
+      },
+      "technicals": {
+        "rsi": 99.35017421671542,
+        "macd": -0.6037362154382553,
+        "ema20": 140.89112997980752,
+        "sma50": 136.86944109902936,
+        "bollinger": {
+          "upper": 147.11597020418608,
+          "lower": 138.0126463963262
+        },
+        "vwap": 141.75576597516368
+      }
+    },
+    "aiScore": 89,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756518995045_naoqttso8",
+    "timestamp": "2025-08-30T01:56:35.045Z",
+    "symbol": "PLTR",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 18.9,
+    "marketData": {
+      "price": 18.9,
+      "volume": 7320608,
+      "change": -25.506089720842017,
+      "changePercent": -25.506089720842017,
+      "aiScore": 48.05914569740781,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 89.3,
+        "options_flow": 15,
+        "gamma_exposure": 18.724164526261433,
+        "dark_pool": 65.3307096581854,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756519006430_9m4n4sg6o",
+    "timestamp": "2025-08-30T01:56:46.430Z",
+    "symbol": "SOFI",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 26.04,
+    "marketData": {
+      "price": 26.04,
+      "volume": 9429666,
+      "change": 3.1811328575194087,
+      "changePercent": 12.216332018123689,
+      "marketCap": 254970502512,
+      "avgVolume": 9737795,
+      "beta": 2.37175702538337,
+      "peRatio": 44.201783884138194,
+      "eps": 3.3982912205267715,
+      "dividend": 5.01048579681911,
+      "sector": "Technology",
+      "industry": "Software"
+    },
+    "squeezeContext": {
+      "holyGrail": 85,
+      "squeeze": 60,
+      "gamma": 1.4149174756020177,
+      "flow": 61,
+      "dix": 0.4950314786337374,
+      "gex": -27.35115171416814,
+      "darkPool": {
+        "ratio": 0.4638010974002489,
+        "volume": 4337540,
+        "trades": 207
+      },
+      "shortInterest": 13.422529168489838,
+      "institutionalOwnership": 38.53792234368054,
+      "optionsMetrics": {
+        "totalVolume": 74237,
+        "putCallRatio": 1.6171637276224982,
+        "volumeOIRatio": 4.8839603211318625,
+        "netPremium": 15649334.177067876,
+        "ivRank": 92,
+        "atmIV": 42.744462698048366,
+        "skew": 97.80286296478361,
+        "term": "CONTANGO"
+      },
+      "technicals": {
+        "rsi": 23.189696963684447,
+        "macd": 0.5223248030085959,
+        "ema20": 25.865022120839075,
+        "sma50": 26.41447490770891,
+        "bollinger": {
+          "upper": 26.642365590696446,
+          "lower": 25.119714239232955
+        },
+        "vwap": 26.18378929050212
+      }
+    },
+    "aiScore": 90,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756519265144_ohcwrws0w",
+    "timestamp": "2025-08-30T02:01:05.144Z",
+    "symbol": "SOFI",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 26.04,
+    "marketData": {
+      "price": 26.04,
+      "volume": 9155281,
+      "change": -11.54164770498337,
+      "changePercent": -11.54164770498337,
+      "aiScore": 47.82915561016313,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 97.9,
+        "options_flow": 15,
+        "gamma_exposure": 5.361181376247299,
+        "dark_pool": 68.71375228473146,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756519266289_cw6p7h879",
+    "timestamp": "2025-08-30T02:01:06.289Z",
+    "symbol": "SOFI",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 26.04,
+    "marketData": {
+      "price": 26.04,
+      "volume": 9155281,
+      "change": -11.54164770498337,
+      "changePercent": -11.54164770498337,
+      "aiScore": 47.82915561016313,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 97.9,
+        "options_flow": 15,
+        "gamma_exposure": 5.361181376247299,
+        "dark_pool": 68.71375228473146,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756519289363_pv2nt1oji",
+    "timestamp": "2025-08-30T02:01:29.363Z",
+    "symbol": "NVDA",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 875.3,
+    "marketData": {
+      "price": 875.3,
+      "volume": 1748932,
+      "change": -2.5781910233474603,
+      "changePercent": -0.29454941429766485,
+      "marketCap": 328880057567,
+      "avgVolume": 1488976,
+      "beta": 2.108028486885119,
+      "peRatio": 43.71582589412482,
+      "eps": 1.059161637626144,
+      "dividend": 0,
+      "sector": "Healthcare",
+      "industry": "Software"
+    },
+    "squeezeContext": {
+      "holyGrail": 89,
+      "squeeze": 83,
+      "gamma": 1.9716283596790416,
+      "flow": 34,
+      "dix": 0.24592044887233266,
+      "gex": -39.821155805256126,
+      "darkPool": {
+        "ratio": 0.19916859032536827,
+        "volume": 402889,
+        "trades": 413
+      },
+      "shortInterest": 14.919733594551992,
+      "institutionalOwnership": 13.712489937410037,
+      "optionsMetrics": {
+        "totalVolume": 89137,
+        "putCallRatio": 0.9261191330639764,
+        "volumeOIRatio": 3.1421011191740664,
+        "netPremium": 3920419.5942939334,
+        "ivRank": 38,
+        "atmIV": 74.88430578426573,
+        "skew": 103.66720235837428,
+        "term": "CONTANGO"
+      },
+      "technicals": {
+        "rsi": 93.66538433927202,
+        "macd": 0.4793048524855976,
+        "ema20": 885.3694347593455,
+        "sma50": 853.3905731174528,
+        "bollinger": {
+          "upper": 906.5904700630635,
+          "lower": 833.3584303377289
+        },
+        "vwap": 880.9617042732452
+      }
+    },
+    "aiScore": 66.4,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756519412094_uywdmo5dr",
+    "timestamp": "2025-08-30T02:03:32.094Z",
+    "symbol": "TEST",
+    "strategy": "Bull Call Spread",
+    "detectedBy": [],
+    "entryPrice": 0,
+    "aiScore": 85,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756520566957_nl2751ght",
+    "timestamp": "2025-08-30T02:22:46.957Z",
+    "symbol": "AAPL",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 175.2,
+    "marketData": {
+      "price": 175.2,
+      "volume": 4096066,
+      "change": 0.6710792922706698,
+      "changePercent": 0.6710792922706698,
+      "aiScore": 47.48378752435113,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 4.5846475129401165,
+        "dark_pool": 65.31807763316665,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756520577031_51sn0oaop",
+    "timestamp": "2025-08-30T02:22:57.031Z",
+    "symbol": "NVDA",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 875.3,
+    "marketData": {
+      "price": 875.3,
+      "volume": 6126579,
+      "change": -0.20847020094346025,
+      "changePercent": -0.02381699999354053,
+      "marketCap": 537226122624,
+      "avgVolume": 6101805,
+      "beta": 2.3620093960024597,
+      "peRatio": 51.80804344771653,
+      "eps": 9.771035488775194,
+      "dividend": 5.205571429502779,
+      "sector": "Healthcare",
+      "industry": "Software"
+    },
+    "squeezeContext": {
+      "holyGrail": 88,
+      "squeeze": 64,
+      "gamma": 1.505645742232519,
+      "flow": 81,
+      "dix": 0.4297662997725042,
+      "gex": -5.7339492845994755,
+      "darkPool": {
+        "ratio": 0.6962098502727794,
+        "volume": 1484370,
+        "trades": 600
+      },
+      "shortInterest": 14.651918820176146,
+      "institutionalOwnership": 52.340412991202996,
+      "optionsMetrics": {
+        "totalVolume": 74202,
+        "putCallRatio": 1.0728209398189097,
+        "volumeOIRatio": 4.386944655558735,
+        "netPremium": 6054343.168842757,
+        "ivRank": 86,
+        "atmIV": 39.257317079554376,
+        "skew": 99.67037819492776,
+        "term": "CONTANGO"
+      },
+      "technicals": {
+        "rsi": 47.175701143871066,
+        "macd": -0.14333507749988517,
+        "ema20": 870.7126807392401,
+        "sma50": 852.9206883346347,
+        "bollinger": {
+          "upper": 907.8193745324689,
+          "lower": 840.7423288200147
+        },
+        "vwap": 880.2503037848685
+      }
+    },
+    "aiScore": 90,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756520947505_h8ludmokc",
+    "timestamp": "2025-08-30T02:29:07.505Z",
+    "symbol": "NVDA",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 875.3,
+    "marketData": {
+      "price": 875.3,
+      "volume": 8589827,
+      "change": 0.0905756886913201,
+      "changePercent": 0.0905756886913201,
+      "aiScore": 44.0697323583683,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 71.6,
+        "options_flow": 15,
+        "gamma_exposure": 13.153286715127908,
+        "dark_pool": 64.66510743508191,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756520963038_gsf919sz7",
+    "timestamp": "2025-08-30T02:29:23.038Z",
+    "symbol": "META",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 485.2,
+    "marketData": {
+      "price": 485.2,
+      "volume": 4934882,
+      "change": -3.0636154441726027,
+      "changePercent": -0.6314129110001242,
+      "marketCap": 352917904189,
+      "avgVolume": 5259728,
+      "beta": 2.1730524325530323,
+      "peRatio": 58.27060536731654,
+      "eps": 1.0927461840257515,
+      "dividend": 4.6522646552812335,
+      "sector": "Energy",
+      "industry": "Software"
+    },
+    "squeezeContext": {
+      "holyGrail": 89,
+      "squeeze": 71,
+      "gamma": 1.8335259911480728,
+      "flow": 75,
+      "dix": 0.6867406675520418,
+      "gex": -94.8864977969861,
+      "darkPool": {
+        "ratio": 0.2917424682510107,
+        "volume": 2018292,
+        "trades": 913
+      },
+      "shortInterest": 6.76323250869401,
+      "institutionalOwnership": 68.29816697718913,
+      "optionsMetrics": {
+        "totalVolume": 74595,
+        "putCallRatio": 1.9550456826855884,
+        "volumeOIRatio": 3.3534709769604194,
+        "netPremium": 1291595.5708429073,
+        "ivRank": 53,
+        "atmIV": 76.8363591554896,
+        "skew": 93.74587620426308,
+        "term": "BACKWARDATION"
+      },
+      "technicals": {
+        "rsi": 69.57275456407437,
+        "macd": -1.1582563675109308,
+        "ema20": 491.6453820077809,
+        "sma50": 493.0497176369862,
+        "bollinger": {
+          "upper": 506.67679484796395,
+          "lower": 466.1693103551719
+        },
+        "vwap": 482.72957822535
+      }
+    },
+    "aiScore": 93.4,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756521119720_4ypldl3t5",
+    "timestamp": "2025-08-30T02:31:59.720Z",
+    "symbol": "GOOGL",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 142.35,
+    "marketData": {
+      "price": 142.35,
+      "volume": 4000316,
+      "change": -2.9291276344393236,
+      "changePercent": -2.9291276344393236,
+      "aiScore": 48.934038451219806,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 14.254641327409082,
+        "dark_pool": 64.34958937990977,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756521363093_lbxlguimo",
+    "timestamp": "2025-08-30T02:36:03.093Z",
+    "symbol": "TEST_ML",
+    "strategy": "Bull Call Spread",
+    "detectedBy": [],
+    "entryPrice": 0,
+    "aiScore": 85,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  }
+]

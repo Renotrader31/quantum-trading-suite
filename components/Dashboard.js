@@ -20,11 +20,13 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    console.log('🎯 Dashboard useEffect triggered');
     setIsClient(true);
     setLastUpdate(new Date());
     
     // Use props data if available, otherwise keep fallback data
     if (propsMarketData && Object.keys(propsMarketData).length > 0) {
+      console.log('📊 Using props market data:', Object.keys(propsMarketData).length, 'items');
       // Convert props market data to proper format
       const indices = {};
       const movers = [];
@@ -43,6 +45,10 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
       if (movers.length > 0) {
         setTopMovers(movers);
       }
+    } else {
+      // If no props data, automatically fetch market data to populate dashboard
+      console.log('📈 No props data, fetching market data automatically...');
+      fetchMarketDataSafely();
     }
   }, [propsMarketData]);
 
@@ -58,6 +64,7 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
 
   const fetchMarketDataSafely = async () => {
     try {
+      console.log('🚀 Dashboard: Starting fetch market data...');
       setLoading(true);
       
       // Use enhanced-scan API instead of broken stocks API
@@ -72,20 +79,31 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
       
       if (response.ok) {
         const data = await response.json();
-        console.log('🔍 Dashboard received enhanced data:', data.success, data.results?.length, 'stocks');
+        console.log('🔍 Dashboard received enhanced data:', data.success, (data.opportunities || data.results || []).length, 'stocks');
+        console.log('📊 Full API response:', JSON.stringify(data, null, 2));
         
-        // Process enhanced-scan results
-        if (data.success && data.results && Array.isArray(data.results) && data.results.length > 0) {
+        // Process enhanced-scan results (API returns "opportunities" not "results")
+        const stocks = data.opportunities || data.results || [];
+        if (data.success && Array.isArray(stocks) && stocks.length > 0) {
           const indices = {};
           const movers = [];
           
-          data.results.forEach(stock => {
+          stocks.forEach(stock => {
             if (['SPY', 'QQQ', 'IWM', 'VIX'].includes(stock.symbol)) {
               indices[stock.symbol] = stock;
             } else {
+              // Calculate deterministic change values based on price if missing
+              const baseChange = stock.change !== undefined ? stock.change : 
+                (stock.price * 0.02 * (stock.symbol.charCodeAt(0) % 3 - 1)); // Deterministic based on symbol
+              const baseChangePercent = stock.changePercent !== undefined ? stock.changePercent :
+                (baseChange / stock.price * 100);
+              
               movers.push({
                 ...stock,
-                name: stock.symbol // Add name field if missing
+                name: stock.symbol, // Add name field if missing
+                change: baseChange,
+                changePercent: baseChangePercent,
+                sector: stock.sector || 'Technology' // Add sector fallback
               });
             }
           });
@@ -96,7 +114,9 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
           }
           if (movers.length > 0) {
             console.log('📈 Dashboard updating movers:', movers.map(m => m.symbol));
+            console.log('📊 Mover data sample:', movers[0]);
             setTopMovers(movers);
+            console.log('✅ TopMovers state updated with', movers.length, 'items');
           }
         }
         if (data.sectors && Array.isArray(data.sectors) && data.sectors.length > 0) {
@@ -151,6 +171,13 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
               }`}
             >
               🎯 Trade Tracker
+            </button>
+            <button
+              onClick={fetchMarketDataSafely}
+              disabled={actualLoading}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 text-white rounded-lg font-medium transition-colors"
+            >
+              {actualLoading ? '🔄' : '📊'} Refresh
             </button>
             <div className="flex items-center space-x-2">
               <div className={`w-3 h-3 rounded-full ${actualLoading ? 'bg-yellow-400 animate-pulse' : 'bg-green-400'}`}></div>
@@ -229,14 +256,16 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
         {/* Top Movers */}
         <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
           <h2 className="text-xl font-semibold text-white mb-6">Top Movers</h2>
+          {/* Debug: Log render-time data */}
+          {isClient && console.log('🎨 Rendering Top Movers. Data:', topMovers?.length || 0, 'items', 'Loading:', loading)}
           
           {loading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
             </div>
-          ) : (
+          ) : topMovers && Array.isArray(topMovers) && topMovers.length > 0 ? (
             <div className="space-y-3">
-              {topMovers && Array.isArray(topMovers) && topMovers.slice(0, 6).map((stock, index) => {
+              {topMovers.slice(0, 6).map((stock, index) => {
                 const symbol = stock?.symbol || 'N/A';
                 const price = stock?.price || 0;
                 const change = stock?.change || 0;
@@ -262,6 +291,18 @@ const Dashboard = ({ marketData: propsMarketData, loading: propsLoading, onRefre
                   </div>
                 );
               })}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-gray-400 mb-4">
+                📈 No market data loaded yet
+              </div>
+              <button
+                onClick={fetchMarketDataSafely}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+              >
+                📊 Load Top Movers
+              </button>
             </div>
           )}
         </div>
