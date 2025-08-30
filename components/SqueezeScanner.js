@@ -432,20 +432,20 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
     setLoadingTrades(true);
     
     try {
-      // Get trade recommendations with SQUEEZE CONTEXT integration 🎯
-      console.log(`🟢 SQUEEZE INTEGRATION: HG=${stock.holyGrail}, Squeeze=${stock.squeeze}, Momentum=${stock.change || 0}`);
-      const response = await fetch(`${API_BASE_URL}/api/options-analyzer`, {
+      // 🎯 UNIFIED STRATEGY INTEGRATION - Using Trading Pipeline's Proven System
+      console.log(`🟢 UNIFIED STRATEGY ANALYSIS: HG=${stock.holyGrail}, Squeeze=${stock.squeeze}, Flow=${stock.flow}`);
+      const response = await fetch(`${API_BASE_URL}/api/unified-strategy-analyzer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           symbols: [stock.symbol],
-          maxTrades: 8, // Get more trades for this specific stock
-          minProbability: 55, // Lower threshold for more recommendations
-          riskTolerance: 'moderate-aggressive', // Enhanced risk profile
-          maxInvestment: 15000, // Higher investment limit
-          targetDTE: { min: 30, max: 45 }, // Enhanced DTE targeting
-          precisionMode: true, // Enable enhanced features
-          // 🚀 NEW: Pass squeeze context for intelligent strategy filtering
+          maxTrades: 6, // Get comprehensive strategies
+          minProbability: 55, // Quality threshold
+          riskTolerance: 'moderate-aggressive', 
+          maxInvestment: 15000,
+          targetDTE: { min: 30, max: 45 },
+          precisionMode: true,
+          // 🚀 Enhanced squeeze context for intelligent strategy selection
           squeezeContext: {
             holyGrail: stock.holyGrail,
             squeeze: stock.squeeze,
@@ -454,7 +454,8 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
             momentum: stock.change || 0,
             gamma: stock.gamma || 0,
             flow: stock.flow || 0,
-            unusual: stock.unusual || 0,
+            iv: stock.iv || 30,
+            unusual: stock.unusual || false,
             sentiment: stock.flowAnalysis?.sentiment?.score || 50
           }
         })

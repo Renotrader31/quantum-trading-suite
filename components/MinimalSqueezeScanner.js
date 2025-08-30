@@ -57,24 +57,26 @@ export default function MinimalSqueezeScanner() {
     setStrategies([]);
 
     try {
-      // Enhanced strategy request with squeeze context
-      const response = await fetch('/api/options-analyzer', {
+      // 🎯 UNIFIED STRATEGY INTEGRATION - Connect to Trading Pipeline's System  
+      const response = await fetch('/api/unified-strategy-analyzer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           symbols: [stock.symbol],
-          maxTrades: 4, // Get more strategies for better selection
+          maxTrades: 4, // Focused strategy selection
           minProbability: 55,
           riskTolerance: 'moderate-aggressive',
           maxInvestment: 10000,
           targetDTE: { min: 30, max: 45 },
-          // Pass squeeze context for better strategy selection
+          // Enhanced squeeze context for intelligent strategy selection
           squeezeContext: {
             holyGrail: stock.holyGrail,
             squeeze: stock.squeeze,
             price: stock.price,
             volume: stock.volume,
-            momentum: stock.change || 0
+            momentum: stock.change || 0,
+            flow: stock.flow || 50,
+            iv: stock.iv || 30
           }
         })
       });
