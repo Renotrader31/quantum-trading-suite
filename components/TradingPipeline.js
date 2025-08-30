@@ -132,6 +132,7 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
 
   // Enhanced market scan with intelligent strategy analysis
   const runMarketScan = async () => {
+    console.log('🚀 runMarketScan function called!');
     const result = await safeApiCall(async () => {
       const response = await fetch('/api/enhanced-scan', {
         method: 'POST',
