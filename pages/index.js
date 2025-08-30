@@ -8,6 +8,8 @@ import QuantumTradeAI from '../components/QuantumTradeAI';
 import TradingPipeline from '../components/TradingPipeline';
 import IntelligentTradingScanner from '../components/IntelligentTradingScanner';
 import ErrorBoundary from '../components/ErrorBoundary';
+import PipelineTrades from './pipeline-trades';
+import SystemReset from '../components/SystemReset';
 
 export default function Home() {
   const [activeMode, setActiveMode] = useState('dashboard');
@@ -35,7 +37,8 @@ export default function Home() {
     }
     
     fetchMarketData();
-    const interval = setInterval(fetchMarketData, 30000); // Update every 30 seconds
+    // 🔴 LIVE DATA: Faster refresh rate for real-time updates (15 seconds)
+    const interval = setInterval(fetchMarketData, 15000); // Update every 15 seconds for live data
     const timeInterval = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString());
     }, 1000); // Update time every second
@@ -48,7 +51,43 @@ export default function Home() {
   const fetchMarketData = async () => {
     try {
       setLoading(true);
-      // Use enhanced-scan API instead of stocks API to avoid polygon API key requirement
+      
+      // 🔴 LIVE DATA INTEGRATION: Use new live-market-data API for real-time updates
+      const liveDataResponse = await fetch('/api/live-market-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symbols: ['SPY', 'QQQ', 'IWM', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'SOFI', 'COIN', 'PLTR'],
+          dataTypes: ['price', 'options', 'gamma', 'flow'],
+          refreshInterval: 15 // 15 second refresh for live data
+        })
+      });
+      
+      if (liveDataResponse.ok) {
+        const liveData = await liveDataResponse.json();
+        
+        if (liveData.success && liveData.data) {
+          const dataMap = {};
+          
+          // Process live market data
+          liveData.data.forEach(stock => {
+            dataMap[stock.symbol] = {
+              ...stock,
+              name: stock.symbol, // AI component expects name field
+              isLive: true,
+              dataSource: 'live_feed'
+            };
+          });
+          
+          setMarketData(dataMap);
+          setLastUpdate(new Date().toLocaleTimeString());
+          console.log(`🔴 LIVE DATA: Updated ${Object.keys(dataMap).length} symbols, session: ${liveData.marketSummary?.marketSession}`);
+          return; // Use live data if successful
+        }
+      }
+      
+      // Fallback to enhanced-scan if live data fails
+      console.log('📡 Falling back to enhanced scan data...');
       const response = await fetch('/api/enhanced-scan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,15 +107,15 @@ export default function Home() {
             dataMap[stock.symbol] = {
               ...stock,
               name: stock.symbol, // AI component expects name field
+              isLive: false,
+              dataSource: 'enhanced_scan'
             };
           });
         }
         
-        // Enhanced scan already includes index data (SPY, QQQ, IWM) in results
-        
         setMarketData(dataMap);
         setLastUpdate(new Date().toLocaleTimeString());
-        console.log(`✅ Updated market data for ${Object.keys(dataMap).length} symbols`);
+        console.log(`✅ Fallback: Updated market data for ${Object.keys(dataMap).length} symbols`);
       }
     } catch (error) {
       console.error('Error fetching market data:', error);
@@ -90,10 +129,12 @@ export default function Home() {
     { id: 'intelligent', name: 'Intelligent Scanner', icon: '🧠' },
     { id: 'scanner', name: 'Squeeze Scanner', icon: '🔍' },
     { id: 'pipeline', name: 'Trading Pipeline', icon: '⚙️' },
+    { id: 'pipeline-trades', name: 'Pipeline Viewer', icon: '📋' },
     { id: 'ai', name: 'AI Recommendations', icon: '🤖' },
     { id: 'quantum', name: 'Quantum AI v3.0', icon: '🔮' },
     { id: 'gamma', name: 'Gamma Analytics', icon: '⚡' },
-    { id: 'options', name: 'Options Strategies', icon: '📈' }
+    { id: 'options', name: 'Options Strategies', icon: '📈' },
+    { id: 'reset', name: 'System Reset', icon: '🔄' }
   ];
 
   const renderActiveComponent = () => {
@@ -117,6 +158,12 @@ export default function Home() {
             <TradingPipeline {...commonProps} />
           </ErrorBoundary>
         );
+      case 'pipeline-trades':
+        return (
+          <ErrorBoundary>
+            <PipelineTrades {...commonProps} />
+          </ErrorBoundary>
+        );
       case 'ai':
         return <AIRecommendations {...commonProps} />;
       case 'quantum':
@@ -125,6 +172,12 @@ export default function Home() {
         return <GammaAnalytics {...commonProps} />;
       case 'options':
         return <OptionsStrategies {...commonProps} />;
+      case 'reset':
+        return (
+          <ErrorBoundary>
+            <SystemReset {...commonProps} />
+          </ErrorBoundary>
+        );
       default:
         return <Dashboard {...commonProps} />;
     }
@@ -156,10 +209,16 @@ export default function Home() {
             </div>
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-green-300 text-sm">
-                  {loading ? 'Updating...' : 'Live Data'}
+                <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-500 animate-pulse' : 'bg-green-500 animate-pulse'}`}></div>
+                <span className={`text-sm ${loading ? 'text-yellow-300' : 'text-green-300'}`}>
+                  {loading ? 'Live Updating...' : 
+                   Object.values(marketData).some(stock => stock.isLive) ? 'Live Feed Active' : 'Enhanced Data'}
                 </span>
+                {!loading && Object.values(marketData).some(stock => stock.isLive) && (
+                  <span className="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded">
+                    15s refresh
+                  </span>
+                )}
               </div>
               <div className="text-gray-400 text-sm">
                 {isClient ? (lastUpdate || currentTime) : 'Loading...'}

@@ -1440,5 +1440,198 @@
     "status": "active",
     "pnl": 0,
     "initialValue": 0
+  },
+  {
+    "tradeId": "trade_1756520947431_7oldg5m2q",
+    "symbol": "NVDA",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T02:29:07.365Z",
+    "entryPrice": 875.3,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 849,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 805,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-03",
+    "dte": 34,
+    "aiScore": 44.0697323583683,
+    "probability": 67.65265006284226,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 44.0697323583683,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 71.6,
+        "options_flow": 15,
+        "gamma_exposure": 13.153286715127908,
+        "dark_pool": 64.66510743508191,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T02:29:02.533Z",
+      "compositeScore": 44.0697323583683,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T02:29:07.431Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 875.3
+  },
+  {
+    "tradeId": "trade_1756520963118_1av9c2zme",
+    "symbol": "META",
+    "strategyName": "Bull Call Spread",
+    "entryPrice": 485.2,
+    "strikes": [],
+    "expiration": "2025-10-10",
+    "dte": 41,
+    "positionSize": 4500,
+    "maxLoss": 41,
+    "maxGain": 105,
+    "squeezeContext": {
+      "holyGrail": 89,
+      "squeeze": 71,
+      "gamma": 1.8335259911480728,
+      "flow": 75,
+      "dix": 0.6867406675520418,
+      "gex": -94.8864977969861,
+      "darkPool": {
+        "ratio": 0.2917424682510107,
+        "volume": 2018292,
+        "trades": 913
+      },
+      "shortInterest": 6.76323250869401,
+      "institutionalOwnership": 68.29816697718913,
+      "optionsMetrics": {
+        "totalVolume": 74595,
+        "putCallRatio": 1.9550456826855884,
+        "volumeOIRatio": 3.3534709769604194,
+        "netPremium": 1291595.5708429073,
+        "ivRank": 53,
+        "atmIV": 76.8363591554896,
+        "skew": 93.74587620426308,
+        "term": "BACKWARDATION"
+      },
+      "technicals": {
+        "rsi": 69.57275456407437,
+        "macd": -1.1582563675109308,
+        "ema20": 491.6453820077809,
+        "sma50": 493.0497176369862,
+        "bollinger": {
+          "upper": 506.67679484796395,
+          "lower": 466.1693103551719
+        },
+        "vwap": 482.72957822535
+      }
+    },
+    "marketConditions": {
+      "price": 485.2,
+      "volume": 4934882,
+      "change": -3.0636154441726027,
+      "changePercent": -0.6314129110001242,
+      "marketCap": 352917904189,
+      "avgVolume": 5259728,
+      "beta": 2.1730524325530323,
+      "peRatio": 58.27060536731654,
+      "eps": 1.0927461840257515,
+      "dividend": 4.6522646552812335,
+      "sector": "Energy",
+      "industry": "Software"
+    },
+    "neuralNetworkPrediction": 0,
+    "aiScore": 93.4,
+    "probability": 79.5,
+    "recordedAt": "2025-08-30T02:29:23.119Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 0
+  },
+  {
+    "tradeId": "trade_1756521119654_lpljjrji7",
+    "symbol": "GOOGL",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T02:31:59.586Z",
+    "entryPrice": 142.35,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 138,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 130,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-01",
+    "dte": 32,
+    "aiScore": 48.934038451219806,
+    "probability": 76.35278972835715,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 48.934038451219806,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 14.254641327409082,
+        "dark_pool": 64.34958937990977,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T02:31:53.875Z",
+      "compositeScore": 48.934038451219806,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T02:31:59.654Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 142.35
   }
 ]

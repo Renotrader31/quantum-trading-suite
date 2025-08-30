@@ -288,11 +288,33 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
     }
   };
   
-  // Run individual strategy scan
+  // Run individual strategy scan with live data priority
   const runStrategyScan = async (strategy) => {
     console.log(`🔍 Running ${strategy} scan...`);
     
     try {
+      // 🔴 LIVE DATA INTEGRATION: Try live market data first for intelligent scanning
+      const liveResponse = await fetch('/api/live-market-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          symbols: ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX', 'CRM', 'ADBE', 'SOFI', 'PLTR', 'AMD', 'INTC', 'BABA'],
+          dataTypes: ['price', 'options', 'gamma', 'flow', 'squeeze'],
+          refreshInterval: 15
+        })
+      });
+      
+      if (liveResponse.ok) {
+        const liveData = await liveResponse.json();
+        
+        if (liveData.success && liveData.data) {
+          console.log(`🔴 Using live data for ${strategy} strategy`);
+          return processStrategyResults(liveData.data, strategy, 'live_data');
+        }
+      }
+      
+      // Fallback to enhanced scan
+      console.log(`📡 Falling back to enhanced scan for ${strategy} strategy`);
       let endpoint = '/api/enhanced-scan';
       let requestBody = {
         symbols: ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'NFLX', 'CRM', 'ADBE', 'SOFI', 'PLTR', 'AMD', 'INTC', 'BABA'], // Default watchlist
@@ -338,14 +360,8 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
       const data = await response.json();
       
       if (data.success && (data.opportunities || data.results)) {
-        // Add strategy source and weight to each result
         const results = data.opportunities || data.results || [];
-        return results.map(result => ({
-          ...result,
-          detectedBy: strategy,
-          strategyWeight: mlModel.strategyWeights[strategy] || 1.0,
-          strategyScore: calculateStrategyScore(result, strategy)
-        }));
+        return processStrategyResults(results, strategy, 'enhanced_scan');
       }
       
       return [];
@@ -353,6 +369,22 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
       console.error(`❌ Error scanning ${strategy}:`, error);
       return [];
     }
+  };
+
+  // Process strategy results from either live data or enhanced scan
+  const processStrategyResults = (results, strategy, dataSource) => {
+    console.log(`📊 Processing ${results.length} results for ${strategy} from ${dataSource}`);
+    
+    // Add strategy source and weight to each result
+    return results.map(result => ({
+      ...result,
+      detectedBy: strategy,
+      dataSource: dataSource,
+      isLive: dataSource === 'live_data',
+      strategyWeight: mlModel.strategyWeights[strategy] || 1.0,
+      strategyScore: calculateStrategyScore(result, strategy),
+      liveDataQuality: dataSource === 'live_data' ? result.dataQuality : null
+    }));
   };
   
   // Calculate strategy-specific score
