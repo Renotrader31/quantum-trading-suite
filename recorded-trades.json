@@ -1,0 +1,18 @@
+[
+  {
+    "tradeId": "trade_1756516474269_ddrey40ju",
+    "symbol": "NVDA",
+    "strategy": "Bull Call Spread",
+    "direction": "BULLISH",
+    "entryTime": "2024-08-30T01:20:00.000Z",
+    "entryPrice": 125.5,
+    "quantity": 3,
+    "scannerSource": "intelligent_scanner",
+    "aiScore": 88,
+    "probability": 76,
+    "recordedAt": "2025-08-30T01:14:34.275Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 376.5
+  }
+]

@@ -7,6 +7,99 @@ export default async function handler(req, res) {
   try {
     const { action, userId } = req.body;
 
+    if (action === 'recordEntry') {
+      // Record a new trade entry in the pipeline
+      const { tradeData } = req.body;
+      
+      if (!tradeData) {
+        return res.status(400).json({ error: 'Missing tradeData' });
+      }
+
+      // Generate unique trade ID
+      const tradeId = `trade_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Log the trade entry for debugging
+      console.log('🚀 RECORDING NEW TRADE ENTRY:', {
+        tradeId,
+        symbol: tradeData.symbol,
+        strategy: tradeData.strategy,
+        direction: tradeData.direction,
+        entryTime: tradeData.entryTime,
+        scannerSource: tradeData.scannerSource,
+        aiScore: tradeData.aiScore,
+        probability: tradeData.probability
+      });
+
+      const recordedTrade = {
+        tradeId,
+        ...tradeData,
+        recordedAt: new Date().toISOString(),
+        status: 'active',
+        pnl: 0, // Starting P&L
+        initialValue: tradeData.entryPrice * tradeData.quantity || 0
+      };
+
+      // Persist trade to file for demonstration (in production, use database)
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const tradesFile = path.join(process.cwd(), 'recorded-trades.json');
+        
+        let trades = [];
+        if (fs.existsSync(tradesFile)) {
+          const existingData = fs.readFileSync(tradesFile, 'utf8');
+          trades = JSON.parse(existingData);
+        }
+        
+        trades.push(recordedTrade);
+        fs.writeFileSync(tradesFile, JSON.stringify(trades, null, 2));
+        
+        console.log(`✅ Trade persisted to file. Total trades: ${trades.length}`);
+      } catch (persistError) {
+        console.warn('⚠️ Failed to persist trade to file:', persistError);
+      }
+
+      return res.status(200).json({
+        success: true,
+        action: 'recordEntry',
+        tradeId,
+        message: `Trade successfully recorded: ${tradeData.symbol} ${tradeData.strategy}`,
+        trade: recordedTrade,
+        pipelineStatus: 'active',
+        trackingEnabled: true,
+        timestamp: new Date().toISOString()
+      });
+    }
+    
+    if (action === 'getRecordedTrades') {
+      // Get all recorded trades from file
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const tradesFile = path.join(process.cwd(), 'recorded-trades.json');
+        
+        let trades = [];
+        if (fs.existsSync(tradesFile)) {
+          const existingData = fs.readFileSync(tradesFile, 'utf8');
+          trades = JSON.parse(existingData);
+        }
+        
+        console.log(`📋 Retrieved ${trades.length} recorded trades from pipeline`);
+        
+        return res.status(200).json({
+          success: true,
+          action: 'getRecordedTrades',
+          trades,
+          count: trades.length,
+          timestamp: new Date().toISOString()
+        });
+        
+      } catch (error) {
+        console.error('❌ Error reading recorded trades:', error);
+        return res.status(500).json({ error: 'Failed to read recorded trades' });
+      }
+    }
+    
     if (action === 'getActiveTrades') {
       // Sample active portfolio positions
       const samplePositions = [

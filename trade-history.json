@@ -74,5 +74,157 @@
     "daysHeld": null,
     "success": null,
     "completedAt": null
+  },
+  {
+    "id": "trade_1756516183395_6gi644yr3",
+    "timestamp": "2025-08-30T01:09:43.395Z",
+    "symbol": "META",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 485.2,
+    "marketData": {
+      "price": 485.2,
+      "volume": 7754761,
+      "change": -0.048567920484435034,
+      "changePercent": -0.048567920484435034,
+      "aiScore": 46.74967638353115,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 96.7,
+        "options_flow": 15,
+        "gamma_exposure": 10.42601838775938,
+        "dark_pool": 58.37203991342756,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516216269_9mublcwjr",
+    "timestamp": "2025-08-30T01:10:16.269Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 54.15793149171941,
+    "marketData": {
+      "price": 54.15793149171941,
+      "volume": 3349743,
+      "change": -9.05676649457577,
+      "changePercent": -9.05676649457577,
+      "aiScore": 48.12907189099371,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 90.4,
+        "options_flow": 15,
+        "gamma_exposure": 17.424712425091123,
+        "dark_pool": 65.94971892087109,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516217487_1dtzqv0g8",
+    "timestamp": "2025-08-30T01:10:17.487Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 54.15793149171941,
+    "marketData": {
+      "price": 54.15793149171941,
+      "volume": 3349743,
+      "change": -9.05676649457577,
+      "changePercent": -9.05676649457577,
+      "aiScore": 48.12907189099371,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 90.4,
+        "options_flow": 15,
+        "gamma_exposure": 17.424712425091123,
+        "dark_pool": 65.94971892087109,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516282531_a9qi9hn0u",
+    "timestamp": "2025-08-30T01:11:22.531Z",
+    "symbol": "BABA",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 91.22506486497817,
+    "marketData": {
+      "price": 91.22506486497817,
+      "volume": 937111,
+      "change": 5.021912361228167,
+      "changePercent": 5.021912361228167,
+      "aiScore": 45.5102001307398,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 95.8,
+        "options_flow": 15,
+        "gamma_exposure": 18.234110975481528,
+        "dark_pool": 44.02708980895724,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
   }
 ]
