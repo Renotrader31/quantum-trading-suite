@@ -707,5 +707,738 @@
     "status": "active",
     "pnl": 0,
     "initialValue": 101.11250544619409
+  },
+  {
+    "tradeId": "trade_1756518890533_vhugb42ba",
+    "symbol": "TSLA",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:54:50.483Z",
+    "entryPrice": 248.42,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 240,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 228,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-06",
+    "dte": 37,
+    "aiScore": 48.652441986787814,
+    "probability": 59.21725104499904,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 48.652441986787814,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 88,
+        "options_flow": 15,
+        "gamma_exposure": 19.515268938802276,
+        "dark_pool": 69.39938298192465,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:54:43.801Z",
+      "compositeScore": 48.652441986787814,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:54:50.533Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 248.42
+  },
+  {
+    "tradeId": "trade_1756518899203_cs7n7lbq7",
+    "symbol": "SPY",
+    "strategyName": "Bull Call Spread",
+    "entryPrice": 445.2,
+    "strikes": [],
+    "expiration": "2025-10-10",
+    "dte": 41,
+    "positionSize": 4500,
+    "maxLoss": 41,
+    "maxGain": 77,
+    "squeezeContext": {
+      "holyGrail": 83,
+      "squeeze": 59,
+      "gamma": 1.1126245847686422,
+      "flow": 83,
+      "dix": 0.2751980555623178,
+      "gex": 178.05878928791196,
+      "darkPool": {
+        "ratio": 0.6725035070264703,
+        "volume": 3126760,
+        "trades": 913
+      },
+      "shortInterest": 23.32544157431456,
+      "institutionalOwnership": 55.48584234202819,
+      "optionsMetrics": {
+        "totalVolume": 44078,
+        "putCallRatio": 1.235653893154627,
+        "volumeOIRatio": 4.264706776116979,
+        "netPremium": -11872720.99294101,
+        "ivRank": 20,
+        "atmIV": 55.097805665728124,
+        "skew": 99.78103128990047,
+        "term": "CONTANGO"
+      },
+      "technicals": {
+        "rsi": 87.19723908344233,
+        "macd": -1.0550540919035853,
+        "ema20": 448.29369561659865,
+        "sma50": 448.2434124781221,
+        "bollinger": {
+          "upper": 464.08520748005753,
+          "lower": 423.1184622328319
+        },
+        "vwap": 448.0506788381572
+      }
+    },
+    "marketConditions": {
+      "price": 445.2,
+      "volume": 9021268,
+      "change": 3.6505267851012646,
+      "changePercent": 0.8199745698789902,
+      "marketCap": 282734355165,
+      "avgVolume": 10389719,
+      "beta": 1.6461240700784443,
+      "peRatio": 57.57102779230789,
+      "eps": 8.20885378162597,
+      "dividend": 2.679163982624762,
+      "sector": "Consumer",
+      "industry": "Software"
+    },
+    "neuralNetworkPrediction": 0,
+    "aiScore": 89.8,
+    "probability": 76.5,
+    "recordedAt": "2025-08-30T01:54:59.204Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 0
+  },
+  {
+    "tradeId": "trade_1756518931164_j26gdiw6r",
+    "symbol": "TSLA",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:55:31.123Z",
+    "entryPrice": 248.42,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 240,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 228,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-03",
+    "dte": 34,
+    "aiScore": 49.05801217649641,
+    "probability": 78.53526222783609,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 49.05801217649641,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 16.69128866937538,
+        "dark_pool": 62.65678438960309,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:55:24.762Z",
+      "compositeScore": 49.05801217649641,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:55:31.165Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 248.42
+  },
+  {
+    "tradeId": "trade_1756518951676_qp4h7vx1x",
+    "symbol": "GOOGL",
+    "strategyName": "Jade Lizard",
+    "entryPrice": 142.35,
+    "strikes": [],
+    "expiration": "2025-09-29",
+    "dte": 30,
+    "positionSize": 5250,
+    "maxLoss": 15,
+    "maxGain": 32,
+    "squeezeContext": {
+      "holyGrail": 78,
+      "squeeze": 79,
+      "gamma": 1.1502326325097334,
+      "flow": 36,
+      "dix": 0.5467059863584458,
+      "gex": 147.2534215669392,
+      "darkPool": {
+        "ratio": 0.45337710565659395,
+        "volume": 646572,
+        "trades": 867
+      },
+      "shortInterest": 27.257797467836944,
+      "institutionalOwnership": 66.27388328931491,
+      "optionsMetrics": {
+        "totalVolume": 102929,
+        "putCallRatio": 2.2817927328898224,
+        "volumeOIRatio": 2.2681451393084293,
+        "netPremium": 232459.00201196433,
+        "ivRank": 45,
+        "atmIV": 49.83344228690305,
+        "skew": 106.36350359293785,
+        "term": "CONTANGO"
+      },
+      "technicals": {
+        "rsi": 99.35017421671542,
+        "macd": -0.6037362154382553,
+        "ema20": 140.89112997980752,
+        "sma50": 136.86944109902936,
+        "bollinger": {
+          "upper": 147.11597020418608,
+          "lower": 138.0126463963262
+        },
+        "vwap": 141.75576597516368
+      }
+    },
+    "marketConditions": {
+      "price": 142.35,
+      "volume": 1955179,
+      "change": 3.7078189202533185,
+      "changePercent": 2.604720000177955,
+      "marketCap": 119785444811,
+      "avgVolume": 1655502,
+      "beta": 1.2253157910894998,
+      "peRatio": 11.607450641231756,
+      "eps": 6.135679056780511,
+      "dividend": 0,
+      "sector": "Healthcare",
+      "industry": "Software"
+    },
+    "neuralNetworkPrediction": 0,
+    "aiScore": 89,
+    "probability": 82,
+    "recordedAt": "2025-08-30T01:55:51.676Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 0
+  },
+  {
+    "tradeId": "trade_1756518994980_tr791kiue",
+    "symbol": "PLTR",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:56:34.938Z",
+    "entryPrice": 18.9,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 18,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 17,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-01",
+    "dte": 32,
+    "aiScore": 48.05914569740781,
+    "probability": 64.7478922804076,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 48.05914569740781,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 89.3,
+        "options_flow": 15,
+        "gamma_exposure": 18.724164526261433,
+        "dark_pool": 65.3307096581854,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:56:32.357Z",
+      "compositeScore": 48.05914569740781,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:56:34.980Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 18.9
+  },
+  {
+    "tradeId": "trade_1756519006526_n8bqfg4qk",
+    "symbol": "SOFI",
+    "strategyName": "Jade Lizard",
+    "entryPrice": 26.04,
+    "strikes": [],
+    "expiration": "2025-10-04",
+    "dte": 35,
+    "positionSize": 5250,
+    "maxLoss": 2,
+    "maxGain": 5,
+    "squeezeContext": {
+      "holyGrail": 85,
+      "squeeze": 60,
+      "gamma": 1.4149174756020177,
+      "flow": 61,
+      "dix": 0.4950314786337374,
+      "gex": -27.35115171416814,
+      "darkPool": {
+        "ratio": 0.4638010974002489,
+        "volume": 4337540,
+        "trades": 207
+      },
+      "shortInterest": 13.422529168489838,
+      "institutionalOwnership": 38.53792234368054,
+      "optionsMetrics": {
+        "totalVolume": 74237,
+        "putCallRatio": 1.6171637276224982,
+        "volumeOIRatio": 4.8839603211318625,
+        "netPremium": 15649334.177067876,
+        "ivRank": 92,
+        "atmIV": 42.744462698048366,
+        "skew": 97.80286296478361,
+        "term": "CONTANGO"
+      },
+      "technicals": {
+        "rsi": 23.189696963684447,
+        "macd": 0.5223248030085959,
+        "ema20": 25.865022120839075,
+        "sma50": 26.41447490770891,
+        "bollinger": {
+          "upper": 26.642365590696446,
+          "lower": 25.119714239232955
+        },
+        "vwap": 26.18378929050212
+      }
+    },
+    "marketConditions": {
+      "price": 26.04,
+      "volume": 9429666,
+      "change": 3.1811328575194087,
+      "changePercent": 12.216332018123689,
+      "marketCap": 254970502512,
+      "avgVolume": 9737795,
+      "beta": 2.37175702538337,
+      "peRatio": 44.201783884138194,
+      "eps": 3.3982912205267715,
+      "dividend": 5.01048579681911,
+      "sector": "Technology",
+      "industry": "Software"
+    },
+    "neuralNetworkPrediction": 0,
+    "aiScore": 90,
+    "probability": 82,
+    "recordedAt": "2025-08-30T01:56:46.526Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 0
+  },
+  {
+    "tradeId": "trade_1756519265078_7uhuogd16",
+    "symbol": "SOFI",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T02:01:05.038Z",
+    "entryPrice": 26.04,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 25,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 23,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-07",
+    "dte": 38,
+    "aiScore": 47.82915561016313,
+    "probability": 61.65816077365361,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 47.82915561016313,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 97.9,
+        "options_flow": 15,
+        "gamma_exposure": 5.361181376247299,
+        "dark_pool": 68.71375228473146,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T02:01:00.197Z",
+      "compositeScore": 47.82915561016313,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T02:01:05.078Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 26.04
+  },
+  {
+    "tradeId": "trade_1756519266218_ibws14sfi",
+    "symbol": "SOFI",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T02:01:06.179Z",
+    "entryPrice": 26.04,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 25,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 23,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-07",
+    "dte": 38,
+    "aiScore": 47.82915561016313,
+    "probability": 61.65816077365361,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 47.82915561016313,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 97.9,
+        "options_flow": 15,
+        "gamma_exposure": 5.361181376247299,
+        "dark_pool": 68.71375228473146,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T02:01:00.197Z",
+      "compositeScore": 47.82915561016313,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T02:01:06.219Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 26.04
+  },
+  {
+    "tradeId": "trade_1756519289445_7fh6lkjf8",
+    "symbol": "NVDA",
+    "strategyName": "Bear Put Spread",
+    "entryPrice": 875.3,
+    "strikes": [],
+    "expiration": "2025-10-05",
+    "dte": 36,
+    "positionSize": 4500,
+    "maxLoss": 67,
+    "maxGain": 143,
+    "squeezeContext": {
+      "holyGrail": 89,
+      "squeeze": 83,
+      "gamma": 1.9716283596790416,
+      "flow": 34,
+      "dix": 0.24592044887233266,
+      "gex": -39.821155805256126,
+      "darkPool": {
+        "ratio": 0.19916859032536827,
+        "volume": 402889,
+        "trades": 413
+      },
+      "shortInterest": 14.919733594551992,
+      "institutionalOwnership": 13.712489937410037,
+      "optionsMetrics": {
+        "totalVolume": 89137,
+        "putCallRatio": 0.9261191330639764,
+        "volumeOIRatio": 3.1421011191740664,
+        "netPremium": 3920419.5942939334,
+        "ivRank": 38,
+        "atmIV": 74.88430578426573,
+        "skew": 103.66720235837428,
+        "term": "CONTANGO"
+      },
+      "technicals": {
+        "rsi": 93.66538433927202,
+        "macd": 0.4793048524855976,
+        "ema20": 885.3694347593455,
+        "sma50": 853.3905731174528,
+        "bollinger": {
+          "upper": 906.5904700630635,
+          "lower": 833.3584303377289
+        },
+        "vwap": 880.9617042732452
+      }
+    },
+    "marketConditions": {
+      "price": 875.3,
+      "volume": 1748932,
+      "change": -2.5781910233474603,
+      "changePercent": -0.29454941429766485,
+      "marketCap": 328880057567,
+      "avgVolume": 1488976,
+      "beta": 2.108028486885119,
+      "peRatio": 43.71582589412482,
+      "eps": 1.059161637626144,
+      "dividend": 0,
+      "sector": "Healthcare",
+      "industry": "Software"
+    },
+    "neuralNetworkPrediction": 0,
+    "aiScore": 66.4,
+    "probability": 59.099095730233486,
+    "recordedAt": "2025-08-30T02:01:29.445Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 0
+  },
+  {
+    "tradeId": "trade_1756519412068_awqtrept2",
+    "symbol": "TEST",
+    "strategy": "Bull Call Spread",
+    "direction": "BULLISH",
+    "entryTime": "2025-08-30T02:03:32.000Z",
+    "entryPrice": 150.5,
+    "quantity": 1,
+    "scannerSource": "workflow_test",
+    "aiScore": 85,
+    "probability": 72,
+    "recordedAt": "2025-08-30T02:03:32.068Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 150.5
+  },
+  {
+    "tradeId": "trade_1756520566890_dxazn0j8n",
+    "symbol": "AAPL",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T02:22:46.829Z",
+    "entryPrice": 175.2,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 169,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 161,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-08",
+    "dte": 39,
+    "aiScore": 47.48378752435113,
+    "probability": 67.1928923652137,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 47.48378752435113,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 4.5846475129401165,
+        "dark_pool": 65.31807763316665,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T02:22:44.028Z",
+      "compositeScore": 47.48378752435113,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T02:22:46.890Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 175.2
+  },
+  {
+    "tradeId": "trade_1756520577207_ifa4ath0f",
+    "symbol": "NVDA",
+    "strategyName": "Jade Lizard",
+    "entryPrice": 875.3,
+    "strikes": [],
+    "expiration": "2025-10-02",
+    "dte": 33,
+    "positionSize": 5250,
+    "maxLoss": 87,
+    "maxGain": 140,
+    "squeezeContext": {
+      "holyGrail": 88,
+      "squeeze": 64,
+      "gamma": 1.505645742232519,
+      "flow": 81,
+      "dix": 0.4297662997725042,
+      "gex": -5.7339492845994755,
+      "darkPool": {
+        "ratio": 0.6962098502727794,
+        "volume": 1484370,
+        "trades": 600
+      },
+      "shortInterest": 14.651918820176146,
+      "institutionalOwnership": 52.340412991202996,
+      "optionsMetrics": {
+        "totalVolume": 74202,
+        "putCallRatio": 1.0728209398189097,
+        "volumeOIRatio": 4.386944655558735,
+        "netPremium": 6054343.168842757,
+        "ivRank": 86,
+        "atmIV": 39.257317079554376,
+        "skew": 99.67037819492776,
+        "term": "CONTANGO"
+      },
+      "technicals": {
+        "rsi": 47.175701143871066,
+        "macd": -0.14333507749988517,
+        "ema20": 870.7126807392401,
+        "sma50": 852.9206883346347,
+        "bollinger": {
+          "upper": 907.8193745324689,
+          "lower": 840.7423288200147
+        },
+        "vwap": 880.2503037848685
+      }
+    },
+    "marketConditions": {
+      "price": 875.3,
+      "volume": 6126579,
+      "change": -0.20847020094346025,
+      "changePercent": -0.02381699999354053,
+      "marketCap": 537226122624,
+      "avgVolume": 6101805,
+      "beta": 2.3620093960024597,
+      "peRatio": 51.80804344771653,
+      "eps": 9.771035488775194,
+      "dividend": 5.205571429502779,
+      "sector": "Healthcare",
+      "industry": "Software"
+    },
+    "neuralNetworkPrediction": 0,
+    "aiScore": 90,
+    "probability": 82,
+    "recordedAt": "2025-08-30T02:22:57.207Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 0
   }
 ]

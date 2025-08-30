@@ -54,7 +54,10 @@
   "userPreferences": {
     "preferredStrategies": [],
     "preferredSectors": [
-      "Financial"
+      "Financial",
+      "Consumer",
+      "Healthcare",
+      "Technology"
     ],
     "preferredPriceRanges": [],
     "preferredVolumes": [],

@@ -247,24 +247,64 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
   // Enhanced load active positions with comprehensive safety checks
   const loadActivePositions = async () => {
     const result = await safeApiCall(async () => {
-      const response = await fetch('/api/trade-entry', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          action: 'getActiveTrades',
-          userId: 'current_user' 
+      // Load both sample active trades AND recorded trades from scanners
+      const [activeResponse, recordedResponse] = await Promise.all([
+        fetch('/api/trade-entry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            action: 'getActiveTrades',
+            userId: 'current_user' 
+          })
+        }),
+        fetch('/api/trade-entry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            action: 'getRecordedTrades'
+          })
         })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to load positions: ${response.status} ${response.statusText}`);
+      ]);
+
+      if (!activeResponse.ok && !recordedResponse.ok) {
+        throw new Error('Failed to load any trade data');
       }
-      
-      const data = await response.json();
-      console.log('Raw positions data:', data);
-      
-      // Enhanced safety mapping with comprehensive property checks
-      const positions = data.positions || data.trades || [];
+
+      const activeData = activeResponse.ok ? await activeResponse.json() : { positions: [] };
+      const recordedData = recordedResponse.ok ? await recordedResponse.json() : { trades: [] };
+
+      // Combine both sets of trades
+      const allTrades = [
+        ...(activeData.positions || []),
+        ...(recordedData.trades || []).map(trade => ({
+          ...trade,
+          id: trade.tradeId,
+          symbol: trade.symbol,
+          strategy: trade.strategy || trade.strategyName,
+          type: 'options',
+          quantity: trade.quantity || 1,
+          entryPrice: trade.entryPrice || 0,
+          currentPrice: trade.entryPrice || 0, // Use entry price as current for now
+          pnl: trade.pnl || 0,
+          status: 'active',
+          severity: trade.aiScore >= 70 ? 'low' : trade.aiScore >= 50 ? 'medium' : 'high',
+          risk: trade.probability >= 70 ? 'low' : trade.probability >= 50 ? 'medium' : 'high',
+          entryDate: trade.recordedAt || trade.entryTime,
+          dte: trade.dte || 30,
+          delta: 0.35, // Default values for display
+          theta: -0.08,
+          maxLoss: trade.maxLoss || Math.floor(trade.entryPrice * 0.1),
+          maxProfit: trade.maxGain || Math.floor(trade.entryPrice * 0.2),
+          strikes: trade.legs ? trade.legs.reduce((acc, leg) => ({ ...acc, [leg.optionType.toLowerCase()]: leg.strike }), {}) : {},
+          scannerSource: trade.scannerSource // Keep track of source
+        }))
+      ];
+
+      console.log(`📊 TRADING PIPELINE LOADING: ${activeData.positions?.length || 0} sample trades + ${recordedData.trades?.length || 0} recorded trades = ${allTrades.length} total`);
+      console.log('🔍 RECORDED TRADES SAMPLE:', recordedData.trades?.slice(0, 2).map(t => ({ symbol: t.symbol, strategy: t.strategy })));
+
+      // Use combined trades directly
+      const positions = allTrades;
       const safePositions = positions.map(pos => {
         // Ensure all required properties exist with safe defaults
         const safePos = {
