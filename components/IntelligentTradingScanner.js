@@ -838,6 +838,61 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
           mlFeedback: mlResult
         });
 
+        // 🚀 TRADING PIPELINE CONNECTION - Record trade entry
+        try {
+          const tradeEntryData = {
+            symbol: selectedStock.symbol,
+            strategy: trade.strategyKey || trade.strategyName,
+            direction: trade.sentiment || 'NEUTRAL',
+            entryTime: new Date().toISOString(),
+            entryPrice: selectedStock.price,
+            quantity: trade.contractsPerLeg || 1,
+            legs: trade.legs,
+            strikes: trade.strikes,
+            expirationDate: expirationDate,
+            dte: dte,
+            aiScore: selectedStock.aiScore || 0,
+            probability: trade.probability || 0,
+            mlConfidence: mlResult.learningResult?.neuralNetworkResults?.confidence || 0,
+            scannerSource: 'intelligent_scanner',
+            intelligentContext: enhancedTradeData.intelligentContext,
+            
+            // Additional context for trading pipeline
+            neuralNetworkPrediction: mlResult.learningResult?.neuralNetworkResults?.confidence || 0,
+            aiScore: enhancedTradeData.strategyDetails?.aiScore || selectedStock.aiScore || 0,
+            probability: enhancedTradeData.strategyDetails?.probability || trade.probability || 0
+          };
+
+          const API_BASE_URL = window.location.origin;
+          const tradeEntryResponse = await fetch(`${API_BASE_URL}/api/trade-entry`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'recordEntry',
+              tradeData: tradeEntryData
+            })
+          });
+
+          if (tradeEntryResponse.ok) {
+            const tradeResult = await tradeEntryResponse.json();
+            console.log('🚀 Trade successfully recorded in Trading Pipeline:', tradeResult);
+            
+            // Update success notification to include trading pipeline
+            addAlert({
+              type: 'PIPELINE_INTEGRATION',
+              message: `🚀 ${selectedStock.symbol} ${trade.strategyKey} → Trading Pipeline ✅ | Trade ID: ${tradeResult.tradeId || 'N/A'} | P&L Tracking: Active`,
+              severity: 'high',
+              timestamp: new Date().toISOString(),
+              pipelineResult: tradeResult
+            });
+            
+          } else {
+            console.warn('⚠️ Trading Pipeline API returned error:', tradeEntryResponse.status);
+          }
+        } catch (pipelineError) {
+          console.error('❌ Error connecting to Trading Pipeline:', pipelineError);
+        }
+
         // Clear processing state and show success feedback
         setProcessingTrade(null);
         setMlSuccess({
@@ -1369,6 +1424,108 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
                                     +{trade.legs.length - 2} more legs
                                   </div>
                                 )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* 📅 Enhanced Trade Dates & Details */}
+                          <div className="mt-3 text-xs bg-gray-800/50 border border-gray-700 rounded p-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <span className="text-gray-400">Entry:</span>
+                                <span className="ml-1 text-green-300">{trade.entryDate || new Date().toISOString().split('T')[0]}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-400">Expiry:</span>
+                                <span className="ml-1 text-blue-300">{trade.expirationDate || 'TBD'}</span>
+                              </div>
+                              {trade.breakevens && trade.breakevens.length > 0 && (
+                                <div className="col-span-2">
+                                  <span className="text-gray-400">Breakevens:</span>
+                                  <span className="ml-1 text-yellow-300">
+                                    {trade.breakevens.map(be => `$${be.toFixed(2)}`).join(', ')}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* 🎯 SURGICAL EXECUTION PLAN */}
+                          {trade.executionPlan && (
+                            <div className="mt-2 text-xs bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-600/50 rounded p-3">
+                              <div className="font-bold text-purple-300 mb-2 flex items-center gap-1">
+                                🎯 Surgical Execution Plan
+                              </div>
+                              
+                              {/* Entry Strategy */}
+                              <div className="mb-2">
+                                <div className="text-purple-200 font-medium">📈 Entry Strategy:</div>
+                                <div className="text-gray-300 ml-2">
+                                  <span className="text-blue-400">{trade.executionPlan.entry?.orderType}</span> order at{' '}
+                                  <span className="text-green-400">{trade.executionPlan.entry?.timing}</span>
+                                  {trade.executionPlan.entry?.notes && trade.executionPlan.entry.notes[0] && (
+                                    <div className="text-yellow-300 text-xs mt-1">💡 {trade.executionPlan.entry.notes[0]}</div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Profit Targets */}
+                              {trade.executionPlan.profitTargets && trade.executionPlan.profitTargets.length > 0 && (
+                                <div className="mb-2">
+                                  <div className="text-purple-200 font-medium">🎯 Profit Targets:</div>
+                                  <div className="ml-2 space-y-1">
+                                    {trade.executionPlan.profitTargets.slice(0, 2).map((target, idx) => (
+                                      <div key={idx} className="text-green-400 text-xs">
+                                        {target.percent}% profit → {target.action} (${target.trigger?.toFixed(0)} by day {target.timeLimit})
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Risk Management */}
+                              {trade.executionPlan.riskManagement && (
+                                <div className="mb-2">
+                                  <div className="text-purple-200 font-medium">🛡️ Risk Management:</div>
+                                  <div className="ml-2 text-red-300 text-xs">
+                                    Stop Loss: {trade.executionPlan.riskManagement.stopLoss?.type || 'Dynamic'} 
+                                    {trade.executionPlan.riskManagement.stopLoss?.trigger && 
+                                      ` at $${Math.abs(trade.executionPlan.riskManagement.stopLoss.trigger).toFixed(0)}`
+                                    }
+                                  </div>
+                                  <div className="ml-2 text-yellow-300 text-xs">
+                                    Max Hold: {trade.executionPlan.riskManagement.maxDaysToHold || 21} days
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Time Stops */}
+                              {trade.executionPlan.riskManagement?.timeStops && trade.executionPlan.riskManagement.timeStops.length > 0 && (
+                                <div className="mb-2">
+                                  <div className="text-purple-200 font-medium">⏰ Time Exits:</div>
+                                  <div className="ml-2">
+                                    {trade.executionPlan.riskManagement.timeStops.slice(0, 2).map((stop, idx) => (
+                                      <div key={idx} className="text-orange-300 text-xs">
+                                        {stop.dte} DTE → {stop.action}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Order Management */}
+                              <div className="flex items-center justify-between text-xs">
+                                <div className="text-gray-400">
+                                  Est. Commission: ${trade.executionPlan.orderManagement?.commission?.toFixed(2) || '0.65'}
+                                </div>
+                                <div className="flex gap-2">
+                                  {trade.executionPlan.orderManagement?.bracket && (
+                                    <span className="bg-blue-900/50 text-blue-300 px-1 rounded">OCO</span>
+                                  )}
+                                  {trade.executionPlan.orderManagement?.multiLeg && (
+                                    <span className="bg-purple-900/50 text-purple-300 px-1 rounded">Multi-Leg</span>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           )}

@@ -1,0 +1,78 @@
+[
+  {
+    "id": "trade_1756515806426_r42jn8qip",
+    "timestamp": "2025-08-30T01:03:26.426Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 66.52388136775528,
+    "marketData": {
+      "price": 66.52388136775528,
+      "volume": 516087,
+      "change": 0.018813525938168426,
+      "changePercent": 0.018813525938168426,
+      "aiScore": 46.402174514087214,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 89.3,
+        "options_flow": 15,
+        "gamma_exposure": 18.463796726189784,
+        "dark_pool": 55.64925035833349,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756515808605_qt2exj1s7",
+    "timestamp": "2025-08-30T01:03:28.605Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 66.52388136775528,
+    "marketData": {
+      "price": 66.52388136775528,
+      "volume": 516087,
+      "change": 0.018813525938168426,
+      "changePercent": 0.018813525938168426,
+      "aiScore": 46.402174514087214,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 89.3,
+        "options_flow": 15,
+        "gamma_exposure": 18.463796726189784,
+        "dark_pool": 55.64925035833349,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  }
+]
