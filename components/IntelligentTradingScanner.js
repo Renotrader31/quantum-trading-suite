@@ -808,112 +808,112 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
         strategiesDetected: selectedStock.detectedBy?.length
       });
 
+      // 🚀 TRADING PIPELINE CONNECTION - Record trade entry (ALWAYS EXECUTE)
+      let mlResult = null;
+      let pipelineSuccess = false;
+      
+      try {
+        const tradeEntryData = {
+          symbol: selectedStock.symbol,
+          strategy: trade.strategyKey || trade.strategyName,
+          direction: trade.sentiment || 'NEUTRAL',
+          entryTime: new Date().toISOString(),
+          entryPrice: selectedStock.price,
+          quantity: trade.contractsPerLeg || 1,
+          legs: trade.legs,
+          strikes: trade.strikes,
+          expirationDate: expirationDate,
+          dte: dte,
+          aiScore: selectedStock.aiScore || 0,
+          probability: trade.probability || 0,
+          scannerSource: 'intelligent_scanner',
+          intelligentContext: enhancedTradeData.intelligentContext
+        };
+
+        const API_BASE_URL = window.location.origin;
+        const tradeEntryResponse = await fetch(`${API_BASE_URL}/api/trade-entry`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'recordEntry',
+            tradeData: tradeEntryData
+          })
+        });
+
+        if (tradeEntryResponse.ok) {
+          const tradeResult = await tradeEntryResponse.json();
+          console.log('🚀 Trade successfully recorded in Trading Pipeline:', tradeResult);
+          pipelineSuccess = true;
+          
+          // Pipeline success notification
+          addAlert({
+            type: 'PIPELINE_INTEGRATION',
+            message: `🚀 ${selectedStock.symbol} ${trade.strategyKey} → Trading Pipeline ✅ | Trade ID: ${tradeResult.tradeId || 'N/A'} | P&L Tracking: Active`,
+            severity: 'high',
+            timestamp: new Date().toISOString(),
+            pipelineResult: tradeResult
+          });
+          
+        } else {
+          console.warn('⚠️ Trading Pipeline API returned error:', tradeEntryResponse.status);
+        }
+      } catch (pipelineError) {
+        console.error('❌ Error connecting to Trading Pipeline:', pipelineError);
+      }
+
       // Feed selected trade to ML learning system with enhanced data
-      const mlResponse = await fetch('/api/ml-learning', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'user_selection',
-          trade: enhancedTradeData,
-          meta: {
-            version: '3.0_intelligent_enhanced',
-            dataQuality: 'premium_ai',
-            completeness: 'maximum',
-            scanner: 'intelligent',
-            timestamp: new Date().toISOString()
-          }
-        })
+      try {
+        const mlResponse = await fetch('/api/ml-learning', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'user_selection',
+            trade: enhancedTradeData,
+            meta: {
+              version: '3.0_intelligent_enhanced',
+              dataQuality: 'premium_ai',
+              completeness: 'maximum',
+              scanner: 'intelligent',
+              timestamp: new Date().toISOString()
+            }
+          })
+        });
+
+        if (mlResponse.ok) {
+          mlResult = await mlResponse.json();
+          console.log('✅ Intelligent trade successfully fed to ML learning system:', mlResult);
+          
+          // Enhanced success notification with ML feedback
+          addAlert({
+            type: 'TRADE_SELECTED',
+            message: `🧠 ${trade.strategyKey || trade.strategyName} → ML Enhanced | ${selectedStock.symbol} | AI Score: ${selectedStock.aiScore} | Neural Net: ${mlResult.learningResult?.neuralNetworkResults?.modelTrained ? '✅' : '❌'}`,
+            severity: 'medium',
+            timestamp: new Date().toISOString(),
+            mlFeedback: mlResult
+          });
+          
+        } else {
+          console.warn('⚠️ ML learning API returned error status:', mlResponse.status);
+        }
+      } catch (mlError) {
+        console.error('❌ Error feeding to ML system:', mlError);
+      }
+
+      // Clear processing state and show success feedback
+      setProcessingTrade(null);
+      setMlSuccess({
+        strategy: trade.strategyKey || trade.strategyName,
+        symbol: selectedStock.symbol,
+        result: mlResult?.learningResult,
+        intelligentContext: true,
+        pipelineSuccess: pipelineSuccess
       });
 
-      if (mlResponse.ok) {
-        const mlResult = await mlResponse.json();
-        console.log('✅ Intelligent trade successfully fed to ML learning system:', mlResult);
-        
-        // Enhanced success notification with ML feedback
-        addAlert({
-          type: 'TRADE_SELECTED',
-          message: `🧠 ${trade.strategyKey || trade.strategyName} → ML Enhanced | ${selectedStock.symbol} | AI Score: ${selectedStock.aiScore} | Neural Net: ${mlResult.learningResult?.neuralNetworkResults?.modelTrained ? '✅' : '❌'}`,
-          severity: 'medium',
-          timestamp: new Date().toISOString(),
-          mlFeedback: mlResult
-        });
-
-        // 🚀 TRADING PIPELINE CONNECTION - Record trade entry
-        try {
-          const tradeEntryData = {
-            symbol: selectedStock.symbol,
-            strategy: trade.strategyKey || trade.strategyName,
-            direction: trade.sentiment || 'NEUTRAL',
-            entryTime: new Date().toISOString(),
-            entryPrice: selectedStock.price,
-            quantity: trade.contractsPerLeg || 1,
-            legs: trade.legs,
-            strikes: trade.strikes,
-            expirationDate: expirationDate,
-            dte: dte,
-            aiScore: selectedStock.aiScore || 0,
-            probability: trade.probability || 0,
-            mlConfidence: mlResult.learningResult?.neuralNetworkResults?.confidence || 0,
-            scannerSource: 'intelligent_scanner',
-            intelligentContext: enhancedTradeData.intelligentContext,
-            
-            // Additional context for trading pipeline
-            neuralNetworkPrediction: mlResult.learningResult?.neuralNetworkResults?.confidence || 0,
-            aiScore: enhancedTradeData.strategyDetails?.aiScore || selectedStock.aiScore || 0,
-            probability: enhancedTradeData.strategyDetails?.probability || trade.probability || 0
-          };
-
-          const API_BASE_URL = window.location.origin;
-          const tradeEntryResponse = await fetch(`${API_BASE_URL}/api/trade-entry`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'recordEntry',
-              tradeData: tradeEntryData
-            })
-          });
-
-          if (tradeEntryResponse.ok) {
-            const tradeResult = await tradeEntryResponse.json();
-            console.log('🚀 Trade successfully recorded in Trading Pipeline:', tradeResult);
-            
-            // Update success notification to include trading pipeline
-            addAlert({
-              type: 'PIPELINE_INTEGRATION',
-              message: `🚀 ${selectedStock.symbol} ${trade.strategyKey} → Trading Pipeline ✅ | Trade ID: ${tradeResult.tradeId || 'N/A'} | P&L Tracking: Active`,
-              severity: 'high',
-              timestamp: new Date().toISOString(),
-              pipelineResult: tradeResult
-            });
-            
-          } else {
-            console.warn('⚠️ Trading Pipeline API returned error:', tradeEntryResponse.status);
-          }
-        } catch (pipelineError) {
-          console.error('❌ Error connecting to Trading Pipeline:', pipelineError);
-        }
-
-        // Clear processing state and show success feedback
-        setProcessingTrade(null);
-        setMlSuccess({
-          strategy: trade.strategyKey || trade.strategyName,
-          symbol: selectedStock.symbol,
-          result: mlResult.learningResult,
-          intelligentContext: true
-        });
-
-        // Keep modal open to show success feedback
-        setTimeout(() => {
-          setShowTradeModal(false);
-          setMlSuccess(null);
-        }, 6000); // 6 seconds for intelligent scanner
-        
-      } else {
-        console.warn('⚠️ ML learning API returned error status:', mlResponse.status);
-        setProcessingTrade(null);
+      // Keep modal open to show success feedback
+      setTimeout(() => {
+        setShowTradeModal(false);
         setMlSuccess(null);
-        setTimeout(() => setShowTradeModal(false), 2000);
-      }
+      }, 6000); // 6 seconds for intelligent scanner
       
     } catch (error) {
       console.error('❌ Error feeding intelligent trade to ML system:', error);

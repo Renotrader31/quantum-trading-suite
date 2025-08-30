@@ -53,7 +53,9 @@
   },
   "userPreferences": {
     "preferredStrategies": [],
-    "preferredSectors": [],
+    "preferredSectors": [
+      "Financial"
+    ],
     "preferredPriceRanges": [],
     "preferredVolumes": [],
     "riskTolerance": "moderate"

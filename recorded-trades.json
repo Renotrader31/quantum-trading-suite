@@ -14,5 +14,202 @@
     "status": "active",
     "pnl": 0,
     "initialValue": 376.5
+  },
+  {
+    "tradeId": "trade_1756516642758_bnqq8wbtv",
+    "symbol": "INTC",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:17:22.680Z",
+    "entryPrice": 114.05640280539887,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 209,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 198,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-08",
+    "dte": 39,
+    "aiScore": 47.909771110170304,
+    "probability": 79.52927995953216,
+    "mlConfidence": 0,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 47.909771110170304,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 98,
+        "options_flow": 15,
+        "gamma_exposure": 4.9864308804202695,
+        "dark_pool": 69.47219578060155,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:17:19.207Z",
+      "compositeScore": 47.909771110170304,
+      "confidence": 0.7
+    },
+    "neuralNetworkPrediction": 0,
+    "recordedAt": "2025-08-30T01:17:22.758Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 114.05640280539887
+  },
+  {
+    "tradeId": "trade_1756516674131_5b0caurrz",
+    "symbol": "META",
+    "strategyName": "Jade Lizard",
+    "entryPrice": 485.2,
+    "strikes": [],
+    "expiration": "2025-10-06",
+    "dte": 37,
+    "positionSize": 5250,
+    "maxLoss": 48,
+    "maxGain": 110,
+    "squeezeContext": {
+      "holyGrail": 78,
+      "squeeze": 69,
+      "gamma": 0.5549944382344969,
+      "flow": 32,
+      "dix": 0.4745762278065108,
+      "gex": -141.65953677671905,
+      "darkPool": {
+        "ratio": 0.37351338872935036,
+        "volume": 1119684,
+        "trades": 688
+      },
+      "shortInterest": 5.538103215069805,
+      "institutionalOwnership": 34.095618366787704,
+      "optionsMetrics": {
+        "totalVolume": 24549,
+        "putCallRatio": 1.9691130363940912,
+        "volumeOIRatio": 1.1197666729097284,
+        "netPremium": 14761406.219116025,
+        "ivRank": 30,
+        "atmIV": 61.037934982229125,
+        "skew": 101.35079491430827,
+        "term": "BACKWARDATION"
+      },
+      "technicals": {
+        "rsi": 64.96213076093731,
+        "macd": 0.29491311728897696,
+        "ema20": 482.2988402199686,
+        "sma50": 475.15135312170895,
+        "bollinger": {
+          "upper": 507.34472433900305,
+          "lower": 461.9026279404468
+        },
+        "vwap": 489.2783033740161
+      }
+    },
+    "marketConditions": {
+      "price": 485.2,
+      "volume": 4990291,
+      "change": -2.1697593845194962,
+      "changePercent": -0.4471886612777197,
+      "marketCap": 82144744453,
+      "avgVolume": 3860694,
+      "beta": 2.2809208693480625,
+      "peRatio": 35.970819393882294,
+      "eps": 5.659630135941368,
+      "dividend": 2.103378645030652,
+      "sector": "Financial",
+      "industry": "Software"
+    },
+    "neuralNetworkPrediction": 0,
+    "aiScore": 89,
+    "probability": 82,
+    "recordedAt": "2025-08-30T01:17:54.132Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 0
+  },
+  {
+    "tradeId": "trade_1756516689517_1011o9rmp",
+    "symbol": "META",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:18:09.439Z",
+    "entryPrice": 485.2,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 470,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 446,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-04",
+    "dte": 35,
+    "aiScore": 47.407936420503795,
+    "probability": 69.68014242793208,
+    "mlConfidence": 0,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 47.407936420503795,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 90.5,
+        "options_flow": 15,
+        "gamma_exposure": 11.756151425523832,
+        "dark_pool": 67.19146709749894,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:18:05.089Z",
+      "compositeScore": 47.407936420503795,
+      "confidence": 0.7
+    },
+    "neuralNetworkPrediction": 0,
+    "recordedAt": "2025-08-30T01:18:09.517Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 485.2
   }
 ]
