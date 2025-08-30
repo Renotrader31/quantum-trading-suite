@@ -1633,5 +1633,115 @@
     "status": "active",
     "pnl": 0,
     "initialValue": 142.35
+  },
+  {
+    "tradeId": "trade_1756579763087_y0ruh30sp",
+    "symbol": "AMD",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T18:49:23.032Z",
+    "entryPrice": 125.76,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 121,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 115,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-01",
+    "dte": 32,
+    "aiScore": 50.68333333333334,
+    "probability": 67.8949564969098,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 50.68333333333334,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 24.1,
+        "dark_pool": 65,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T18:49:02.022Z",
+      "compositeScore": 50.68333333333334,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T18:49:23.088Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 125.76
+  },
+  {
+    "tradeId": "trade_1756579788739_g2m3t7eca",
+    "symbol": "SOFI",
+    "strategyName": "Jade Lizard",
+    "entryPrice": 25.82,
+    "strikes": [],
+    "expiration": "2025-10-02",
+    "dte": 33,
+    "positionSize": 5250,
+    "maxLoss": 2,
+    "maxGain": 5,
+    "squeezeContext": {
+      "holyGrail": 85,
+      "squeeze": 67,
+      "gamma": 0.63,
+      "darkPool": {
+        "ratio": 0.38,
+        "volume": 1234487,
+        "averageSize": 352,
+        "sentiment": "ACCUMULATION"
+      },
+      "optionsMetrics": {
+        "totalVolume": 6190181,
+        "putCallRatio": 1.2,
+        "volumeOIRatio": 2.5,
+        "netPremium": 0,
+        "ivRank": 50,
+        "atmIV": 30,
+        "skew": 100,
+        "term": "NEUTRAL"
+      },
+      "technicals": {}
+    },
+    "marketConditions": {
+      "price": 25.82,
+      "volume": 6190181,
+      "change": -0.22,
+      "changePercent": -0.85,
+      "avgVolume": 4892658
+    },
+    "neuralNetworkPrediction": 0,
+    "aiScore": 90,
+    "probability": 82,
+    "recordedAt": "2025-08-30T18:49:48.740Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 0
   }
 ]

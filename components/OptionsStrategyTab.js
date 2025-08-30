@@ -211,10 +211,20 @@ export default function OptionsStrategyTab({ marketData = {}, selectedTrades = [
   const [strategies, setStrategies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isClient, setIsClient] = useState(false);
+
+  // Ensure client-side only rendering to avoid hydration issues
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Debug logging
-  console.log('OptionsStrategyTab received selectedTrades:', selectedTrades);
-  console.log('OptionsStrategyTab received marketData:', Object.keys(marketData));
+  useEffect(() => {
+    if (isClient) {
+      console.log('OptionsStrategyTab received selectedTrades:', selectedTrades);
+      console.log('OptionsStrategyTab received marketData:', Object.keys(marketData));
+    }
+  }, [selectedTrades, marketData, isClient]);
 
   // Enhanced strategy analysis function for 15+ strategies
   const analyzeStrategies = (stockData) => {
@@ -377,6 +387,17 @@ export default function OptionsStrategyTab({ marketData = {}, selectedTrades = [
     
     alert(`✅ ${strategy.strategy} selected! ML system will learn from this choice.`);
   };
+
+  // Prevent hydration mismatch by only rendering on client
+  if (!isClient) {
+    return (
+      <Container maxWidth="xl" sx={{ py: 3 }}>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+          <CircularProgress />
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>

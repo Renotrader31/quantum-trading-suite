@@ -1395,5 +1395,87 @@
     "daysHeld": null,
     "success": null,
     "completedAt": null
+  },
+  {
+    "id": "trade_1756579763163_s7ndtxlip",
+    "timestamp": "2025-08-30T18:49:23.163Z",
+    "symbol": "AMD",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 125.76,
+    "marketData": {
+      "price": 125.76,
+      "volume": 2265428,
+      "change": 0.05,
+      "changePercent": 0.05,
+      "aiScore": 50.68333333333334,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 24.1,
+        "dark_pool": 65,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756579788659_yd02ruf34",
+    "timestamp": "2025-08-30T18:49:48.660Z",
+    "symbol": "SOFI",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 25.82,
+    "marketData": {
+      "price": 25.82,
+      "volume": 6190181,
+      "change": -0.22,
+      "changePercent": -0.85,
+      "avgVolume": 4892658
+    },
+    "squeezeContext": {
+      "holyGrail": 85,
+      "squeeze": 67,
+      "gamma": 0.63,
+      "darkPool": {
+        "ratio": 0.38,
+        "volume": 1234487,
+        "averageSize": 352,
+        "sentiment": "ACCUMULATION"
+      },
+      "optionsMetrics": {
+        "totalVolume": 6190181,
+        "putCallRatio": 1.2,
+        "volumeOIRatio": 2.5,
+        "netPremium": 0,
+        "ivRank": 50,
+        "atmIV": 30,
+        "skew": 100,
+        "term": "NEUTRAL"
+      },
+      "technicals": {}
+    },
+    "aiScore": 90,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
   }
 ]
