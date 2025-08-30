@@ -1341,7 +1341,7 @@ export default function IntelligentTradingScanner({ marketData, loading: propsLo
                           )}
                           {stock.gamma && (
                             <div className="text-xs bg-purple-900/50 text-purple-400 px-2 py-0.5 rounded">
-                              γ: {stock.gamma.toFixed(1)}
+                              γ: {(stock.gamma || 0).toFixed(1)}
                             </div>
                           )}
                         </div>

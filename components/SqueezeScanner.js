@@ -1160,18 +1160,18 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                           </span>
                         </td>
                         <td className="p-4 text-right">
-                          <div className="font-medium">${stock.price.toFixed(2)}</div>
+                          <div className="font-medium">${(stock.price || 0).toFixed(2)}</div>
                           <div className={`text-xs ${stock.change >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {stock.change >= 0 ? '+' : ''}{stock.change.toFixed(2)}%
+                            {(stock.change || 0) >= 0 ? '+' : ''}{(stock.change || 0).toFixed(2)}%
                           </div>
                         </td>
                         <td className="p-4 text-center">
                           <div className="text-xl font-bold text-red-400">{stock.squeeze}</div>
-                          <div className="text-xs text-gray-500">DTC: {stock.dtc.toFixed(1)}</div>
+                          <div className="text-xs text-gray-500">DTC: {(stock.dtc || 0).toFixed(1)}</div>
                         </td>
                         <td className="p-4 text-center">
-                          <div className="text-xl font-bold text-purple-400">{stock.gamma.toFixed(1)}</div>
-                          <div className="text-xs text-gray-500">GEX: ${stock.gex.toFixed(0)}M</div>
+                          <div className="text-xl font-bold text-purple-400">{(stock.gamma || 0).toFixed(1)}</div>
+                          <div className="text-xs text-gray-500">GEX: ${(stock.gex || 0).toFixed(0)}M</div>
                         </td>
                         <td className="p-4 text-center">
                           <div className={`text-xl font-bold ${
@@ -1180,7 +1180,7 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                             {stock.flow}%
                           </div>
                           <div className="text-xs text-gray-500">
-                            P/C: {stock.optionsMetrics.putCallRatio.toFixed(2)}
+                            P/C: {(stock.optionsMetrics?.putCallRatio || 0).toFixed(2)}
                           </div>
                         </td>
                         <td className="p-4 text-center">
@@ -1195,10 +1195,10 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                         </td>
                         <td className="p-4 text-center">
                           <div className="text-lg font-bold text-blue-400">
-                            {(stock.darkPool.ratio * 100).toFixed(0)}%
+                            {((stock.darkPool?.ratio || 0) * 100).toFixed(0)}%
                           </div>
                           <div className="text-xs text-gray-500">
-                            {(stock.darkPool.volume / 1000000).toFixed(1)}M
+                            {((stock.darkPool?.volume || 0) / 1000000).toFixed(1)}M
                           </div>
                         </td>
                         <td className="p-4 text-center">
@@ -1263,7 +1263,7 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                                   <div className="flex justify-between">
                                     <span className="text-gray-400">Net Premium</span>
                                     <span className={stock.optionsMetrics.netPremium > 0 ? 'text-green-400' : 'text-red-400'}>
-                                      ${(stock.optionsMetrics.netPremium / 1000000).toFixed(1)}M
+                                      ${((stock.optionsMetrics?.netPremium || 0) / 1000000).toFixed(1)}M
                                     </span>
                                   </div>
                                   <div className="flex justify-between">
@@ -1322,11 +1322,11 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                                 <div className="space-y-2 text-sm">
                                   <div className="flex justify-between">
                                     <span className="text-gray-400">DP Ratio</span>
-                                    <span>{(stock.darkPool.ratio * 100).toFixed(1)}%</span>
+                                    <span>{((stock.darkPool?.ratio || 0) * 100).toFixed(1)}%</span>
                                   </div>
                                   <div className="flex justify-between">
                                     <span className="text-gray-400">DP Volume</span>
-                                    <span>{(stock.darkPool.volume / 1000000).toFixed(2)}M</span>
+                                    <span>{((stock.darkPool?.volume || 0) / 1000000).toFixed(2)}M</span>
                                   </div>
                                   <div className="flex justify-between">
                                     <span className="text-gray-400">DP Trades</span>
