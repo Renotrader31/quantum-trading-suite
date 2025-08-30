@@ -951,12 +951,14 @@ export default function TradingPipeline({ marketData = {}, loading: externalLoad
           </TabPanel>
           
           <TabPanel value={activeTab} index={1}>
-            <OptionsStrategyTab 
-              marketData={marketData} 
-              selectedTrades={selectedTrades}
-              loading={externalLoading} 
-              onRefresh={onRefresh} 
-            />
+            <ErrorBoundary>
+              <OptionsStrategyTab 
+                marketData={marketData} 
+                selectedTrades={selectedTrades}
+                loading={externalLoading} 
+                onRefresh={onRefresh} 
+              />
+            </ErrorBoundary>
           </TabPanel>
           
           <TabPanel value={activeTab} index={2}>

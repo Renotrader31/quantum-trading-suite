@@ -496,8 +496,10 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
       const data = await response.json();
       
       if (data.success) {
-        setTradeRecommendations(data.actionableTrades);
-        console.log(`✅ SQUEEZE-ENHANCED: Found ${data.actionableTrades.length} trade recommendations for ${stock.symbol}`);
+        console.log('📊 API Response:', data);
+        console.log('📊 Actionable Trades:', data.actionableTrades);
+        setTradeRecommendations(data.actionableTrades || []);
+        console.log(`✅ SQUEEZE-ENHANCED: Found ${data.actionableTrades?.length || 0} trade recommendations for ${stock.symbol}`);
         console.log(`📊 Average Probability: ${data.summary?.averageProbability}%, AI Score: ${data.summary?.averageAIScore}`);
         
         // Show squeeze context impact
@@ -1505,7 +1507,7 @@ export default function SqueezeScanner({ marketData, loading: propsLoading, onRe
                   <div className="text-lg font-medium">Analyzing 15 Strategies...</div>
                   <div className="text-sm text-gray-400">Finding optimal trade opportunities</div>
                 </div>
-              ) : tradeRecommendations.length > 0 ? (
+              ) : (console.log('🔍 Rendering trades, count:', tradeRecommendations?.length, 'Data:', tradeRecommendations), tradeRecommendations.length > 0) ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">
