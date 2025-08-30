@@ -367,5 +367,309 @@
     "daysHeld": null,
     "success": null,
     "completedAt": null
+  },
+  {
+    "id": "trade_1756516871323_giuoxbch3",
+    "timestamp": "2025-08-30T01:21:11.323Z",
+    "symbol": "GOOGL",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 142.35,
+    "marketData": {
+      "price": 142.35,
+      "volume": 3289563,
+      "change": 0.072909909391103,
+      "changePercent": 0.072909909391103,
+      "aiScore": 49.29703049820322,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 12.886105355301565,
+        "dark_pool": 67.89607763391774,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516882097_ffpj6bzgu",
+    "timestamp": "2025-08-30T01:21:22.098Z",
+    "symbol": "AMD",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 125.7,
+    "marketData": {
+      "price": 125.7,
+      "volume": 6940346,
+      "change": 3.1327676231121946,
+      "changePercent": 3.1327676231121946,
+      "aiScore": 47.30399360494948,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 4.027922539180437,
+        "dark_pool": 64.79603909051643,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516911950_awyhm19qg",
+    "timestamp": "2025-08-30T01:21:51.950Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 216.6618644140809,
+    "marketData": {
+      "price": 216.6618644140809,
+      "volume": 9349271,
+      "change": -1.6272517268775943,
+      "changePercent": -1.6272517268775943,
+      "aiScore": 44.50075130145041,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 93.4,
+        "options_flow": 15,
+        "gamma_exposure": 1.9657914579054925,
+        "dark_pool": 56.63871635079697,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516913215_u19npxyer",
+    "timestamp": "2025-08-30T01:21:53.215Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 216.6618644140809,
+    "marketData": {
+      "price": 216.6618644140809,
+      "volume": 9349271,
+      "change": -1.6272517268775943,
+      "changePercent": -1.6272517268775943,
+      "aiScore": 44.50075130145041,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 93.4,
+        "options_flow": 15,
+        "gamma_exposure": 1.9657914579054925,
+        "dark_pool": 56.63871635079697,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516913735_rz6q3xiem",
+    "timestamp": "2025-08-30T01:21:53.735Z",
+    "symbol": "ADBE",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 216.6618644140809,
+    "marketData": {
+      "price": 216.6618644140809,
+      "volume": 9349271,
+      "change": -1.6272517268775943,
+      "changePercent": -1.6272517268775943,
+      "aiScore": 44.50075130145041,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 93.4,
+        "options_flow": 15,
+        "gamma_exposure": 1.9657914579054925,
+        "dark_pool": 56.63871635079697,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516922520_q5yk24mho",
+    "timestamp": "2025-08-30T01:22:02.520Z",
+    "symbol": "CRM",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 101.11250544619409,
+    "marketData": {
+      "price": 101.11250544619409,
+      "volume": 5435055,
+      "change": 3.3711847781568856,
+      "changePercent": 3.3711847781568856,
+      "aiScore": 49.483299898368955,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 19.11109017903431,
+        "dark_pool": 62.78870921117945,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516922978_6dedgb745",
+    "timestamp": "2025-08-30T01:22:02.978Z",
+    "symbol": "CRM",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 101.11250544619409,
+    "marketData": {
+      "price": 101.11250544619409,
+      "volume": 5435055,
+      "change": 3.3711847781568856,
+      "changePercent": 3.3711847781568856,
+      "aiScore": 49.483299898368955,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 19.11109017903431,
+        "dark_pool": 62.78870921117945,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
+  },
+  {
+    "id": "trade_1756516923864_3ho4ls17y",
+    "timestamp": "2025-08-30T01:22:03.864Z",
+    "symbol": "CRM",
+    "strategy": "unknown",
+    "detectedBy": [],
+    "entryPrice": 101.11250544619409,
+    "marketData": {
+      "price": 101.11250544619409,
+      "volume": 5435055,
+      "change": 3.3711847781568856,
+      "changePercent": 3.3711847781568856,
+      "aiScore": 49.483299898368955,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 19.11109017903431,
+        "dark_pool": 62.78870921117945,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      }
+    },
+    "aiScore": 74,
+    "exitPrice": null,
+    "outcome": null,
+    "return": null,
+    "daysHeld": null,
+    "success": null,
+    "completedAt": null
   }
 ]

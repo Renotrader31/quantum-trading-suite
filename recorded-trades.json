@@ -211,5 +211,501 @@
     "status": "active",
     "pnl": 0,
     "initialValue": 485.2
+  },
+  {
+    "tradeId": "trade_1756516871258_c3okgqfp2",
+    "symbol": "GOOGL",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:21:11.178Z",
+    "entryPrice": 142.35,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 138,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 130,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-02",
+    "dte": 33,
+    "aiScore": 49.29703049820322,
+    "probability": 62.247966799724324,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 49.29703049820322,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 12.886105355301565,
+        "dark_pool": 67.89607763391774,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:21:08.271Z",
+      "compositeScore": 49.29703049820322,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:21:11.258Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 142.35
+  },
+  {
+    "tradeId": "trade_1756516882029_nqaulr9xx",
+    "symbol": "AMD",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:21:21.967Z",
+    "entryPrice": 125.7,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 121,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 115,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-06",
+    "dte": 37,
+    "aiScore": 47.30399360494948,
+    "probability": 66.05870356028139,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 47.30399360494948,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 4.027922539180437,
+        "dark_pool": 64.79603909051643,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:21:18.955Z",
+      "compositeScore": 47.30399360494948,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:21:22.029Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 125.7
+  },
+  {
+    "tradeId": "trade_1756516911877_scd3mxfrc",
+    "symbol": "ADBE",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:21:51.816Z",
+    "entryPrice": 216.6618644140809,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 142,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 135,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-05",
+    "dte": 36,
+    "aiScore": 44.50075130145041,
+    "probability": 77.02006135201412,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 44.50075130145041,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 93.4,
+        "options_flow": 15,
+        "gamma_exposure": 1.9657914579054925,
+        "dark_pool": 56.63871635079697,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:21:18.955Z",
+      "compositeScore": 44.50075130145041,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:21:51.878Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 216.6618644140809
+  },
+  {
+    "tradeId": "trade_1756516913068_le40bcy4f",
+    "symbol": "ADBE",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:21:52.992Z",
+    "entryPrice": 216.6618644140809,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 142,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 135,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-05",
+    "dte": 36,
+    "aiScore": 44.50075130145041,
+    "probability": 77.02006135201412,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 44.50075130145041,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 93.4,
+        "options_flow": 15,
+        "gamma_exposure": 1.9657914579054925,
+        "dark_pool": 56.63871635079697,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:21:18.955Z",
+      "compositeScore": 44.50075130145041,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:21:53.068Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 216.6618644140809
+  },
+  {
+    "tradeId": "trade_1756516913590_g9l2exwea",
+    "symbol": "ADBE",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:21:53.524Z",
+    "entryPrice": 216.6618644140809,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 142,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 135,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-05",
+    "dte": 36,
+    "aiScore": 44.50075130145041,
+    "probability": 77.02006135201412,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 44.50075130145041,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 93.4,
+        "options_flow": 15,
+        "gamma_exposure": 1.9657914579054925,
+        "dark_pool": 56.63871635079697,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:21:18.955Z",
+      "compositeScore": 44.50075130145041,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:21:53.590Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 216.6618644140809
+  },
+  {
+    "tradeId": "trade_1756516922444_p8ho9466q",
+    "symbol": "CRM",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:22:02.361Z",
+    "entryPrice": 101.11250544619409,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 60,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 57,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-07",
+    "dte": 38,
+    "aiScore": 49.483299898368955,
+    "probability": 62.38020983252801,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 49.483299898368955,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 19.11109017903431,
+        "dark_pool": 62.78870921117945,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:21:59.687Z",
+      "compositeScore": 49.483299898368955,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:22:02.444Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 101.11250544619409
+  },
+  {
+    "tradeId": "trade_1756516922912_8hg4q1x1j",
+    "symbol": "CRM",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:22:02.852Z",
+    "entryPrice": 101.11250544619409,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 60,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 57,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-07",
+    "dte": 38,
+    "aiScore": 49.483299898368955,
+    "probability": 62.38020983252801,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 49.483299898368955,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 19.11109017903431,
+        "dark_pool": 62.78870921117945,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:21:59.687Z",
+      "compositeScore": 49.483299898368955,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:22:02.912Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 101.11250544619409
+  },
+  {
+    "tradeId": "trade_1756516923795_qrgzo60s3",
+    "symbol": "CRM",
+    "strategy": "Bear Put Spread",
+    "direction": "NEUTRAL",
+    "entryTime": "2025-08-30T01:22:03.736Z",
+    "entryPrice": 101.11250544619409,
+    "quantity": 1,
+    "legs": [
+      {
+        "action": "BUY",
+        "strike": 60,
+        "optionType": "PUT",
+        "quantity": 1
+      },
+      {
+        "action": "SELL",
+        "strike": 57,
+        "optionType": "PUT",
+        "quantity": 1
+      }
+    ],
+    "expirationDate": "2025-10-07",
+    "dte": 38,
+    "aiScore": 49.483299898368955,
+    "probability": 62.38020983252801,
+    "scannerSource": "intelligent_scanner",
+    "intelligentContext": {
+      "aiScore": 49.483299898368955,
+      "detectedBy": [
+        "ttm_squeeze",
+        "options_flow",
+        "gamma_exposure",
+        "dark_pool",
+        "technical_analysis",
+        "unusual_activity"
+      ],
+      "strategyScores": {
+        "ttm_squeeze": 100,
+        "options_flow": 15,
+        "gamma_exposure": 19.11109017903431,
+        "dark_pool": 62.78870921117945,
+        "technical_analysis": 50,
+        "unusual_activity": 50
+      },
+      "mlWeights": {
+        "ttm_squeeze": 1,
+        "options_flow": 1,
+        "gamma_exposure": 1,
+        "dark_pool": 1,
+        "technical_analysis": 1,
+        "unusual_activity": 1
+      },
+      "scanTimestamp": "2025-08-30T01:21:59.687Z",
+      "compositeScore": 49.483299898368955,
+      "confidence": 0.7
+    },
+    "recordedAt": "2025-08-30T01:22:03.795Z",
+    "status": "active",
+    "pnl": 0,
+    "initialValue": 101.11250544619409
   }
 ]
