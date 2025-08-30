@@ -8,7 +8,7 @@ import QuantumTradeAI from '../components/QuantumTradeAI';
 import TradingPipeline from '../components/TradingPipeline';
 import IntelligentTradingScanner from '../components/IntelligentTradingScanner';
 import ErrorBoundary from '../components/ErrorBoundary';
-import PipelineTrades from './pipeline-trades';
+import PipelineTradesView from '../components/PipelineTradesView';
 import SystemReset from '../components/SystemReset';
 
 export default function Home() {
@@ -161,7 +161,7 @@ export default function Home() {
       case 'pipeline-trades':
         return (
           <ErrorBoundary>
-            <PipelineTrades {...commonProps} />
+            <PipelineTradesView {...commonProps} />
           </ErrorBoundary>
         );
       case 'ai':
